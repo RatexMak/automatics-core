@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <style>
+			button.accordion {
+			    background-color: Transparent;
+			    color: #444;
+			    cursor: pointer;
+			    border: none;
+			    text-align: left;
+			    outline: none;
+			    font-size: 15px;
+			    transition: 0.4s;
+			    margin-left: 20px;
+			    width:100%;
+			    height:22px;
+			}
+			
+			button.accordion.active, button.accordion:hover,button.accordion1.active, button.accordion1:hover {
+			    background-color: #ccc;
+			    
+			}
+			
+			button.accordion:after ,button.accordion1:after{
+			    content: '\002B';
+			    color: #777;
+			    font-weight: bold;
+			}
+			
+			button.accordion.active:after,button.accordion1.active:after {
+			    content: "\2212";
+			}
+			
+			div.panel,div.panel1 {
+			    padding: 0 2px;
+			    background-color: #f5f5f0;
+			    max-height: 0;
+			    transition: max-height 0.2s ease-out;
+			    margin-left: 15px;
+			    padding-left: 15px;
+			    font-size:12px;
+			    font-family:arial;
+			    overflow:auto;
+			    font-color: #777;
+			    border-radius: 25px;
+			    border-bottom-style: hidden;
+			    width:100%;
+			}
+			p{
+			   
+			}
+			.test{
+			    font-size:12px;
+			    font-family:arial;
+			}
+			#firstIndent{
+			   
+			   
+			}
+			#secondIndent{
+			    
+			 
+			}
+			.preview{
+			 font-size:10px;
+			 font-family:arial;
+			 font-style:italic;
+			}
+			.pass{
+			    color:green;
+			    font-weight:bold;
+			}
+			.fail{
+			    color:red;
+			    font-weight:bold;
+			}
+			.notrun{
+			    color:grey;
+			    font-weight:bold;
+			}
+			.notapplicable{
+			    color:grey;
+			    font-weight:bold;
+			}.nottested{
+			    color:blue;
+			    font-weight:bold;
+			}
+			.container{
+			    box-sizing: border-box;
+			    min-height: 95vh;
+			    margin: 0;
+			    border-top: solid 5px #777;
+			    padding-left: 5px;
+			}
+			table{
+			    color:#777;
+			    background:	#DCDCDC;
+			    width:100%;
+			    border-radius: 5px;
+			    border:solid 1px grey;
+			}
+			.header{
+			   width:15%;
+			   text-align:center;
+			}
+			.data{
+			   text-align:left;
+			}
+			.symbol{
+			   width:5%;
+			   text-align:left;
+			}
+			h2{
+			    color:grey; 
+			    font-family:arial;
+			    font-style:italic;
+			}
+        </style>
+        <script>
+        function myFunction(){
+			var acc = document.getElementsByClassName("accordion");
+			var i;
+			console.log("accordion-"+acc.length)
+			for (i = 0; i < acc.length; i++) {
+			  acc[i].onclick = function() {
+			    this.classList.toggle("active");
+			    var panel = this.nextElementSibling;
+			    //console.log("hehe"+panel.nextElementSibling)
+			    var lastchild = panel.lastElementChild;
+			    //var firstchild = this.firstElementChild;   //for displaying the first line
+			    if (panel.style.maxHeight){
+			      panel.style.maxHeight = null;
+			      //firstchild.style.display="block";
+			      panel.style.borderBottomStyle  ="hidden";
+			      console.log(panel.style.borderBottomStyle);
+			    } else {
+			      panel.style.maxHeight = lastchild.scrollHeight + panel.scrollHeight + "px";
+			      //firstchild.style.display="none";
+			      panel.style.borderBottomStyle  ="ridge";
+			      console.log(panel.style.borderBottomStyle);
+			   }
+			  }
+			}
+		}
+        </script>
+</head>
+<body onload="myFunction()">
+<div class="container"><h2>TEST SESSION LOGS</h2>
+<####logs####>
+</body>
+</html>
