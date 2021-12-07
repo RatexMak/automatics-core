@@ -18,44 +18,44 @@
 package com.automatics.providers.imageupgrade;
 
 /**
- * 
- * Request object for image upgrade
+ * Request for Image upgrade via SNMP
+ *
  *
  */
-public class ImageRequestParams {
+public class SnmpRequestParams extends ImageRequestParams {
 
-    private String firmwareToBeDownloaded;
+    private String communityString;
 
-    private boolean rebootImmediately;
+    private String snmpImageDownloadServerIp;
 
     /**
-     * @return the rebootImmediately
+     * @return the communityString
      */
-    public boolean isRebootImmediately() {
-	return rebootImmediately;
+    public String getCommunityString() {
+	return communityString;
     }
 
     /**
-     * @param rebootImmediately
-     *            the rebootImmediately to set
+     * @param communityString
+     *            the communityString to set
      */
-    public void setRebootImmediately(boolean rebootImmediately) {
-	this.rebootImmediately = rebootImmediately;
+    public void setCommunityString(String communityString) {
+	this.communityString = communityString;
     }
 
     /**
-     * @return the firmwareToBeDownloaded
+     * @return the snmpDownloadServerIp
      */
-    public String getFirmwareToBeDownloaded() {
-	return firmwareToBeDownloaded;
+    public String getSnmpImageDownloadServerIp() {
+	return snmpImageDownloadServerIp;
     }
 
     /**
-     * @param firmwareToBeDownloaded
-     *            the firmwareToBeDownloaded to set
+     * @param snmpDownloadServerIp
+     *            the snmpDownloadServerIp to set
      */
-    public void setFirmwareToBeDownloaded(String firmwareToBeDownloaded) {
-	this.firmwareToBeDownloaded = firmwareToBeDownloaded;
+    public void setSnmpImageDownloadServerIp(String snmpDownloadServerIp) {
+	this.snmpImageDownloadServerIp = snmpDownloadServerIp;
     }
 
 }

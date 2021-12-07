@@ -15,25 +15,31 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package com.automatics.providers.connection;
+
+package com.automatics.providers.imageupgrade;
 
 /**
- * Enum for command types
- * @author Radhika
+ * Request for Image upgrade via XConf
+ *
  *
  */
-public enum ExecuteCommandType {
+public class XConfRequestParams extends ImageRequestParams {
 
-    REV_SSH_DEVICE_VERIFY,
+    private String xConfServerUrl;
 
-    TRACE_INIT_COMMAND_GATEWAY,
+    /**
+     * @return the xConfServerUrl
+     */
+    public String getxConfServerUrl() {
+	return xConfServerUrl;
+    }
 
-    ADDLN_TRACE_INIT_COMMAND_GATEWAY,
-
-    SNMP_CODE_DOWNLOAD,
-    
-    SNMP_COMMAND,
-    
-    XCONF_CONFIG_UPDATE
+    /**
+     * @param xConfServerUrl
+     *            the xConfServerUrl to set
+     */
+    public void setxConfServerUrl(String xConfServerUrl) {
+	this.xConfServerUrl = xConfServerUrl;
+    }
 
 }

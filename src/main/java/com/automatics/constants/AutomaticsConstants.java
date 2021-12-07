@@ -925,9 +925,11 @@ public class AutomaticsConstants {
 
     /** Restart service */
     public static final String RESTART_SERVICE = "restart.service";
-    
+
     /** Native Process Id */
     public static final String NATIVE_PROCESS_ID = "nativeProcessId";
-    
+
+    /** Bean not initialized/found error message */
+    public static final String BEAN_NOT_FOUND_LOG = "{} not configured for bean '{}'";
 
 }

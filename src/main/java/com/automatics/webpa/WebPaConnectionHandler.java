@@ -217,7 +217,6 @@ public class WebPaConnectionHandler {
 	    try {
 		LOGGER.debug("STARTING METHOD: getWebPaParamValue");
 
-		LOGGER.debug("STARTING METHOD: getWebPaTableParamValue");
 		StringBuffer completeUrl = new StringBuffer();
 		String restUrl = getServerURL();
 		completeUrl = completeUrl.append(restUrl).append(macAddress.replaceAll(":", "")).append("/config")
@@ -233,9 +232,8 @@ public class WebPaConnectionHandler {
 
 		LOGGER.info("RESPONSE RECIEVED FOR WEBPA GET REQUEST: " + statusCode);
 
-		LOGGER.info("RESPONSE RECIEVED FOR WEBPA GET REQUEST: " + statusCode);
-
 		String responseAsString = response.getResponseBody();
+
 		LOGGER.info("WEBPA RESPONSE : {}", responseAsString);
 		if (CommonMethods.isNotNull(responseAsString)) {
 
@@ -269,6 +267,55 @@ public class WebPaConnectionHandler {
 	    }
 	}
 	LOGGER.debug("ENDING METHOD: getWebPaParamValueUsingRestApi");
+	return webPaServerResponse;
+    }
+
+    /**
+     * Utility method to get WebPa parameter values using WebPa without retry mechanism
+     * 
+     * @param dut
+     *            Device for which webpa param to be fetched
+     * 
+     * @param parameters
+     *            String array representing the webpa param names
+     * 
+     * @return The response of the execution of WebPA parameter.
+     * 
+     *
+     */
+    public WebPaServerResponse getWebPaParamValueWithoutRetry(Dut dut, String[] parameters) {
+
+	RestResponse response = null;
+	WebPaServerResponse webPaServerResponse = new WebPaServerResponse();
+
+	try {
+	    LOGGER.debug("STARTING METHOD: getWebPaParamValueWithoutRetry");
+
+	    // Get webpa param values
+	    response = getWebPaParameterValue(dut, parameters);
+
+	    int statusCode = response.getResponseCode();
+	    webPaServerResponse.setStatusCode(statusCode);
+
+	    LOGGER.info("RESPONSE RECIEVED FOR WEBPA GET REQUEST: " + statusCode);
+
+	    String responseAsString = response.getResponseBody();
+	    LOGGER.info("WEBPA RESPONSE : {}", responseAsString);
+	    if (CommonMethods.isNotNull(responseAsString)) {
+		if (CommonMethods.isValidJsonString(responseAsString)) {
+		    webPaServerResponse = webPaServerResponse.fromJson(responseAsString);
+		}
+	    }
+
+	} catch (FailedTransitionException e) {
+	    LOGGER.error("FOLLOWING FailedTransitionException OCCURED WHILE WEBPA GET REQUEST: " + e.getMessage());
+	    throw new TestException(e.getMessage());
+	} catch (Exception e) {
+	    LOGGER.error("FOLLOWING EXCEPTION OCCURED WHILE WEBPA GET REQUEST: " + e.getMessage());
+	    throw new TestException(e.getMessage());
+	}
+
+	LOGGER.debug("ENDING METHOD: getWebPaParamValueWithoutRetry");
 	return webPaServerResponse;
     }
 
@@ -553,22 +600,8 @@ public class WebPaConnectionHandler {
 		LOGGER.error("Failed to get the HTTP response from webpa. Retrying attempt - " + retryCount);
 	    }
 	    try {
-		LOGGER.debug("STARTING METHOD: setWebPaParameterValue");
-		WebPaParameterList paramList = new WebPaParameterList();
-		paramList.setList(parameters);
-		String json = new Gson().toJson(paramList);
 
-		String completeUrl = getFormattedWebPaUrl(dut, null, WebPaType.SET);
-
-		Map<String, String> headers = fetchAuthHeaders(WebPaType.SET);
-
-		RestClient restClient = new RestEasyClientImpl();
-		RestRequest request = new RestRequest(completeUrl, HttpRequestMethod.PATCH, headers);
-		request.setTimeoutInMilliSeconds(CONNECTION_TIMEOUT);
-		request.setMediaType(MediaType.APPLICATION_JSON_TYPE);
-		request.setContent(json.toString());
-
-		response = restClient.executeAndGetResponse(request);
+		response = setWebParamterValue(dut, parameters);
 		int statusCode = response.getResponseCode();
 
 		LOGGER.info("RESPONSE RECIEVED FOR WEBPA SET REQUEST: " + statusCode);
@@ -607,6 +640,55 @@ public class WebPaConnectionHandler {
 	    }
 	}
 	LOGGER.debug("ENDING METHOD: setWebPaParameterValue");
+	return webPaServerResponse;
+    }
+
+    /**
+     * Utility method to set WebPa parameter values using WebPa without retry mechanism
+     * 
+     * @param dut
+     *            Device for which WebPa params to be set.
+     * 
+     * @param parameters
+     *            WebPaParameter list
+     * 
+     * @return The response of the execution of WebPA parameter.
+     * 
+     *
+     */
+    public WebPaServerResponse setWebPaParameterValueWithoutRetry(Dut dut, List<WebPaParameter> parameters) {
+
+	RestResponse response = null;
+	WebPaServerResponse webPaServerResponse = new WebPaServerResponse();
+
+	try {
+	    LOGGER.debug("STARTING METHOD: getWebPaParamValuesWithoutRetry");
+
+	    // Get webpa param values
+	    response = setWebParamterValue(dut, parameters);
+
+	    int statusCode = response.getResponseCode();
+	    webPaServerResponse.setStatusCode(statusCode);
+
+	    LOGGER.info("RESPONSE RECIEVED FOR WEBPA SET REQUEST: " + statusCode);
+
+	    String responseAsString = response.getResponseBody();
+	    LOGGER.info("WEBPA RESPONSE : {}", responseAsString);
+	    if (CommonMethods.isNotNull(responseAsString)) {
+		if (CommonMethods.isValidJsonString(responseAsString)) {
+		    webPaServerResponse = webPaServerResponse.fromJson(responseAsString);
+		}
+	    }
+
+	} catch (FailedTransitionException e) {
+	    LOGGER.error("FOLLOWING FailedTransitionException OCCURED WHILE WEBPA GET REQUEST: " + e.getMessage());
+	    throw new TestException(e.getMessage());
+	} catch (Exception e) {
+	    LOGGER.error("FOLLOWING EXCEPTION OCCURED WHILE WEBPA GET REQUEST: " + e.getMessage());
+	    throw new TestException(e.getMessage());
+	}
+
+	LOGGER.debug("ENDING METHOD: getWebPaParamValuesWithoutRetry");
 	return webPaServerResponse;
     }
 
@@ -732,7 +814,7 @@ public class WebPaConnectionHandler {
 	LOGGER.debug("STARTING METHOD: getFormattedWebPaUrl");
 	StringBuffer completeUrl = new StringBuffer();
 	try {
-	    // Getting webpa rest Url "webpa.restapi.url"
+
 	    WebpaProvider webpaProvider = BeanUtils.getWebpaProvider();
 
 	    String restUrl = getServerURL();
@@ -789,5 +871,87 @@ public class WebPaConnectionHandler {
     private Map<String, String> fetchAuthHeaders(WebPaType methodType) {
 	WebpaProvider webpaProvider = BeanUtils.getWebpaProvider();
 	return webpaProvider.getRequestHeaderAuthData(methodType);
+    }
+
+    /**
+     * Set WebPa parameter values.
+     * 
+     * @param dut
+     *            Device for which WebPa params to be set.
+     * 
+     * @param parameters
+     *            WebPaParameter list
+     * 
+     * @return RestResponse.
+     *
+     */
+    private RestResponse setWebParamterValue(Dut dut, List<WebPaParameter> parameters) {
+
+	RestResponse response = null;
+	try {
+	    LOGGER.debug("STARTING METHOD: setWebPaParameterValue");
+
+	    WebPaParameterList paramList = new WebPaParameterList();
+	    paramList.setList(parameters);
+
+	    String webPaUrl = getFormattedWebPaUrl(dut, null, WebPaType.SET);
+	    Map<String, String> headers = fetchAuthHeaders(WebPaType.SET);
+
+	    RestClient restClient = new RestEasyClientImpl();
+	    RestRequest request = new RestRequest(webPaUrl, HttpRequestMethod.PATCH, headers);
+	    request.setTimeoutInMilliSeconds(CONNECTION_TIMEOUT);
+	    request.setMediaType(MediaType.APPLICATION_JSON_TYPE);
+
+	    String json = new Gson().toJson(paramList);
+	    request.setContent(json.toString());
+
+	    // Send request to WebPa
+	    response = restClient.executeAndGetResponse(request);
+
+	} catch (FailedTransitionException e) {
+	    LOGGER.error("FOLLOWING FailedTransitionException OCCURED WHILE WEBPA SET REQUEST: " + e.getMessage());
+	    throw new TestException(e.getMessage());
+	} catch (Exception e) {
+	    LOGGER.error("FOLLOWING EXCEPTION OCCURED WHILE WEBPA SET REQUEST: " + e.getMessage());
+	    throw new TestException(e.getMessage());
+	}
+	return response;
+    }
+
+    /**
+     * Gets webpa param values
+     * 
+     * @param macAddress
+     *            Mac Address of device for which webpa param to be fetched
+     * @param parameters
+     *            String array representing the webpa param names
+     * @return The response of WebPA get parameter.
+     */
+    private RestResponse getWebPaParameterValue(Dut dut, String[] parameters) {
+
+	RestResponse response = null;
+	try {
+	    LOGGER.debug("STARTING METHOD: getWebPaParameterValue");
+
+	    String webPaBaseUrl = getFormattedWebPaUrl(dut, convertToCommaSeparatedList(parameters), WebPaType.GET);
+	    Map<String, String> headers = fetchAuthHeaders(WebPaType.GET);
+	    RestClient restClient = new RestEasyClientImpl();
+	    RestRequest request = new RestRequest(webPaBaseUrl, HttpRequestMethod.GET, headers);
+	    request.setTimeoutInMilliSeconds(CONNECTION_TIMEOUT);
+
+	    // Get webpa param values
+	    response = restClient.executeAndGetResponse(request);
+
+	} catch (FailedTransitionException e) {
+	    LOGGER.error("FOLLOWING FailedTransitionException OCCURED WHILE WEBPA GET REQUEST: " + e.getMessage());
+	    throw new TestException(e.getMessage());
+	} catch (Exception e) {
+	    LOGGER.error("FOLLOWING EXCEPTION OCCURED WHILE WEBPA GET REQUEST: " + e.getMessage());
+	    throw new TestException(e.getMessage());
+	}
+
+	LOGGER.debug("ENDING METHOD: getWebPaParameterValue");
+	return response;
+
     }
 }

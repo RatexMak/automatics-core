@@ -20,6 +20,8 @@ package com.automatics.utils;
 import java.util.Iterator;
 import java.util.List;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +39,23 @@ public class FrameworkHelperUtils {
     private static final String IDENTIFIER_STABLE_BUILD = "stable";
 
     private static final String IDENTIFIER_RELEASE_BUILD = "release";
+    
+    private static FrameworkHelperUtils frameworkHelperUtils = null;
+   
+    /**
+     * Gets singleton instance
+     * @return FrameworkHelperUtils
+     */
+    public synchronized static FrameworkHelperUtils get() {
+   	if (frameworkHelperUtils == null) {
+   	    synchronized (FrameworkHelperUtils.class) {
+   		if (frameworkHelperUtils == null) {
+   		    frameworkHelperUtils = new FrameworkHelperUtils();
+   		}
+   	    }
+   	}
+   	return frameworkHelperUtils;
+       }
 
     /**
      * This method is used to return the firmwareVersion branch.It returns three values - master - stable - release
@@ -227,6 +246,28 @@ public class FrameworkHelperUtils {
 	    LOGGER.error("Unable to reboot device using Rack power provider . " + e.getMessage());
 	}
 	return isAccessible;
+    }
+    
+    /**
+     * 
+     * Method to combine all input sons to form single json object
+     * 
+     * @param jsonObjects
+     * @return
+     * @throws JSONException
+     */
+    public JSONObject mergeJsons(JSONObject... jsonObjects) throws JSONException {
+	JSONObject jsonObject = new JSONObject();
+	for (JSONObject eachJsonArgument : jsonObjects) {
+	    if (eachJsonArgument != null) {
+		Iterator<String> keys = eachJsonArgument.keys();
+		while (keys.hasNext()) {
+		    String key = keys.next();
+		    jsonObject.put(key, eachJsonArgument.get(key));
+		}
+	    }
+	}
+	return jsonObject;
     }
 
 }

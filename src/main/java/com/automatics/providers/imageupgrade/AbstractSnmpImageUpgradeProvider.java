@@ -40,7 +40,7 @@ public abstract class AbstractSnmpImageUpgradeProvider implements ImageUpgradePr
     @Override
     public String performImageUpgrade(boolean rebootImmediately, String firmwareToBeDownloaded, Dut device) {
 
-	ImageRequestParams params = new ImageRequestParams();
+	SnmpRequestParams params = new SnmpRequestParams();
 	params.setCommunityString(this.getCommunityString(device));
 	params.setFirmwareToBeDownloaded(firmwareToBeDownloaded);
 	params.setSnmpImageDownloadServerIp(getImageDownloadServerIp(device));
@@ -50,6 +50,7 @@ public abstract class AbstractSnmpImageUpgradeProvider implements ImageUpgradePr
 
     /**
      * Gets the snmp community string
+     * 
      * @param device
      * @return
      */
@@ -57,6 +58,7 @@ public abstract class AbstractSnmpImageUpgradeProvider implements ImageUpgradePr
 
     /**
      * Gets the image download server ip
+     * 
      * @param device
      * @return
      */
@@ -68,25 +70,33 @@ public abstract class AbstractSnmpImageUpgradeProvider implements ImageUpgradePr
     @Override
     public String performImageUpgrade(ImageRequestParams params, Dut device) {
 
-	DeviceConnectionProvider deviceConnectionProvider = BeanUtils.getDeviceConnetionProvider();
+	String response = "Method parameter ImageRequestParams is not instance of SnmpRequestParams. Hence image upgrade cannot be done.";
 
-	String ipAddress = this.getDeviceIpAddress(device);
-	List<String> commandsToTriggerCdl = new ArrayList<String>();
-	commandsToTriggerCdl.add(SnmpConstants.CMD_SNMP_SET_WITH_COMMUNITY + " " + params.getCommunityString() + " "
-		+ ipAddress + " " + SnmpConstants.CMD_SNMP_SET_DOCS_DEV_SW_SERVER_OID + " "
-		+ getImageDownloadServerIp(device));
-	commandsToTriggerCdl.add(SnmpConstants.CMD_SNMP_SET_WITH_COMMUNITY + " " + params.getCommunityString() + " "
-		+ ipAddress + " " + SnmpConstants.CMD_SNMP_SET_DOCS_DEV_SW_FILE_NAME_OID + " "
-		+ params.getFirmwareToBeDownloaded());
-	commandsToTriggerCdl.add(SnmpConstants.CMD_SNMP_SET_WITH_COMMUNITY + " " + ipAddress + " "
-		+ SnmpConstants.CMD_SNMP_SET_DOCS_DEV_SW_ADMIN_STATUS_OID);
-	return deviceConnectionProvider.execute((Device) device, ExecuteCommandType.SNMP_CODE_DOWNLOAD,
-		commandsToTriggerCdl);
+	if (params instanceof SnmpRequestParams) {
+
+	    SnmpRequestParams snmpParams = (SnmpRequestParams) params;
+
+	    DeviceConnectionProvider deviceConnectionProvider = BeanUtils.getDeviceConnetionProvider();
+
+	    String ipAddress = this.getDeviceIpAddress(device);
+	    List<String> commandsToTriggerCdl = new ArrayList<String>();
+	    commandsToTriggerCdl.add(SnmpConstants.CMD_SNMP_SET_WITH_COMMUNITY + " " + snmpParams.getCommunityString()
+		    + " " + ipAddress + " " + SnmpConstants.CMD_SNMP_SET_DOCS_DEV_SW_SERVER_OID + " "
+		    + getImageDownloadServerIp(device));
+	    commandsToTriggerCdl.add(SnmpConstants.CMD_SNMP_SET_WITH_COMMUNITY + " " + snmpParams.getCommunityString()
+		    + " " + ipAddress + " " + SnmpConstants.CMD_SNMP_SET_DOCS_DEV_SW_FILE_NAME_OID + " "
+		    + snmpParams.getFirmwareToBeDownloaded());
+	    commandsToTriggerCdl.add(SnmpConstants.CMD_SNMP_SET_WITH_COMMUNITY + " " + ipAddress + " "
+		    + SnmpConstants.CMD_SNMP_SET_DOCS_DEV_SW_ADMIN_STATUS_OID);
+	    response = deviceConnectionProvider.execute((Device) device, ExecuteCommandType.SNMP_CODE_DOWNLOAD,
+		    commandsToTriggerCdl);
+	}
+	return response;
     }
-    
-    
+
     /**
      * Gets device ip address for snmp image upgrade
+     * 
      * @param device
      * @return device ip address
      */

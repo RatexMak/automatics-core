@@ -67,6 +67,7 @@ import com.automatics.constants.AutomaticsConstants;
 import com.automatics.constants.DataProviderConstants;
 import com.automatics.constants.LinuxCommandConstants;
 import com.automatics.constants.ReportsConstants;
+import com.automatics.constants.WebPaConstants;
 import com.automatics.core.SupportedModelHandler;
 import com.automatics.dataobjects.ChannelDetailsDO;
 import com.automatics.device.ConnectedDevices;
@@ -156,8 +157,6 @@ public class AutomaticsTapApi {
     private static SnmpProviderFactory snmpProviderFactoryInstance = null;
 
     private static RdkVideoDeviceProvider rdkVideoDeviceProvider = null;
-
-    private static TR69Provider tr69Provider = null;
 
     private static int reConnectCount = 0;
 
@@ -2467,7 +2466,11 @@ public class AutomaticsTapApi {
 
 	    if (deviceAccessValidator.isDeviceAccessible(dut)) {
 		try {
-		    dut.getPower().reboot();
+		    if (null != dut.getPower()) {
+			dut.getPower().reboot();
+		    } else {
+			LOGGER.info("Reboot cannot be done via Power switch as Power Provider is not initialized");
+		    }
 		} catch (Exception e) {
 		    LOGGER.info("Failed to reboot via all methods exiting");
 		}
@@ -2477,9 +2480,13 @@ public class AutomaticsTapApi {
 	} catch (Exception ppex) {
 	    LOGGER.error("Failed to reboot the box using the command. Rebooting using 'reboot' power switch");
 	    try {
-		dut.getPower().reboot();
-		// Increment the known reboot Counter.
-		AutomaticsTapApi.incrementKnownRebootCounter(dut.getHostMacAddress());
+		if (null != dut.getPower()) {
+		    dut.getPower().reboot();
+		    // Increment the known reboot Counter.
+		    AutomaticsTapApi.incrementKnownRebootCounter(dut.getHostMacAddress());
+		} else {
+		    LOGGER.info("Reboot cannot be done via Power switch as Power Provider is not initialized");
+		}
 	    } catch (Exception e) {
 		LOGGER.error(
 			"Exception Catched - Exception occured while dut reboot throws Power Provider Exception and Telnet command execution also throws exception since box is already rebooted.",
@@ -2880,9 +2887,13 @@ public class AutomaticsTapApi {
 
 	    if (!rebootStatus) {
 		try {
-		    LOGGER.info("Going to reboot via power code as command failed twice.");
-		    dut.getPower().reboot();
-		    waitTill(AutomaticsConstants.TWO_SECONDS);
+		    if (null != dut.getPower()) {
+			LOGGER.info("Going to reboot via power code as command failed twice.");
+			dut.getPower().reboot();
+			waitTill(AutomaticsConstants.TWO_SECONDS);
+		    } else {
+			LOGGER.info("Cannot reboot via power code Power Provider is not initialized.");
+		    }
 
 		} catch (Exception e) {
 		    LOGGER.info("Failed to reboot via all methods exiting");
@@ -2896,10 +2907,14 @@ public class AutomaticsTapApi {
 	} catch (Exception ppex) {
 	    LOGGER.error("Failed to reboot the box using the command. Rebooting using 'reboot' power switch");
 	    try {
-		LOGGER.info("Going to reboot via power code as command failed twice and Power Switch failed once.");
-		dut.getPower().reboot();
-		// Increment the known reboot Counter.
-		AutomaticsTapApi.incrementKnownRebootCounter(dut.getHostMacAddress());
+		if (null != dut.getPower()) {
+		    LOGGER.info("Going to reboot via power code as command failed twice and Power Switch failed once.");
+		    dut.getPower().reboot();
+		    // Increment the known reboot Counter.
+		    AutomaticsTapApi.incrementKnownRebootCounter(dut.getHostMacAddress());
+		} else {
+		    LOGGER.info("Cannot reboot via power code Power Provider is not initialized.");
+		}
 	    } catch (Exception e) {
 		LOGGER.error(
 			"Exception Catched - Exception occured while dut reboot throws Power Provider Exception and Telnet command execution also throws exception since box is already rebooted.",
@@ -5729,16 +5744,19 @@ public class AutomaticsTapApi {
 
 	try {
 	    LOGGER.info("STARTING EXECUTE TR69 COMMANDS ");
-	    if (null == tr69Provider) {
-		tr69Provider = BeanUtils.getTR69Provider();
-	    }
-	    List<String> response = tr69Provider.getTr69ParameterValues(dut, commands);
+	    TR69Provider tr69Provider = BeanUtils.getTR69Provider();
+	    if (null != tr69Provider) {
 
-	    if (response != null && response.size() == 1) {
-		commandResults = response.get(response.size() - 1);
-	    }
+		List<String> response = tr69Provider.getTr69ParameterValues(dut, commands);
 
-	    LOGGER.info("TR69 - Result: " + commandResults);
+		if (response != null && response.size() == 1) {
+		    commandResults = response.get(response.size() - 1);
+		}
+
+		LOGGER.info("TR69 - Result: " + commandResults);
+	    } else {
+		LOGGER.error(BeanConstants.BEAN_NOT_FOUND_LOG, "TR69Provider", BeanConstants.BEAN_ID_TR69_PROVIDER);
+	    }
 
 	} catch (Exception e) {
 	    LOGGER.info("ERROR ON EXECUTE TR69 .. " + e.getMessage());
@@ -5769,17 +5787,19 @@ public class AutomaticsTapApi {
 
 	try {
 	    LOGGER.info("STARTING EXECUTE TR69/WEBPA COMMANDS ");
-	    if (null == tr69Provider) {
-		tr69Provider = BeanUtils.getTR69Provider();
-	    }
-	    List<String> response = tr69Provider.getTr69ParameterValues(dut, commandArray);
+	    TR69Provider tr69Provider = BeanUtils.getTR69Provider();
+	    if (null != tr69Provider) {
 
-	    LOGGER.debug("TR69 - Response.size " + response.size());
-	    if (response != null && response.size() == 1) {
-		commandResults = response.get(response.size() - 1);
-	    }
+		List<String> response = tr69Provider.getTr69ParameterValues(dut, commandArray);
+		if (response != null && response.size() == 1) {
+		    LOGGER.debug("TR69 - Response.size " + response.size());
+		    commandResults = response.get(response.size() - 1);
+		}
 
-	    LOGGER.info("TR69 - Result: " + commandResults);
+		LOGGER.info("TR69 - Result: " + commandResults);
+	    } else {
+		LOGGER.error(BeanConstants.BEAN_NOT_FOUND_LOG, "TR69Provider", BeanConstants.BEAN_ID_TR69_PROVIDER);
+	    }
 
 	} catch (Exception e) {
 	    LOGGER.info("ERROR ON EXECUTE TR69 .. " + e.getMessage());
@@ -5909,6 +5929,96 @@ public class AutomaticsTapApi {
 	    return null;
 	} else {
 	    return codeDownloadProvider.getLatestAvailableImage(imageNamePrefix, buildType);
+	}
+    }
+
+    /**
+     * Hard power cycles a dut outlet OFF and then ON using the WTI device.
+     * 
+     * @param dut
+     *            The {@link Dut} object
+     * 
+     * @throws FailedTransitionException
+     *             if an exception occurs during operation
+     */
+    public void reboot(Dut dut) {
+
+	try {
+
+	    if (SupportedModelHandler.isRDKB(dut) && AutomaticsPropertyUtility
+		    .getProperty(WebPaConstants.PROP_KEY_RDKB_WEBPA_REBOOT_ENABLE, "N").equalsIgnoreCase("Y")
+		    && CommonMethods.isSTBAccessible(dut)) {
+		boolean isStbRebooted = false;
+		try {
+		    tapApi.setWebPaParams(dut, WebPaConstants.WEBPA_PARAM_DEVICE_CONTROL_DEVICE_REBOOT,
+			    AutomaticsConstants.DEVICE, AutomaticsConstants.CONSTANT_0);
+		    isStbRebooted = CommonMethods.isSTBRebooted(tapApi, dut, AutomaticsConstants.THIRTY_SECONDS,
+			    AutomaticsConstants.CONSTANT_10);
+		} catch (Exception e) {
+		    LOGGER.error(e.getMessage());
+		}
+		if (!isStbRebooted) {
+		    if (CommonMethods.isSTBAccessible(dut)) {
+			tapApi.executeCommandUsingSsh(dut, LinuxCommandConstants.CMD_REBOOT);
+		    } else {
+			// Some time device is not getting rebooted because
+			// of connectivity issues. So
+			// forcefully rebooting with power switch.
+			if (!NonRackUtils.isNonRack()) {
+			    dut.getPower().reboot();
+			}
+		    }
+		}
+	    } else if (CommonMethods.isSTBAccessible(dut)) {
+		tapApi.executeCommandUsingSsh(dut, LinuxCommandConstants.CMD_REBOOT);
+	    } else {
+		// Some time device is not getting rebooted because of
+		// connectivity issues. So
+		// forcefully rebooting with power switch.
+		if (!NonRackUtils.isNonRack()) {
+		    dut.getPower().reboot();
+		}
+	    }
+	    if (SupportedModelHandler.isRDKVClient(dut) || SupportedModelHandler.isRDKB(dut)) {
+
+		/*
+		 * Gets the new ip address once after the reboot
+		 */
+		// Wait for box to reboot and get the video.
+		tapApi.waitAfterHardRebootInitiated(dut);
+
+	    }
+	    // Increment the known reboot Counter.
+	    AutomaticsTapApi.incrementKnownRebootCounter(dut.getHostMacAddress());
+
+	} catch (Exception ppex) {
+	    LOGGER.error(
+		    "Failed to reboot the box using the command. Rebooting using 'reboot' power switch. ERROR MESSAGE: "
+			    + ppex.getMessage());
+
+	    try {
+
+		if (!NonRackUtils.isNonRack()) {
+		    dut.getPower().reboot();
+
+		    // Increment the known reboot Counter.
+		    AutomaticsTapApi.incrementKnownRebootCounter(dut.getHostMacAddress());
+
+		    if (SupportedModelHandler.isRDKVClient(dut) || SupportedModelHandler.isRDKB(dut)) {
+
+			/*
+			 * Gets the new ip address once after the reboot
+			 */
+			// Wait for box to reboot and get the video.
+			tapApi.waitAfterHardRebootInitiated(dut);
+
+		    }
+		}
+	    } catch (Exception e) {
+		LOGGER.error(
+			"Exception Catched - Exception occured while dut reboot throws Power Provider Exception and command execution also throws exception since box is already rebooted. ERROR MESSAGE:"
+				+ e.getMessage());
+	    }
 	}
     }
 

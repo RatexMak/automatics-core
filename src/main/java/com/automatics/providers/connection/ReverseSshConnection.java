@@ -116,10 +116,10 @@ public class ReverseSshConnection implements Connection {
      * @throws WebPaFailureException
      */
     public ReverseSshConnection(Device settop) {
-	LOGGER.info("Creating new connection object from constructor");
+	LOGGER.debug("Creating new connection object from constructor");
 	connectionProvider = BeanUtils.getDeviceConnetionProvider();
 
-	LOGGER.info("Setting dut");
+	LOGGER.debug("Setting dut");
 	setSettop(settop);
 
     }
@@ -294,19 +294,19 @@ public class ReverseSshConnection implements Connection {
     /**
      * This method checks if port is in use or not by executing nc command to listen to a port // When we identify a
      * port, while webpas are executed, it can be taken up by different device .Hence we need to lock // the port.That
-     * is why we are listening to the port WHen the port is being listenened to , it cannot be used by any other
+     * is why we are listening to the port WHen the port is being listened to , it cannot be used by any other
      * device.While the netcat commands listen in background, we create a file <port>_Connecting in home folder of
-     * svcpeqa01 useer. We cannot allocate the port for reverse ssh if listening continues.But when we stop listening it
-     * can be allocated by some other device.To handle this situation , we are creating this file.While the litening is
+     * user. We cannot allocate the port for reverse ssh if listening continues.But when we stop listening it
+     * can be allocated by some other device.To handle this situation , we are creating this file.While the listening is
      * done in background, we create the file and then stop listening
      * 
-     * So before checking for a port, if we find <port>_Connecting file for that particular port, we dont go durthur to
-     * check if port is free, becasue it is at this stage that port is alllocated by framework for a device. Now the
+     * So before checking for a port, if we find <port>_Connecting file for that particular port, we dont go further to
+     * check if port is free, because it is at this stage that port is allocated by framework for a device. Now the
      * port will be set to device and web pa commands can be executed.Once webpa execution is complete, COnnectiong will
      * be removed and COnnected file will be created.
      * 
      * @param port
-     * @return Booelan indicating port is free or not
+     * @return Boolean indicating port is free or not
      * @throws WebPaFailureException
      * @throws IllegalArgumentException
      */

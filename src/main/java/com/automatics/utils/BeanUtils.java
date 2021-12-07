@@ -44,6 +44,7 @@ import com.automatics.providers.snmp.SnmpProviderFactory;
 import com.automatics.providers.tr69.TR69Provider;
 import com.automatics.providers.trace.TraceProvider;
 import com.automatics.providers.webpa.WebpaProvider;
+import com.automatics.providers.xconf.XConfDataProvider;
 
 /**
  * 
@@ -419,6 +420,31 @@ public class BeanUtils {
 		    BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
 	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_WEBPA_PROVIDER, e.getMessage());
+	}
+	return provider;
+    }
+
+    /**
+     * Gets XConfDataProvider instance
+     * 
+     * @return XConfDataProvider instance
+     */
+    public static XConfDataProvider getXConfDataProvider() {
+	XConfDataProvider provider = null;
+	try {
+	    LOGGER.info("Reading {} from partner {}", BeanConstants.BEAN_ID_XCONF_DATA_PROVIDER,
+		    BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
+	    provider = (XConfDataProvider) getProviderImpl(BeanConstants.BEAN_ID_XCONF_DATA_PROVIDER,
+		    XConfDataProvider.class, BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
+	} catch (Exception e) {
+	    LOGGER.info("Since {} not configured in partner, reading default implementation in Automatics.",
+		    BeanConstants.BEAN_ID_XCONF_DATA_PROVIDER);
+	    try {
+		provider = (XConfDataProvider) getProviderImpl(BeanConstants.BEAN_ID_XCONF_DATA_PROVIDER,
+			XConfDataProvider.class, BeanConstants.CORE_SPRING_CONFIG_FILE_NAME);
+	    } catch (Exception e1) {
+		LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_XCONF_DATA_PROVIDER, e.getMessage());
+	    }
 	}
 	return provider;
     }

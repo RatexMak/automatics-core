@@ -22,6 +22,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 import com.automatics.constants.AutomaticsConstants;
 import com.automatics.utils.CommonMethods;
+import com.automatics.utils.FrameworkHelperUtils;
 
 /**
  * Configures the XCONF firmware configuration details before executing XCONF SNMP or XCONF DIFD related test cases.
@@ -100,6 +101,16 @@ public class FirmwareConfigurations {
 
     /** The delayDownload delay. */
     private int delayDownload = 0;
+    
+    private JSONObject additionalConfigurations = null;
+
+    public JSONObject getAdditionalConfigurations() {
+        return additionalConfigurations;
+    }
+
+    public void setAdditionalConfigurations(JSONObject json) {
+        this.additionalConfigurations = json;
+    }
 
     /**
      * Get firmware download protocol.
@@ -327,7 +338,8 @@ public class FirmwareConfigurations {
 	if (getDelayDownload() > 0) {
 	    xconfJsonObject.put(KEY_OBJECT_DELAY_DOWNLOAD, getDelayDownload());
 	}
-
+	
+	xconfJsonObject = FrameworkHelperUtils.get().mergeJsons(xconfJsonObject,additionalConfigurations);
 	JSONObject mockServerConfig = new JSONObject();
 
 	mockServerConfig.put(KEY_OBJECT_E_STB_MAC, getEstbMac());

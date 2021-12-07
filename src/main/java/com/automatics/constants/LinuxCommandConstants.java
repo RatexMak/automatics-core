@@ -48,7 +48,7 @@ public class LinuxCommandConstants {
     /** Linux command - telnet. */
     public static final String CMD_TELNET = "telnet";
 
-    /** Command to use get version name for xi3. */
+    /** Command to use get version name. */
     public static final String CMD_GREP_IMAGE_NAME_FROM_VERSION_FILE = "grep \"imagename\\(:\\|=\\)\" /version.txt";
 
     /** Command to get SI cache result. */
@@ -135,5 +135,11 @@ public class LinuxCommandConstants {
 
     /** * Constant for storing the command to retrieve output.json */
     public static final String CAT_COMMAND_TO_GET_OPT_OUPUT_JSON = "cat /opt/output.json";
+    
+    /** Constant holding the redirect operator. */
+    public static String REDIRECT_OPERATOR = " > ";
+    
+    /** Linux command to sync. */
+    public static final String CMD_SYNC = "sync";
 
 }

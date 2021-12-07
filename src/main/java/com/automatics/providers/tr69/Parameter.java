@@ -15,25 +15,44 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package com.automatics.providers.connection;
+
+package com.automatics.providers.tr69;
 
 /**
- * Enum for command types
- * @author Radhika
+ * 
+ * Defines parameter for TR69 communication
  *
  */
-public enum ExecuteCommandType {
+public class Parameter {
 
-    REV_SSH_DEVICE_VERIFY,
+    private String paramName;
 
-    TRACE_INIT_COMMAND_GATEWAY,
+    private String paramValue;
 
-    ADDLN_TRACE_INIT_COMMAND_GATEWAY,
+    private String dataType;
 
-    SNMP_CODE_DOWNLOAD,
-    
-    SNMP_COMMAND,
-    
-    XCONF_CONFIG_UPDATE
+    public String getParamName() {
+	return paramName;
+    }
+
+    public void setParamName(String paramName) {
+	this.paramName = paramName;
+    }
+
+    public String getParamValue() {
+	return paramValue;
+    }
+
+    public void setParamValue(String paramValue) {
+	this.paramValue = paramValue;
+    }
+
+    public String getDataType() {
+	return dataType;
+    }
+
+    public void setDataType(String dataType) {
+	this.dataType = dataType;
+    }
 
 }

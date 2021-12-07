@@ -19,4 +19,10 @@ package com.automatics.constants;
 
 public class WebPaConstants {
     public static final String WEBPA_PARAMETER_FOR_SERIAL_NUMBER = "DeviceConfig.DeviceInfo.SerialNumber";
+    
+    /** Constant for WEBPA REBOOT ENABLE */
+    public static final String PROP_KEY_RDKB_WEBPA_REBOOT_ENABLE = "rdkb.webpa.reboot.enable";
+    
+    /** WebPa parameter for device reboot. The value should be of string type - "Device" */
+    public static final String WEBPA_PARAM_DEVICE_CONTROL_DEVICE_REBOOT = "Device.X_CISCO_COM_DeviceControl.RebootDevice";
 }

@@ -30,6 +30,23 @@ public class XconfConstants {
 
     /** Constant holding the location of swupdate.conf file. */
     public static final String SOFTWARE_UPDATE_CONF_FILE = "/opt/swupdate.conf";
+    
+    /** Constant holding the xconf simulator server url. */
+    public static final String PROP_KEY_XCONF_SIMULATOR_SERVER_URL = "xconf.simulator.url"; 
+    
+    /** Constant holding the xconf firmware location. */
+    public static final String PROP_KEY_XCONF_FIRMWARE_LOCATION = "xconf.firmware.location"; 
+    
+    
+    /** The constant for firmware download protocol 'http'. */
+    public static final String FIRMWARE_DOWNLOAD_PROTOCOL_HTTP = "http";
+    
+    /** The constant for firmware download protocol 'https'. */
+    public static final String FIRMWARE_DOWNLOAD_PROTOCOL_HTTPS = "https";
+    
+    /** The constant for firmware download protocol 'tftp'. */
+    public static final String FIRMWARE_DOWNLOAD_PROTOCOL_TFTP = "tftp";
+   
 
 
 }

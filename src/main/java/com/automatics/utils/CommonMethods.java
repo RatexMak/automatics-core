@@ -94,6 +94,7 @@ import com.automatics.device.DutImpl;
 import com.automatics.device.config.DeviceConfig;
 import com.automatics.enums.AutomaticsTestTypes;
 import com.automatics.enums.DeviceCategory;
+import com.automatics.enums.ExecutionMode;
 import com.automatics.enums.ProcessRestartOption;
 import com.automatics.enums.RemoteControlType;
 import com.automatics.enums.ServiceType;
@@ -104,8 +105,6 @@ import com.automatics.exceptions.TestException;
 import com.automatics.manager.device.DeviceManager;
 import com.automatics.providers.DeviceAccessValidator;
 import com.automatics.providers.connection.DeviceConnectionProvider;
-import com.automatics.providers.imageupgrade.ImageUpgradeProvider;
-import com.automatics.providers.imageupgrade.ImageUpgradeProviderFactory;
 import com.automatics.providers.rack.exceptions.PowerProviderException;
 import com.automatics.providers.snmp.SnmpProvider;
 import com.automatics.providers.snmp.SnmpProviderFactory;
@@ -115,11 +114,13 @@ import com.automatics.providers.trace.TraceServerConnectionStatus;
 import com.automatics.rack.RackDeviceValidationManager;
 import com.automatics.rack.RackInitializer;
 import com.automatics.snmp.SnmpCommand;
+import com.automatics.snmp.SnmpDataType;
 import com.automatics.snmp.SnmpParams;
 import com.automatics.snmp.SnmpProtocol;
 import com.automatics.tap.AutomaticsTapApi;
 import com.automatics.test.AutomaticsTestBase;
 import com.automatics.utils.tr69.Tr69Constants;
+import com.automatics.utils.xconf.XConfUtils;
 import com.automatics.webpa.WebPaConnectionHandler;
 import com.automatics.webpa.WebPaParameter;
 import com.automatics.webpa.WebPaServerResponse;
@@ -1637,29 +1638,6 @@ public class CommonMethods {
 	}
 	LOGGER.info("Count of String " + searchString + " in " + fileName + " is : " + count);
 	return count;
-    }
-
-    /**
-     * Utility method which updates swupdate.conf in opt directory and insert the XCONF software update URL. This is
-     * specifically added to address and is expected to call prior to all CDL scenarios
-     *
-     * @param tapEnv
-     *            AutomaticsTapApi
-     * 
-     * @param dut
-     *            The set-top instance
-     * @param buildNameToBeTriggerred
-     */
-    public static void updateXConfWithSettings(AutomaticsTapApi tapEnv, Dut dut, String buildNameToBeTriggerred) {
-
-	ImageUpgradeProviderFactory imageupgradeProviderFactory = BeanUtils.getImageUpgradeProviderFactory();
-	ImageUpgradeProvider imageProvider = imageupgradeProviderFactory.getImageUpgradeProvider();
-	if (null != imageProvider) {
-	    imageProvider.performImageUpgrade(false, buildNameToBeTriggerred, dut);
-	} else {
-	    LOGGER.error("ImageDownloadProvider is null. Image upgrade cannot be done!!!");
-	}
-
     }
 
     /**
@@ -3521,23 +3499,7 @@ public class CommonMethods {
 	}
 	LOGGER.info("EXITING: getRFCPath");
 	return rfcPath.trim();
-    }
-
-    /**
-     * Verify if the test type is Native flip
-     * 
-     * @return true if Native test enabled
-     */
-    public static boolean isNativeFlipTest() {
-
-	boolean isNativeFlipTest = false;
-	if (System.getProperty(AutomaticsConstants.SYSTEM_PROPERTY_FILTER_TEST_TYPE, "")
-		.contains(AutomaticsTestTypes.NATIVE_FLIP.value())) {
-	    isNativeFlipTest = true;
-	}
-
-	return isNativeFlipTest;
-    }
+    } 
 
     /**
      * Utility methods to verify the currently running firmware version using sysDescr SNMP MIBs.
@@ -3807,11 +3769,8 @@ public class CommonMethods {
 	// validation for device reboot
 	for (int index = 1; index <= maxLoopCount; index++) {
 	    LOGGER.info(index + "/" + maxLoopCount + "# verify whether the device is rebooted or not");
-	    DeviceAccessValidator deviceAccessValidator = (DeviceAccessValidator) BeanUtils.getProviderImpl(
-		    BeanConstants.BEAN_ID_DEVICE_ACCESS_VALIDATOR, DeviceAccessValidator.class,
-		    BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	    // verifying whether device is accessible or not
-	    if (!deviceAccessValidator.isDeviceAccessible(dut)) {
+	    if (!isSTBAccessible(dut)) {
 		status = true;
 		break;
 	    }
@@ -3827,19 +3786,26 @@ public class CommonMethods {
     }
 
     /**
-     * Method to check whether the STB is accessible. This is cross verified by sending an echo test_connection command
-     * and see if we get the response.
+     * Method to check whether the STB is accessible.
      * 
      * @param dut
      * @return isSTBAccessible
      */
     public static boolean isSTBAccessible(Dut dut) {
 
+	boolean isAccessible = false;
 	DeviceAccessValidator deviceAccessValidator = (DeviceAccessValidator) BeanUtils.getProviderImpl(
 		BeanConstants.BEAN_ID_DEVICE_ACCESS_VALIDATOR, DeviceAccessValidator.class,
 		BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
+
 	// verifying whether device is accessible or not
-	return deviceAccessValidator.isDeviceAccessible(dut);
+	if (null != deviceAccessValidator) {
+	    isAccessible = deviceAccessValidator.isDeviceAccessible(dut);
+	} else {
+	    LOGGER.error("Could not verify if device is accessible since "
+		    + BeanConstants.BEAN_ID_DEVICE_ACCESS_VALIDATOR + " is not configured.");
+	}
+	return isAccessible;
     }
 
     /**
@@ -3854,11 +3820,18 @@ public class CommonMethods {
      * @return true if STB is accessible else false;
      */
     public static boolean waitForEstbIpAcquisition(AutomaticsTapApi tapEnv, Dut dut) {
+	boolean isIpAcquired = false;
 	DeviceAccessValidator deviceAccessValidator = (DeviceAccessValidator) BeanUtils.getProviderImpl(
 		BeanConstants.BEAN_ID_DEVICE_ACCESS_VALIDATOR, DeviceAccessValidator.class,
 		BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	// verifying whether device is accessible or not
-	return deviceAccessValidator.waitForIpAcquisitionAfterReboot(dut);
+	if (null != deviceAccessValidator) {
+	    isIpAcquired = deviceAccessValidator.waitForIpAcquisitionAfterReboot(dut);
+	} else {
+	    LOGGER.error("Could not verify if device ip is acquired since "
+		    + BeanConstants.BEAN_ID_DEVICE_ACCESS_VALIDATOR + " is not configured.");
+	}
+	return isIpAcquired;
 
     }
 
@@ -4633,4 +4606,131 @@ public class CommonMethods {
 	return restartStatus;
 
     }
+
+    /**
+     * Utility method to reboot the device using SNMP and verify that the device is UP after executing the command
+     *
+     * @param dut
+     *            The device under test
+     * @param tapEnv
+     *            {@link AutomaticsTapApi}
+     * @throws TestException
+     *             Thows exception if failed to get proper resoponse of if the device is still accessible after
+     *             executing the command)
+     */
+    public static boolean rebootUsingSnmpAndVerify(Dut dut) {
+
+	boolean status = false;
+	boolean stbAccessible = true;
+	AutomaticsTapApi tapEnv = AutomaticsTapApi.getInstance();
+
+	SnmpParams snmpParams = new SnmpParams();
+	snmpParams.setIpAddress(((Device) dut).getEcmIpAddress());
+
+	String deviceRebootOid = AutomaticsTapApi.getSTBPropsValue(SnmpConstants.PROP_KEY_DEVICE_REBOOT_OID);
+	if (CommonMethods.isNull(deviceRebootOid)) {
+	    LOGGER.error(
+		    "Device reboot via SNMP will fail as OID for reboot is not configured in Automatics Props in property: {}",
+		    SnmpConstants.PROP_KEY_DEVICE_REBOOT_OID);
+	}
+	snmpParams.setMibOid(deviceRebootOid);
+
+	String deviceRebootOidValue = AutomaticsTapApi.getSTBPropsValue(SnmpConstants.PROP_KEY_DEVICE_REBOOT_OID_VALUE);
+	if (CommonMethods.isNull(deviceRebootOidValue)) {
+	    LOGGER.error(
+		    "Device reboot via SNMP will fail as OID value for reboot is not configured in Automatics Props in property: {}",
+		    SnmpConstants.PROP_KEY_DEVICE_REBOOT_OID_VALUE);
+	}
+	snmpParams.setValue(deviceRebootOidValue);
+	snmpParams.setCommandOption(SnmpConstants.SNMP_COMMAND_OPTIONS);
+	snmpParams.setDataType(SnmpDataType.INTEGER);
+	snmpParams.setSnmpCommand(SnmpCommand.SET);
+	String response = tapEnv.executeSnmpCommand(dut, snmpParams);
+
+	if (CommonMethods.isNotNull(response) && !response.contains(SnmpConstants.NO_SUCH_OID_RESPONSE)) {
+	    for (int i = 0; i < 2; i++) {
+		// Checking whether the device is up. If the device is still up,
+		// then reboot did not happen.
+		stbAccessible = isSTBAccessible(dut);
+		if (stbAccessible) {
+		    LOGGER.error("Device is still up after executing snmp command to reset the device. Retry: " + i);
+		} else {
+		    LOGGER.info("Successfully initiated reboot on device usin snmp");
+		    status = true;
+		    break;
+		}
+		// Wait for some time for the device to get reboot
+		LOGGER.info("Waiting for 30 seconds for the device to initiate reboot");
+		tapEnv.waitTill(AutomaticsConstants.FIFTEEN_SECONDS);
+	    }
+
+	} else {
+	    LOGGER.error("Failed to reset the device using snmp. Response : " + response);
+	}
+
+	return status;
+    }
+
+    /**
+     * Helper method to reboot the box,wait for IP Acquisition and restart the trace
+     * 
+     * @param dut
+     *            instance of {@link Dut}
+     * @param tapApi
+     *            instance of {@link AutomaticsTapApi}
+     * @return rebootFinished true if ip acquired after reboot else false
+     * 
+     */
+    public static boolean rebootAndWaitForIpAccusition(Dut dut, AutomaticsTapApi tapEnv) {
+	LOGGER.info("STARTING METHOD: rebootAndWaitForIpAccusition()");
+	Boolean rebootFinished = false;
+
+	// Reboot the box
+	tapEnv.reboot(dut);
+
+	if (!(SupportedModelHandler.isRDKVClient(dut) || SupportedModelHandler.isRDKB(dut))) {
+	    // Wait to bring the box power UP(Box gets IP)
+	    rebootFinished = waitForEstbIpAcquisition(tapEnv, dut);
+	}
+
+	rebootFinished = isSTBAccessible(dut);
+	LOGGER.info("ENDING METHOD: rebootAndWaitForIpAccusition()");
+	return rebootFinished;
+    }
+
+    /**
+     * Utility method which updates swupdate.conf in opt directory and insert the XCONF software update URL. This is
+     * expected to call prior to all CDL scenarios
+     *
+     * @param tapEnv
+     *            The ecats tap api instance to access the cats properties
+     * @param dut
+     *            The set-top instance
+     * @param buildNameToBeTriggerred
+     */
+    public static void updateXConfWithSettings(AutomaticsTapApi tapEnv, Dut dut, String buildNameToBeTriggerred) {
+	// Configure Mock XConf server with required configurations
+	XConfUtils.configureXconfHttpDownloadFirmwareDetailsOnServer(dut, buildNameToBeTriggerred);
+
+	// Update config in device
+	XConfUtils.updatXconfUrlInDevice(tapEnv, dut);
+    }
+    
+    /**
+     * Checking whether the setup is in ETHWAN mode.
+     * @return true, if ethwan mode
+     */
+    public static boolean isRunningEthwanMode() {
+ 	boolean isTrue = false;
+ 	String executionMode = AutomaticsTapApi.getCurrentExecutionMode();
+ 	if (CommonMethods.isNotNull(executionMode)) {
+ 	    try {
+ 		ExecutionMode executionModeFromTm = ExecutionMode.valueOf(executionMode);
+
+ 	    } catch (Exception e) {
+ 		LOGGER.debug("Could not verify ETHWAN mode");
+ 	    }
+ 	}
+ 	return isTrue;
+     }
 }

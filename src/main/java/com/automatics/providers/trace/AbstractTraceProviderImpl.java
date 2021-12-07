@@ -181,8 +181,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
     @Override
     public void startTrace() throws Exception {
 
-	if (CommonMethods.isNativeFlipTest() || NonRackUtils.disableSettopTrace()) {
-	    LOGGER.info("Native flip test enabled. Skipping Trace operations");
+	if (NonRackUtils.disableSettopTrace()) {
+	    LOGGER.info("Skipping Trace operations");
 	    return;
 	}
 
@@ -231,8 +231,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
     @Override
     public void stopTrace() throws Exception {
 
-	if (CommonMethods.isNativeFlipTest() || NonRackUtils.disableSettopTrace()) {
-	    LOGGER.info("Native flip test enabled. Skipping Trace operations");
+	if (NonRackUtils.disableSettopTrace()) {
+	    LOGGER.info("Skipping Trace operations");
 	    return;
 	}
 
@@ -298,8 +298,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
      */
     public void setupDeviceTraceLogger() {
 
-	if (CommonMethods.isNativeFlipTest() || NonRackUtils.disableSettopTrace()) {
-	    LOGGER.info("Native flip test enabled. Skipping Trace operations");
+	if (NonRackUtils.disableSettopTrace()) {
+	    LOGGER.info("Skipping Trace operations");
 	    return;
 	}
 	settopTraceLogger = Logger.getLogger(dut.getHostMacAddress());
@@ -342,8 +342,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 	if (isTraceRequiredForConnectedGateway(dut)) {
 	    AbstractTraceProviderImpl gatewayTraceProvider = getGatewayTraceProvider(dut);
 	    if (null != gatewayTraceProvider) {
-		LOGGER.info("Start bufferring gateway trace for {}", gatewayTraceProvider.getDevice()
-			.getHostMacAddress());
+		LOGGER.info("Start bufferring gateway trace for {}",
+			gatewayTraceProvider.getDevice().getHostMacAddress());
 		gatewayTraceProvider.startBuffering();
 	    } else {
 		LOGGER.info("The gateway dut trace is empty, hence cannot start trace buffer!!");
@@ -362,8 +362,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 	if (isTraceRequiredForConnectedGateway(dut)) {
 	    AbstractTraceProviderImpl gatewayTraceProvider = getGatewayTraceProvider(dut);
 	    if (null != gatewayTraceProvider) {
-		LOGGER.info("Stop bufferring gateway trace for {}", gatewayTraceProvider.getDevice()
-			.getHostMacAddress());
+		LOGGER.info("Stop bufferring gateway trace for {}",
+			gatewayTraceProvider.getDevice().getHostMacAddress());
 		gatewayTraceProvider.stopBuffering();
 	    } else {
 		LOGGER.info("The gateway dut trace is empty, hence cannot stop trace buffer!!");
@@ -377,8 +377,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
      */
     @Override
     public void insertIntoTrace(String textToInsert, Level logLevel) {
-	if (CommonMethods.isNativeFlipTest() || NonRackUtils.disableSettopTrace()) {
-	    LOGGER.info("Native flip test enabled. Skipping Trace operations");
+	if (NonRackUtils.disableSettopTrace()) {
+	    LOGGER.info("Skipping Trace operations");
 	    return;
 	}
 
@@ -412,8 +412,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
      */
     public void stopTrace(boolean isConnectionThread) throws Exception {
 
-	if (CommonMethods.isNativeFlipTest() || NonRackUtils.disableSettopTrace()) {
-	    LOGGER.debug("Native flip test enabled. Skipping Trace operations");
+	if (NonRackUtils.disableSettopTrace()) {
+	    LOGGER.debug("Skipping Trace operations");
 	    return;
 	}
 
@@ -449,8 +449,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
      */
     public void stopTraceOnConnectionLoss() throws Exception {
 
-	if (CommonMethods.isNativeFlipTest() || NonRackUtils.disableSettopTrace()) {
-	    LOGGER.info("Native flip test enabled. Skipping Trace operations");
+	if (NonRackUtils.disableSettopTrace()) {
+	    LOGGER.info("Skipping Trace operations");
 	    return;
 	}
 
@@ -477,16 +477,18 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
      *            The trace timeout in milliseconds
      * @param start
      *            The start marker
-     * @param isFirstOccurrence Is first match to be found
+     * @param isFirstOccurrence
+     *            Is first match to be found
      * 
-     * @param shouldPrintLogs if trace search data to be printed in log or not
+     * @param shouldPrintLogs
+     *            if trace search data to be printed in log or not
      * 
      * @return The corresponding log message if the particular pattern is present, otherwise null.
      * 
      * @throws IOException
      *             in the case of exception happens.
      */
-    
+
     public String searchAndWaitForTrace(String regEx, long timeoutInMilliseconds, boolean start,
 	    boolean isFirstOccurrence, boolean shouldPrintLogs) throws IOException {
 
@@ -556,7 +558,7 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 		for (; searchOffset < queue_array.length; searchOffset++) {
 
 		    String item = queue_array[searchOffset];
-		    // LOGGER.info(">>>>> regEx :"+regEx+"   item : " + item);
+		    // LOGGER.info(">>>>> regEx :"+regEx+" item : " + item);
 
 		    if (pattern.matcher(item).find()) {
 			matchingString = item;
@@ -586,8 +588,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
      */
     private void connectAndRead() {
 
-	if (CommonMethods.isNativeFlipTest() || NonRackUtils.disableSettopTrace()) {
-	    LOGGER.info("Native flip test enabled. Skipping Trace operations");
+	if (NonRackUtils.disableSettopTrace()) {
+	    LOGGER.info("Skipping Trace operations");
 	    return;
 	}
 
@@ -644,8 +646,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 		    keepPollingXg1ThreadAlive = true;
 
 		    // Execute trace command
-		    connectionProvider.execute(device, connectionGateway,
-			    ExecuteCommandType.TRACE_INIT_COMMAND_GATEWAY, command);
+		    connectionProvider.execute(device, connectionGateway, ExecuteCommandType.TRACE_INIT_COMMAND_GATEWAY,
+			    command);
 
 		    if (additionalTraceLogger.isEnabled) {
 			connectionGatewayAdditionalLogger = connectionProvider.getConnection(device);
@@ -689,8 +691,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 		// Starts the polling thread
 		if (pollingThread == null || !pollingThread.isAlive() || pollingThread.isInterrupted()) {
 		    pollingThread = new PollingThread();
-		    pollingThread.setName("PollingThread_" + pollingThread.getId() + "_(" + dut.getHostMacAddress()
-			    + ")");
+		    pollingThread
+			    .setName("PollingThread_" + pollingThread.getId() + "_(" + dut.getHostMacAddress() + ")");
 		    pollingThread.setPriority(Thread.MAX_PRIORITY);
 		    pollingThread.startPolling();
 		}
@@ -762,8 +764,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 		    if (null != gateWayDeviceInputStreamAddlLogger) {
 			if (bufferedReaderAdditionalLogger == null) {
 			    LOGGER.info("Buffered Reader for additional trace initialized");
-			    bufferedReaderAdditionalLogger = new BufferedReader(new InputStreamReader(
-				    gateWayDeviceInputStreamAddlLogger));
+			    bufferedReaderAdditionalLogger = new BufferedReader(
+				    new InputStreamReader(gateWayDeviceInputStreamAddlLogger));
 			}
 		    }
 
@@ -924,8 +926,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
      */
     public synchronized void disconnect() {
 
-	if (CommonMethods.isNativeFlipTest() || NonRackUtils.disableSettopTrace()) {
-	    LOGGER.info("Native flip test enabled. Skipping Trace operations");
+	if (NonRackUtils.disableSettopTrace()) {
+	    LOGGER.info("Skipping Trace operations");
 	    return;
 	}
 
@@ -1072,7 +1074,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 		    stopTrace();
 		} catch (Exception e) {
 		    LOGGER.error("========================================================");
-		    LOGGER.error("Unable to stop trace.This might lead to OOM.Check trace for excessive logging in devices");
+		    LOGGER.error(
+			    "Unable to stop trace.This might lead to OOM.Check trace for excessive logging in devices");
 		    LOGGER.error("========================================================");
 		    throw new Exception(e);
 		}
@@ -1107,8 +1110,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 	@Override
 	public void run() {
 
-	    if (CommonMethods.isNativeFlipTest() || NonRackUtils.disableSettopTrace()) {
-		LOGGER.debug("Native flip test enabled. Skipping Trace operations");
+	    if (NonRackUtils.disableSettopTrace()) {
+		LOGGER.debug("Skipping Trace operations");
 		return;
 	    }
 
@@ -1132,7 +1135,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 
 			    if (isLostConnection) {
 				LOGGER.info("Resetting polling reconnect count to 0");
-				LOGGER.info("Polling thread identified the device comes online after connection loss. Restarting the Trace provider");
+				LOGGER.info(
+					"Polling thread identified the device comes online after connection loss. Restarting the Trace provider");
 				if (null != connectionThread) {
 				    connectionThread.interrupt();
 				}
@@ -1150,7 +1154,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 				isLostConnection = true;
 
 				if (!disConnectFlag) {
-				    LOGGER.error("Polling thread detected a connection loss, Stopping the trace provider and will be restarted after establishing connection with device.");
+				    LOGGER.error(
+					    "Polling thread detected a connection loss, Stopping the trace provider and will be restarted after establishing connection with device.");
 				    stopTraceOnConnectionLoss();
 				}
 				connectionStatus = TraceServerConnectionStatus.CONNECTING;

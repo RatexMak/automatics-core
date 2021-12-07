@@ -159,8 +159,7 @@ public class SupportedModelHandler {
      * @return True - > If device is of required type . False - > If device is of different type
      */
     public static boolean isRDKB(Dut dut) {
-	boolean isValid = false;
-	LOGGER.info("RDKB Models={}", rdkbModels);
+	boolean isValid = false;	
 	if (CommonMethods.isNotNull(rdkbModels) && rdkbModels.contains(dut.getModel())) {
 	    isValid = true;
 	}
