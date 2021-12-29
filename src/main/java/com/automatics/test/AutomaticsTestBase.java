@@ -319,7 +319,12 @@ public class AutomaticsTestBase {
 			testEnvData.setAvPresent(isAvPresent);
 
 			LOGGER.info("INIT-{} Perform before suite initialization", device.getHostMacAddress());
-			testInitilizationProvider.performBeforeSuiteInitialization(device, testEnvData);
+			if (null != testInitilizationProvider) {
+			    testInitilizationProvider.performBeforeSuiteInitialization(device, testEnvData);
+			} else {
+			    LOGGER.info(
+				    "Skipping partner specific before suite initialization as it is not configured.");
+			}
 
 			if (!AutomaticsTestBase.isAccountTest && !SupportedModelHandler.isRDKB(device)
 				&& !SupportedModelHandler.isRDKC(device)) {
@@ -368,9 +373,8 @@ public class AutomaticsTestBase {
 	    String testCaseTobeExecuted = testDetailsAnnotation.testUID();
 	    TestSessionDO testSessionDetails = null;
 
-	    if (device.getTestSessionDetails() == null
-		    || !device.getTestSessionDetails().getTestCaseLastExecuted()
-			    .equals(testDetailsAnnotation.testUID())) {
+	    if (device.getTestSessionDetails() == null || !device.getTestSessionDetails().getTestCaseLastExecuted()
+		    .equals(testDetailsAnnotation.testUID())) {
 		testSessionDetails = new TestSessionDO();
 	    } else {
 		testSessionDetails = device.getTestSessionDetails();
@@ -391,7 +395,11 @@ public class AutomaticsTestBase {
 
 	    TestEnvData testEnvData = new TestEnvData();
 	    // Perform partner specific before method initialization
-	    testInitilizationProvider.performBeforeMethodInitialization(device, testEnvData);
+	    if (null != testInitilizationProvider) {
+		testInitilizationProvider.performBeforeMethodInitialization(device, testEnvData);
+	    } else {
+		LOGGER.info("Skipping partner specific before method initialization as it is not configured.");
+	    }
 
 	    LOGGER.info(">>>[BEFORE_METHOD]: Extending allocation before method for testType : {} {}", testType,
 		    device.getHostMacAddress());
@@ -472,8 +480,13 @@ public class AutomaticsTestBase {
 
 		    LOGGER.info("Going for if build changed : Test Type : " + testType.name());
 		    String buildName = TestUtils.getBuildName();
-		    BuildTypeChanges hasBuildChanged = testInitilizationProvider
-			    .getBuildChangeStatus(device, buildName);
+		    BuildTypeChanges hasBuildChanged = BuildTypeChanges.NO_CHANGE;
+		    if (null != testInitilizationProvider) {
+			hasBuildChanged = testInitilizationProvider.getBuildChangeStatus(device, buildName);
+		    } else {
+			LOGGER.info(
+				"Skipping build change verification as partner specific initialization is not configured.");
+		    }
 		    LOGGER.info(">>>[AFTER_METHOD]: Build Change Status: {}", hasBuildChanged);
 		    if (!hasBuildChanged.equals(BuildTypeChanges.NO_CHANGE)) {
 			updateJobStatus(device.getHostMacAddress(), JobStatusValue.BUILD_CHANGED_AFTER_TEST);
@@ -486,7 +499,12 @@ public class AutomaticsTestBase {
 
 	    TestEnvData testEnvData = new TestEnvData();
 	    testEnvData.setTestDetails(testDetailsAnnotation);
-	    testInitilizationProvider.performAfterMethodCleanup(device, testEnvData);
+
+	    if (null != testInitilizationProvider) {
+		testInitilizationProvider.performAfterMethodCleanup(device, testEnvData);
+	    } else {
+		LOGGER.info("Skipping parter specific after method clean up as it is not configured.");
+	    }
 	}
     }
 
@@ -565,7 +583,14 @@ public class AutomaticsTestBase {
 			    }
 			    // check for build change in device
 			    LOGGER.info(">>>[AFTER-SUITE]: Verifying if build changed after test");
-			    hasBuildChanged = testInitilizationProvider.getBuildChangeStatus(device, testBuildName);
+
+			    if (null != testInitilizationProvider) {
+				hasBuildChanged = testInitilizationProvider.getBuildChangeStatus(device, testBuildName);
+			    } else {
+				LOGGER.info(
+					"Skipping build change verification as partner specific initialization is not configured.");
+				hasBuildChanged = BuildTypeChanges.NO_CHANGE;
+			    }
 			    LOGGER.info(">>>[AFTER-SUITE]: Build Change Status: {}", hasBuildChanged);
 
 			    if (hasBuildChanged.equals(BuildTypeChanges.NO_CHANGE)) {
@@ -573,7 +598,8 @@ public class AutomaticsTestBase {
 			    } else {
 				if (!hasBuildChanged.equals(BuildTypeChanges.SKIP_CHECK)) {
 				    if (hasBuildChanged.equals(BuildTypeChanges.UNABLE_TO_DETERMINE)) {
-					LOGGER.info(">>>[AFTER-SUITE]: Unable to verify build on the device as same as the testing firmware.Device could be down.");
+					LOGGER.info(
+						">>>[AFTER-SUITE]: Unable to verify build on the device as same as the testing firmware.Device could be down.");
 					updateJobStatus(device.getHostMacAddress(), JobStatusValue.SSH_FAIL);
 				    } else if (hasBuildChanged.equals(BuildTypeChanges.BUILD_CHANGED_TO_PROD)) {
 					LOGGER.info(">>>[AFTER-SUITE]: Build changed to PRODUCTION version.");
@@ -594,8 +620,11 @@ public class AutomaticsTestBase {
 		    }
 
 		    try {
-			device.getTrace().stopBuffering();
-			device.getTrace().stopTrace();
+			TraceProvider connectionBasedTrace = device.getTrace();
+			if (null != connectionBasedTrace) {
+			    connectionBasedTrace.stopBuffering();
+			    connectionBasedTrace.stopTrace();
+			}
 		    } catch (Exception e) {
 			LOGGER.error("Error stoppping trace for device {}", device.getHostMacAddress());
 		    }
@@ -617,7 +646,12 @@ public class AutomaticsTestBase {
 		    }
 
 		    testEnvData.setAvPresent(isAvPresent);
-		    testInitilizationProvider.performAfterSuiteCleanup(device, testEnvData);
+
+		    if (null != testInitilizationProvider) {
+			testInitilizationProvider.performAfterSuiteCleanup(device, testEnvData);
+		    } else {
+			LOGGER.info("Skipping parter specific after suite clean up as it is not configured.");
+		    }
 		    releaseSettop(device);
 		}
 	    }
@@ -630,7 +664,8 @@ public class AutomaticsTestBase {
 		|| testFilterType.equals(AutomaticsTestTypes.FAST_QUICK_CI.value())) {
 	    if (finalDeviceList == null || finalDeviceList.isEmpty()) {
 		AutomaticsUtils.jsonToAutomatics = AutomaticsUtils.formatJsonObjectToRespondAsBoxIssues();
-		LOGGER.info("Json To Automatics as box not accessible or available " + AutomaticsUtils.jsonToAutomatics);
+		LOGGER.info(
+			"Json To Automatics as box not accessible or available " + AutomaticsUtils.jsonToAutomatics);
 	    }
 
 	}
@@ -640,7 +675,6 @@ public class AutomaticsTestBase {
 	 */
 	if ((!TestType.isQt(testType.name()))) {
 
-	    
 	    if (CommonMethods.isNull(buildName)) {
 		buildName = TestUtils.getBuildName();
 	    }
@@ -659,8 +693,8 @@ public class AutomaticsTestBase {
 	if (isHtmlLoggingEnabled()) {
 	    String entireLogsLocation = AutomaticsConstants.SETTOP_LOG_DIRECTORY;
 	    String testingBuild = System.getProperty(AutomaticsConstants.BUILD_NAME_SYSTEM_PROPERTY, "").trim();
-	    List<String> listOfTestCases = new ArrayList<String>(Arrays.asList(System.getProperty("filterTestIds")
-		    .split(",")));
+	    List<String> listOfTestCases = new ArrayList<String>(
+		    Arrays.asList(System.getProperty("filterTestIds").split(",")));
 	    List<String> listOfDuts = new ArrayList<String>(Arrays.asList(System.getProperty("settopList").split(",")));
 	    (new HtmlLogGenerator()).parseAndGenerateHTMLLog(listOfTestCases, listOfDuts, entireLogsLocation,
 		    testingBuild);
@@ -880,8 +914,8 @@ public class AutomaticsTestBase {
 		    }
 		}
 	    } else {
-		LOGGER.error("Invalid response from automatics. Code - ", response.getResponseCode() + " message - "
-			+ response.getResponseBody());
+		LOGGER.error("Invalid response from automatics. Code - ",
+			response.getResponseCode() + " message - " + response.getResponseBody());
 	    }
 
 	} catch (RestClientException e) {
@@ -914,7 +948,13 @@ public class AutomaticsTestBase {
 		}
 	    }
 	    LOGGER.info("[BEFORE-SUITE:]Verifying if build changed before test");
-	    BuildTypeChanges buildTypeChange = testInitilizationProvider.getBuildChangeStatus(device, testBuildName);
+	    BuildTypeChanges buildTypeChange = null;
+	    if (null != testInitilizationProvider) {
+		buildTypeChange = testInitilizationProvider.getBuildChangeStatus(device, testBuildName);
+	    } else {
+		LOGGER.info("Skipping build change verification as partner specific initialization is not configured.");
+		buildTypeChange = BuildTypeChanges.NO_CHANGE;
+	    }
 	    LOGGER.info("[BEFORE-SUITE:]Build Change Status: {}", buildTypeChange);
 
 	    if (buildTypeChange.equals(BuildTypeChanges.NO_CHANGE)) {
@@ -946,7 +986,8 @@ public class AutomaticsTestBase {
 	if (!TestType.isQt(testType.name())) {
 	    Device device = ((Device) dut);
 	    LOGGER.info(">>>[BEFORE_SUITE]: Verifying if build loaded in device as expected");
-	    if (CommonMethods.isNotNull(testBuildName) && (verifyIfBuildChangedInDevice(testBuildName, lockedDevices))) {
+	    if (CommonMethods.isNotNull(testBuildName)
+		    && (verifyIfBuildChangedInDevice(testBuildName, lockedDevices))) {
 		updateJobStatus(dut.getHostMacAddress(), JobStatusValue.BUILD_CHANGED_BEFORE_TEST);
 		setSkipOnNonExpectedBuild(true);
 
@@ -960,7 +1001,12 @@ public class AutomaticsTestBase {
 	    try {
 		String buildAppender = TestUtils.getBuildAppender();
 		ExecutionMode executionMode = TestUtils.getExecutionMode();
-		testInitilizationProvider.setExecutionModeInDevice(dut, executionMode, buildAppender);
+		if (null != testInitilizationProvider) {
+		    testInitilizationProvider.setExecutionModeInDevice(dut, executionMode, buildAppender);
+		} else {
+		    LOGGER.info(
+			    "Skipping setting of execution mode in device as partner specific initialization is not configured.");
+		}
 		device.setExecutionMode(executionMode);
 	    } catch (Exception e) {
 		LOGGER.info(">>>[BEFORE_SUITE]: Releasing device {}", dut.getHostMacAddress());
@@ -1065,8 +1111,8 @@ public class AutomaticsTestBase {
 	    }
 
 	} catch (Exception e) {
-	    LOGGER.error("Issue with Extending dut box alloction - " + device.getHostMacAddress() + "."
-		    + e.getMessage());
+	    LOGGER.error(
+		    "Issue with Extending dut box alloction - " + device.getHostMacAddress() + "." + e.getMessage());
 	}
     }
 
@@ -1181,11 +1227,8 @@ public class AutomaticsTestBase {
      */
     private static String getLogRedirectionFolder(Dut dut, String testUId, boolean isTraceLog) {
 	String logFolder = isTraceLog ? TraceProviderConstants.SETTOP_TRACE_DIRECTORY_NAME : ReportsConstants.LOG_DIR;
-	String logSaveLocation = System.getProperty(ReportsConstants.USR_DIR)
-		+ AutomaticsConstants.PATH_SEPARATOR
-		+ AutomaticsConstants.TARGET_FOLDER
-		+ AutomaticsConstants.PATH_SEPARATOR
-		+ testUId
+	String logSaveLocation = System.getProperty(ReportsConstants.USR_DIR) + AutomaticsConstants.PATH_SEPARATOR
+		+ AutomaticsConstants.TARGET_FOLDER + AutomaticsConstants.PATH_SEPARATOR + testUId
 		+ AutomaticsConstants.PATH_SEPARATOR
 		+ AutomaticsUtils.getCleanMac(dut.getHostMacAddress() + AutomaticsConstants.PATH_SEPARATOR
 			+ logFolder.replace("/", "") + AutomaticsConstants.PATH_SEPARATOR);
@@ -1420,8 +1463,8 @@ public class AutomaticsTestBase {
 	    LOGGER.info("Status of AV {}", isAvPresent);
 
 	    if (!isAvPresent) {
-		LOGGER.error("PRECONDITION#Unable to verify AV status as good for the STB "
-			+ device.getHostMacAddress());
+		LOGGER.error(
+			"PRECONDITION#Unable to verify AV status as good for the STB " + device.getHostMacAddress());
 
 		if (isBeforeTestCheck) {
 		    AutomaticsTestBase.updateJobStatus(device.getHostMacAddress(), JobStatusValue.NO_AV_BEFORE_TEST);

@@ -45,6 +45,7 @@ import com.automatics.utils.AutomaticsPropertyUtility;
 import com.automatics.utils.AutomaticsUtils;
 import com.automatics.utils.BeanUtils;
 import com.automatics.utils.CommonMethods;
+import com.automatics.utils.FrameworkHelperUtils;
 import com.google.gson.Gson;
 
 /**
@@ -220,7 +221,7 @@ public class WebPaConnectionHandler {
 		StringBuffer completeUrl = new StringBuffer();
 		String restUrl = getServerURL();
 		completeUrl = completeUrl.append(restUrl).append(macAddress.replaceAll(":", "")).append("/config")
-			.append("?names=").append(convertToCommaSeparatedList(parameters));
+			.append("?names=").append(FrameworkHelperUtils.convertToCommaSeparatedList(parameters));
 
 		Map<String, String> headers = fetchAuthHeaders(WebPaType.GET);
 		RestClient restClient = new RestEasyClientImpl();
@@ -717,7 +718,8 @@ public class WebPaConnectionHandler {
 	    try {
 		LOGGER.info("STARTING METHOD: getWebPaParamValue");
 		LOGGER.info("STARTING METHOD4 : dut {}", dut);
-		String completeUrl = getFormattedWebPaUrl(dut, convertToCommaSeparatedList(parameters), WebPaType.GET);
+		String completeUrl = getFormattedWebPaUrl(dut,
+			FrameworkHelperUtils.convertToCommaSeparatedList(parameters), WebPaType.GET);
 
 		Map<String, String> headers = fetchAuthHeaders(WebPaType.GET);
 		RestClient restClient = new RestEasyClientImpl();
@@ -767,34 +769,6 @@ public class WebPaConnectionHandler {
 
     private String getServerURL() {
 	return AutomaticsPropertyUtility.getProperty("WEBPA_SERVER_URL", "");
-    }
-
-    /**
-     * Convert the String array to list of string with command separated. Also append starting and and ending braces.
-     * 
-     * @param parameters
-     *            Array of parameters
-     * @return String in which parameters are separated by comma
-     */
-    private String convertToCommaSeparatedList(final String[] parameters) {
-	int parametersLength = parameters.length;
-	String requiredParams = null;
-	/*
-	 * If only one parameter, we don't need process anything.
-	 */
-	if (parametersLength > 1) {
-	    StringBuffer paramList = new StringBuffer();
-	    for (int index = 0; index < parametersLength; index++) {
-		paramList.append(parameters[index]);
-		if (index != parametersLength - 1) {
-		    paramList.append(",");
-		}
-	    }
-	    requiredParams = paramList.toString();
-	} else {
-	    requiredParams = parameters[0];
-	}
-	return requiredParams;
     }
 
     /**
@@ -933,7 +907,8 @@ public class WebPaConnectionHandler {
 	try {
 	    LOGGER.debug("STARTING METHOD: getWebPaParameterValue");
 
-	    String webPaBaseUrl = getFormattedWebPaUrl(dut, convertToCommaSeparatedList(parameters), WebPaType.GET);
+	    String webPaBaseUrl = getFormattedWebPaUrl(dut,
+		    FrameworkHelperUtils.convertToCommaSeparatedList(parameters), WebPaType.GET);
 	    Map<String, String> headers = fetchAuthHeaders(WebPaType.GET);
 	    RestClient restClient = new RestEasyClientImpl();
 	    RestRequest request = new RestRequest(webPaBaseUrl, HttpRequestMethod.GET, headers);

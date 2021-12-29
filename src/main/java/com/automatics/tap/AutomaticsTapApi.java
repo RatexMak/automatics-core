@@ -110,6 +110,7 @@ import com.automatics.providers.rack.exceptions.OcrException;
 import com.automatics.providers.rack.exceptions.PowerProviderException;
 import com.automatics.providers.snmp.SnmpProvider;
 import com.automatics.providers.snmp.SnmpProviderFactory;
+import com.automatics.providers.tr69.Parameter;
 import com.automatics.providers.tr69.TR69Provider;
 import com.automatics.providers.trace.ConnectionTraceProvider;
 import com.automatics.providers.trace.SerialTraceProvider;
@@ -272,9 +273,7 @@ public class AutomaticsTapApi {
 
 	deviceConnectionProvider = BeanUtils.getDeviceConnetionProvider();
 
-	deviceAccessValidator = (DeviceAccessValidator) BeanUtils.getProviderImpl(
-		BeanConstants.BEAN_ID_DEVICE_ACCESS_VALIDATOR, DeviceAccessValidator.class,
-		BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
+	deviceAccessValidator = BeanUtils.getDeviceAccessValidator();
 	getRackInitializerInstance();
 
     }
@@ -682,9 +681,13 @@ public class AutomaticsTapApi {
      * @return the output of linux commands executed.
      */
     public String executeCommand(Dut dut, String[] commands) {
+	String response = null;
 
 	List<String> commandList = Arrays.asList(commands);
-	return deviceConnectionProvider.execute((Device) dut, commandList, DeviceConsoleType.ARM);
+	if (null != deviceConnectionProvider) {
+	    response = deviceConnectionProvider.execute((Device) dut, commandList, DeviceConsoleType.ARM);
+	}
+	return response;
 
     }
 
@@ -700,8 +703,13 @@ public class AutomaticsTapApi {
      */
     public String executeCommandUsingSsh(Dut dut, String[] commands) {
 
-	List<String> commandList = Arrays.asList(commands);
-	return deviceConnectionProvider.execute((Device) dut, commandList, DeviceConsoleType.ARM);
+	String response = null;
+
+	if (null != deviceConnectionProvider) {
+	    List<String> commandList = Arrays.asList(commands);
+	    response = deviceConnectionProvider.execute((Device) dut, commandList, DeviceConsoleType.ARM);
+	}
+	return response;
 
     }
 
@@ -1029,7 +1037,11 @@ public class AutomaticsTapApi {
      * @return the output of command executed.
      */
     public String executeCommandUsingSsh(Dut dut, String command, long timeout) {
-	return deviceConnectionProvider.execute((Device) dut, command, DeviceConsoleType.ARM, timeout);
+	String response = null;
+	if (null != deviceConnectionProvider) {
+	    response = deviceConnectionProvider.execute((Device) dut, command, DeviceConsoleType.ARM, timeout);
+	}
+	return response;
     }
 
     /**
@@ -1049,8 +1061,12 @@ public class AutomaticsTapApi {
     }
 
     public String executeCommandOnAtom(Dut device, String command) {
-	return deviceConnectionProvider.execute((Device) device, command, DeviceConsoleType.ATOM,
-		AutomaticsConstants.THIRTY_SECONDS);
+	String response = null;
+	if (null != deviceConnectionProvider) {
+	    response = deviceConnectionProvider.execute((Device) device, command, DeviceConsoleType.ATOM,
+		    AutomaticsConstants.THIRTY_SECONDS);
+	}
+	return response;
     }
 
     /**
@@ -1089,6 +1105,9 @@ public class AutomaticsTapApi {
 	File outputFile = null;
 	File outputDirectory = null;
 
+	String firmwareVersion = (null != dut.getFirmwareVersion() ? dut.getFirmwareVersion()
+		: AutomaticsConstants.EMPTY_STRING);
+
 	try {
 	    if (SupportedModelHandler.isRDKB(dut) || SupportedModelHandler.isRDKC(dut)) {
 
@@ -1102,7 +1121,16 @@ public class AutomaticsTapApi {
 					    dut.getHostMacAddress() + AutomaticsConstants.PATH_SEPARATOR + "images"));
 		    LOGGER.info("Obtained jenkins location for image save :" + outputDirectory);
 		} else {
-		    outputDirectory = new File(dut.getImageCompareProvider().getImageSaveLocation());
+		    if (null != dut.getImageCompareProvider()) {
+			outputDirectory = new File(dut.getImageCompareProvider().getImageSaveLocation());
+		    } else {
+			outputDirectory = new File(
+				System.getProperty(ReportsConstants.USR_DIR) + AutomaticsConstants.PATH_SEPARATOR
+					+ AutomaticsConstants.TARGET_FOLDER + AutomaticsConstants.PATH_SEPARATOR
+					+ AutomaticsUtils.getCleanMac(
+						dut.getHostMacAddress() + AutomaticsConstants.PATH_SEPARATOR)
+					+ AVConstants.IMAGE_COMPARE_FOLDER);
+		    }
 		}
 	    }
 
@@ -1110,16 +1138,15 @@ public class AutomaticsTapApi {
 		outputDirectory.mkdirs();
 	    }
 	    outputFile = new File(outputDirectory,
-		    dut.getFirmwareVersion().replaceAll("\\.", AutomaticsConstants.EMPTY_STRING) + "_" + imageName
-			    + ".png");
+		    firmwareVersion.replaceAll("\\.", AutomaticsConstants.EMPTY_STRING) + "_" + imageName + ".png");
 	    ImageIO.write(bufferedImage, "PNG", outputFile);
 
 	} catch (Exception e) {
-	    LOGGER.info("Error occured while saving the image");
+	    LOGGER.info("Error occured while saving the image: {}", e.getMessage());
 	}
-	return outputDirectory + File.separator
-		+ dut.getFirmwareVersion().replaceAll("\\.", AutomaticsConstants.EMPTY_STRING) + "_" + imageName
-		+ ".png";
+
+	return outputDirectory + File.separator + firmwareVersion.replaceAll("\\.", AutomaticsConstants.EMPTY_STRING)
+		+ "_" + imageName + ".png";
     }
 
     /**
@@ -1505,10 +1532,18 @@ public class AutomaticsTapApi {
      * @return The power state returned by the WTI or Netboost power strips.
      */
     public String getPowerStatus(Dut dut) {
+	String powerStatus = null;
 	if (NonRackUtils.isNonRack()) {
-	    return null;
+	    return powerStatus;
 	} else {
-	    return dut.getPower().getPowerStatus();
+	    if (null != dut.getPower()) {
+		try {
+		    powerStatus = dut.getPower().getPowerStatus();
+		} catch (PowerProviderException e) {
+		    LOGGER.error("Exception while getting device power status: {}", e.getMessage());
+		}
+	    }
+	    return powerStatus;
 	}
     }
 
@@ -2102,9 +2137,13 @@ public class AutomaticsTapApi {
      * @return the response of the command executed on the server.
      */
     public String executeCommandUsingSshConnection(IServer serverDetails, String command) {
-	List<String> commands = new ArrayList<String>();
-	commands.add(command);
-	return deviceConnectionProvider.execute(serverDetails, commands, AutomaticsConstants.THIRTY_SECONDS);
+	String response = null;
+	if (null != deviceConnectionProvider) {
+	    List<String> commands = new ArrayList<String>();
+	    commands.add(command);
+	    response = deviceConnectionProvider.execute(serverDetails, commands, AutomaticsConstants.THIRTY_SECONDS);
+	}
+	return response;
     }
 
     /**
@@ -2528,7 +2567,11 @@ public class AutomaticsTapApi {
      * @return Execution result
      */
     public String executeCommandUsingSsh(Dut dut, String command, String expectStr, String[] options) {
-	return deviceConnectionProvider.execute(dut, command, expectStr, options);
+	String response = null;
+	if (null != deviceConnectionProvider) {
+	    response = deviceConnectionProvider.execute(dut, command, expectStr, options);
+	}
+	return response;
     }
 
     /**
@@ -3239,8 +3282,12 @@ public class AutomaticsTapApi {
      * @return response of execution
      */
     public String executeCommandOnOneIPClients(Dut dut, String[] commands) {
-	List<String> commandList = Arrays.asList(commands);
-	return deviceConnectionProvider.execute((Device) dut, commandList);
+	String response = null;
+	if (null != deviceConnectionProvider) {
+	    List<String> commandList = Arrays.asList(commands);
+	    response = deviceConnectionProvider.execute((Device) dut, commandList);
+	}
+	return response;
     }
 
     /**
@@ -3503,7 +3550,11 @@ public class AutomaticsTapApi {
      * @return Execution result
      */
     public String executeCommandInsideAtomConsoleUsingExpect(Dut dut, String atomServerIp, String command) {
-	return deviceConnectionProvider.executeInsideAtomConsoleUsingExpect(dut, atomServerIp, command);
+	String response = null;
+	if (null != deviceConnectionProvider) {
+	    response = deviceConnectionProvider.executeInsideAtomConsoleUsingExpect(dut, atomServerIp, command);
+	}
+	return response;
     }
 
     /**
@@ -3591,8 +3642,12 @@ public class AutomaticsTapApi {
      *            Commcasd list to be executed
      */
     public static String executeCommandInRDKCConnectedXW4(Dut camDevice, String[] commands) {
-	List<String> commandList = Arrays.asList(commands);
-	return deviceConnectionProvider.execute((Device) camDevice, commandList);
+	String response = null;
+	if (null != deviceConnectionProvider) {
+	    List<String> commandList = Arrays.asList(commands);
+	    response = deviceConnectionProvider.execute((Device) camDevice, commandList);
+	}
+	return response;
     }
 
     /**
@@ -3757,7 +3812,11 @@ public class AutomaticsTapApi {
      * @return the output of linux commands executed.
      */
     public String executeCommandAndReturnResponseWithBanner(Dut dut, String command) {
-	return deviceConnectionProvider.execute((Device) dut, command);
+	String response = null;
+	if (null != deviceConnectionProvider) {
+	    response = deviceConnectionProvider.execute((Device) dut, command);
+	}
+	return response;
     }
 
     public boolean compareImageOnTargetRegion(Dut dut, RegionInfo regionInfo, long timeOut) {
@@ -5541,8 +5600,11 @@ public class AutomaticsTapApi {
 	try {
 
 	    if (!SupportedModelHandler.isNonRDKDevice(dut)) {
-		imageVersion = parseOutputToGetImageVersionFromVersionFile(
-			executeCommandInSettopBox(dut, LinuxCommandConstants.CMD_GREP_IMAGE_NAME_FROM_VERSION_FILE));
+		String response = executeCommandInSettopBox(dut,
+			LinuxCommandConstants.CMD_GREP_IMAGE_NAME_FROM_VERSION_FILE);
+		if (CommonMethods.isNotNull(response)) {
+		    imageVersion = parseOutputToGetImageVersionFromVersionFile(response);
+		}
 
 		LOGGER.info("CURRENT IMAGE VERSION FROM Version.txt : " + imageVersion);
 
@@ -5660,10 +5722,15 @@ public class AutomaticsTapApi {
      * @param string
      */
     public boolean validateAV(Dut device) {
+	boolean isAVPresent = false;
 	if (null == rdkVideoDeviceProvider) {
 	    rdkVideoDeviceProvider = BeanUtils.getRdkVideoDeviceProvider();
 	}
-	return rdkVideoDeviceProvider.validateAV(device);
+
+	if (null != rdkVideoDeviceProvider) {
+	    isAVPresent = rdkVideoDeviceProvider.validateAV(device);
+	}
+	return isAVPresent;
     }
 
     /**
@@ -5874,24 +5941,26 @@ public class AutomaticsTapApi {
 	if (null == rdkVideoDeviceProvider) {
 	    rdkVideoDeviceProvider = BeanUtils.getRdkVideoDeviceProvider();
 	}
-	String channelLocatorUrl = rdkVideoDeviceProvider.getCurrentChannelLocatorUrl(dut);
-	if (CommonMethods.isNotNull(channelLocatorUrl)) {
-	    if ((CommonMethods.patternMatcher(channelLocatorUrl,
-		    AutomaticsPropertyUtility
-			    .getProperty(AutomaticsConstants.PATTERN_FOR_IPLINEAR_CHANNEL_LOCATOR_URL)))
-		    || (CommonMethods.patternMatcher(channelLocatorUrl, AutomaticsPropertyUtility
-			    .getProperty(AutomaticsConstants.PATTERN_FOR_IPLINEAR_CHANNEL_LOCATOR_URL_MPD)))) {
-		executionMode = "IPLINEAR_OR_GRAM";
-	    }
-	    // }
-	    else if (CommonMethods.patternMatcher(channelLocatorUrl,
-		    AutomaticsConstants.PATTERN_FOR_QAM_CHANNEL_LOCATOR_URL)) {
-		executionMode = "SP";
-	    } else {
-		LOGGER.error("DeviceConfig mode could not be verified. Hence setting mode as unknown");
-		executionMode = ExecutionMode.UNKNOWN.get();
-	    }
+	if (null != rdkVideoDeviceProvider) {
+	    String channelLocatorUrl = rdkVideoDeviceProvider.getCurrentChannelLocatorUrl(dut);
+	    if (CommonMethods.isNotNull(channelLocatorUrl)) {
+		if ((CommonMethods.patternMatcher(channelLocatorUrl,
+			AutomaticsPropertyUtility
+				.getProperty(AutomaticsConstants.PATTERN_FOR_IPLINEAR_CHANNEL_LOCATOR_URL)))
+			|| (CommonMethods.patternMatcher(channelLocatorUrl, AutomaticsPropertyUtility
+				.getProperty(AutomaticsConstants.PATTERN_FOR_IPLINEAR_CHANNEL_LOCATOR_URL_MPD)))) {
+		    executionMode = "IPLINEAR_OR_GRAM";
+		}
+		// }
+		else if (CommonMethods.patternMatcher(channelLocatorUrl,
+			AutomaticsConstants.PATTERN_FOR_QAM_CHANNEL_LOCATOR_URL)) {
+		    executionMode = "SP";
+		} else {
+		    LOGGER.error("DeviceConfig mode could not be verified. Hence setting mode as unknown");
+		    executionMode = ExecutionMode.UNKNOWN.get();
+		}
 
+	    }
 	}
 
 	LOGGER.info("Execution mode of device after initialization is " + executionMode);

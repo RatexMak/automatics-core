@@ -18,7 +18,6 @@
 
 package com.automatics.providers.connection;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -93,8 +92,7 @@ public class SshConnection implements Connection {
 	try {
 	    crypto = BeanUtils.getCredentialCrypto();
 	} catch (Exception e) {
-	    LOGGER.error("Credential decryptor not configured. Hence using the credential directly from config file.",
-		    e.getMessage());
+	    LOGGER.info("Credential decryptor not configured. Hence using the credential directly from config file.");
 	}
     }
 
@@ -130,8 +128,8 @@ public class SshConnection implements Connection {
 	}
 
 	if (defaultPassword == null) {
-	    throw new FailedTransitionException(GeneralError.FAILED_RESOURCE_READ, "Unable to find password for "
-		    + defaultUsername);
+	    throw new FailedTransitionException(GeneralError.FAILED_RESOURCE_READ,
+		    "Unable to find password for " + defaultUsername);
 	}
 
 	if (CommonMethods.isNotNull(privateKeyLocation)) {
@@ -306,7 +304,8 @@ public class SshConnection implements Connection {
      *            The login password.
      *
      */
-    public SshConnection(String ipaddress, int portNumber, String userName, String password, String privateKeyLocation) {
+    public SshConnection(String ipaddress, int portNumber, String userName, String password,
+	    String privateKeyLocation) {
 	this.defaultUsername = userName;
 	this.defaultPassword = password;
 	this.hostName = ipaddress;
@@ -543,8 +542,8 @@ public class SshConnection implements Connection {
      * @throws JSchException
      *             SSH Connection error
      */
-    private void doSend(String command, String type, int sleepTime) throws IOException, InterruptedException,
-	    JSchException {
+    private void doSend(String command, String type, int sleepTime)
+	    throws IOException, InterruptedException, JSchException {
 	if ("root".equals(type)) {
 	    channelExec = session.openChannel("exec");
 	    ((ChannelExec) channelExec).setPty(true);
@@ -680,9 +679,10 @@ public class SshConnection implements Connection {
 			    defaultOutputStream.write(passwd);
 			    defaultOutputStream.flush();
 			}
-			if (check.indexOf(AutomaticsConstants.WARNING_MESSAGE_FOR_NEW_CONNECTION) != -1
-				|| check.indexOf(AutomaticsConstants.ALTERNATE_WARNING_MESSAGE_FOR_NEW_CONNECTION) != -1) {
-			    String yesKeyword = check.contains(AutomaticsConstants.WARNING_MESSAGE_FOR_NEW_CONNECTION) ? "yes"
+			if (check.indexOf(AutomaticsConstants.WARNING_MESSAGE_FOR_NEW_CONNECTION) != -1 || check
+				.indexOf(AutomaticsConstants.ALTERNATE_WARNING_MESSAGE_FOR_NEW_CONNECTION) != -1) {
+			    String yesKeyword = check.contains(AutomaticsConstants.WARNING_MESSAGE_FOR_NEW_CONNECTION)
+				    ? "yes"
 				    : "y";
 			    byte[] passwd = (yesKeyword + "\n").getBytes();
 			    defaultOutputStream.write(passwd);
@@ -772,10 +772,10 @@ public class SshConnection implements Connection {
 				    defaultOutputStream.flush();
 				}
 				if (check.indexOf(AutomaticsConstants.WARNING_MESSAGE_FOR_NEW_CONNECTION) != -1
-					|| check.indexOf(AutomaticsConstants.ALTERNATE_WARNING_MESSAGE_FOR_NEW_CONNECTION) != -1) {
-				    String yesKeyword = check
-					    .contains(AutomaticsConstants.WARNING_MESSAGE_FOR_NEW_CONNECTION) ? "yes"
-					    : "y";
+					|| check.indexOf(
+						AutomaticsConstants.ALTERNATE_WARNING_MESSAGE_FOR_NEW_CONNECTION) != -1) {
+				    String yesKeyword = check.contains(
+					    AutomaticsConstants.WARNING_MESSAGE_FOR_NEW_CONNECTION) ? "yes" : "y";
 				    byte[] passwd = (yesKeyword + "\n").getBytes();
 				    defaultOutputStream.write(passwd);
 				    defaultOutputStream.flush();
@@ -944,8 +944,8 @@ public class SshConnection implements Connection {
      * @throws JSchException
      *             SSH Connection error
      */
-    public String send(String command, String expectStr, String[] options) throws IOException, InterruptedException,
-	    JSchException {
+    public String send(String command, String expectStr, String[] options)
+	    throws IOException, InterruptedException, JSchException {
 
 	StringBuffer responseBuilder = null;
 	Channel channel = session.openChannel("shell");
@@ -1030,14 +1030,16 @@ public class SshConnection implements Connection {
 		    ((ChannelSftp) channel).ls(remoteLocation + remoteFileName);
 		    copyStatus = true;
 		} else {
-		    LOGGER.error("Selenium home folder seems to be missing.Please re-check Selenium configurations manually");
+		    LOGGER.error(
+			    "Selenium home folder seems to be missing.Please re-check Selenium configurations manually");
 		}
 	    } catch (SftpException e1) {
 		LOGGER.error("Caught exceptin while trying to copy sftp: [{}:{}]", e1.id, e1.getMessage());
 	    }
 	} catch (SftpException e) {
 	    if (e.id == ChannelSftp.SSH_FX_NO_SUCH_FILE) {
-		LOGGER.error("Selenium home folder seems to be missing.Please re-check Selenium configurations manually");
+		LOGGER.error(
+			"Selenium home folder seems to be missing.Please re-check Selenium configurations manually");
 	    } else {
 		LOGGER.error("Unexpected exception during ls files on sftp: [{}:{}]", e.id, e.getMessage());
 	    }
@@ -1117,7 +1119,7 @@ public class SshConnection implements Connection {
 	Thread responseReadThread = new Thread() {
 	    public void run() {
 		try {
-		    // LOGGER.debug("Command Response  for executing command {} start", commandToExecute);
+		    // LOGGER.debug("Command Response for executing command {} start", commandToExecute);
 		    byte[] tmp = new byte[1024];
 		    try {
 			while (true) {
@@ -1139,7 +1141,8 @@ public class SshConnection implements Connection {
 					defaultOutputStream.flush();
 				    }
 				    if (check.indexOf(AutomaticsConstants.WARNING_MESSAGE_FOR_NEW_CONNECTION) != -1
-					    || check.indexOf(AutomaticsConstants.ALTERNATE_WARNING_MESSAGE_FOR_NEW_CONNECTION) != -1) {
+					    || check.indexOf(
+						    AutomaticsConstants.ALTERNATE_WARNING_MESSAGE_FOR_NEW_CONNECTION) != -1) {
 					byte[] passwd = ("yes" + "\n").getBytes();
 					defaultOutputStream.write(passwd);
 					defaultOutputStream.flush();

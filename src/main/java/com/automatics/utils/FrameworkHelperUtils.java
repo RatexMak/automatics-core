@@ -39,23 +39,24 @@ public class FrameworkHelperUtils {
     private static final String IDENTIFIER_STABLE_BUILD = "stable";
 
     private static final String IDENTIFIER_RELEASE_BUILD = "release";
-    
+
     private static FrameworkHelperUtils frameworkHelperUtils = null;
-   
+
     /**
      * Gets singleton instance
+     * 
      * @return FrameworkHelperUtils
      */
     public synchronized static FrameworkHelperUtils get() {
-   	if (frameworkHelperUtils == null) {
-   	    synchronized (FrameworkHelperUtils.class) {
-   		if (frameworkHelperUtils == null) {
-   		    frameworkHelperUtils = new FrameworkHelperUtils();
-   		}
-   	    }
-   	}
-   	return frameworkHelperUtils;
-       }
+	if (frameworkHelperUtils == null) {
+	    synchronized (FrameworkHelperUtils.class) {
+		if (frameworkHelperUtils == null) {
+		    frameworkHelperUtils = new FrameworkHelperUtils();
+		}
+	    }
+	}
+	return frameworkHelperUtils;
+    }
 
     /**
      * This method is used to return the firmwareVersion branch.It returns three values - master - stable - release
@@ -219,6 +220,34 @@ public class FrameworkHelperUtils {
     }
 
     /**
+     * Convert the String array to list of string with command separated. Also append starting and and ending braces.
+     * 
+     * @param parameters
+     *            Array of parameters
+     * @return String in which parameters are separated by comma
+     */
+    public static String convertToCommaSeparatedList(final String[] parameters) {
+	int parametersLength = parameters.length;
+	String requiredParams = null;
+	/*
+	 * If only one parameter, we don't need process anything.
+	 */
+	if (parametersLength > 1) {
+	    StringBuffer paramList = new StringBuffer();
+	    for (int index = 0; index < parametersLength; index++) {
+		paramList.append(parameters[index]);
+		if (index != parametersLength - 1) {
+		    paramList.append(",");
+		}
+	    }
+	    requiredParams = paramList.toString();
+	} else {
+	    requiredParams = parameters[0];
+	}
+	return requiredParams;
+    }
+
+    /**
      * API is used during init when device is not accessible
      * 
      * @param dut
@@ -247,7 +276,7 @@ public class FrameworkHelperUtils {
 	}
 	return isAccessible;
     }
-    
+
     /**
      * 
      * Method to combine all input sons to form single json object

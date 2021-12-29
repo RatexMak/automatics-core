@@ -18,7 +18,6 @@
 package com.automatics.providers.rack.impl;
 
 import java.io.IOException;
-import java.net.URI;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
@@ -31,14 +30,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.automatics.providers.objects.DeviceRequest;
-import com.automatics.providers.objects.PowerStatus;
 import com.automatics.providers.objects.PowerStatusResponse;
 import com.automatics.providers.objects.StatusResponse;
+import com.automatics.providers.objects.enums.StatusMessage;
 import com.automatics.providers.rack.AbstractPowerProvider;
 import com.automatics.providers.rack.exceptions.PowerProviderException;
 import com.automatics.utils.TestUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 /*
  * PowerProviderRestImpl class provides the implementations for different power operations
  */
@@ -56,113 +56,201 @@ public class PowerProviderRestImpl extends AbstractPowerProvider {
 	BASE_URL = TestUtils.getRackBaseUrl();
     }
 
+    /**
+     * Perform device power on
+     */
     @Override
-    public URI getPowerLocator() {
-	return null;
-    }
-
-    @Override
-    public void powerOn() throws PowerProviderException {
+    public boolean powerOn() throws PowerProviderException {
 	StatusResponse statusResponse = null;
-	ResteasyClient client = getClient();
+	boolean isPowerOnSuccess = false;
 	String url = BASE_URL + POWER_ON_PATH;
-	String macAddress = device.getHostMacAddress();
-	ResteasyWebTarget target = client.target(url);
-	DeviceRequest request = new DeviceRequest();
-	request.setMac(macAddress);
-	LOGGER.info("Power on device {}", macAddress);
-	Response response = target.request().post(Entity.entity(request, "application/json"));
-	if (null != response) {
-	    if (response.getStatus() == HttpStatus.SC_OK) {
-		String respData = response.readEntity(String.class);
-		if (null != respData && !respData.isEmpty()) {
-		    ObjectMapper mapper = new ObjectMapper();
-		    try {
-			statusResponse = mapper.readValue(respData, StatusResponse.class);
-		    } catch (JsonProcessingException e) {
-			LOGGER.error("Exception parsing json for device power on {} response via rest api",
-				request.getMac(), e);
-		    } catch (IOException e) {
-			LOGGER.error("Exception parsing json for device power on {} response via rest api",
-				request.getMac(), e);
+
+	if (null != device) {
+	    String macAddress = device.getHostMacAddress();
+	    ResteasyClient client = getClient();
+	    ResteasyWebTarget target = client.target(url);
+	    DeviceRequest request = new DeviceRequest();
+	    request.setMac(macAddress);
+	    LOGGER.info("Sending request to power on device {} : {}", macAddress, url);
+	    Response response = target.request().post(Entity.entity(request, "application/json"));
+	    if (null != response) {
+		if (response.getStatus() == HttpStatus.SC_OK) {
+		    String respData = response.readEntity(String.class);
+		    if (null != respData && !respData.isEmpty()) {
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+			    LOGGER.info("Power on response: {}", respData);
+			    statusResponse = mapper.readValue(respData, StatusResponse.class);
+			    if (StatusMessage.SUCCESS == statusResponse.getStatus()) {
+				isPowerOnSuccess = true;
+			    }
+			} catch (JsonProcessingException e) {
+			    LOGGER.error("Exception parsing json for device power on {} response via rest api",
+				    request.getMac(), e);
+			    throw new PowerProviderException("Failed to power on");
+			} catch (IOException e) {
+			    LOGGER.error("Exception parsing json for device power on {} response via rest api",
+				    request.getMac(), e);
+			    throw new PowerProviderException("Failed to power on");
+			}
 		    }
+		} else {
+		    LOGGER.info("Failed to power on device {} ,status {}", request.getMac(), response.getStatus());
 		}
-	    } else {
-		LOGGER.info("Failed to power on device {} ,status {}", request.getMac(), response.getStatus());
 	    }
-	}
-    }
-
-    @Override
-    public void reboot() throws PowerProviderException {
-	StatusResponse statusResponse = null;
-	ResteasyClient client = getClient();
-	String url = BASE_URL + POWER_CYCLE;
-	String macAddress = device.getHostMacAddress();
-	ResteasyWebTarget target = client.target(url);
-	DeviceRequest request = new DeviceRequest();
-	request.setMac(macAddress);
-	LOGGER.info("Power reboot of device {}", macAddress);
-	Response response = target.request().post(Entity.entity(request, "application/json"));
-	if (null != response) {
-	    if (response.getStatus() == HttpStatus.SC_OK) {
-		String respData = response.readEntity(String.class);
-		if (null != respData && !respData.isEmpty()) {
-		    ObjectMapper mapper = new ObjectMapper();
-		    try {
-			statusResponse = mapper.readValue(respData, StatusResponse.class);
-		    } catch (JsonProcessingException e) {
-			LOGGER.error("Exception parsing json for device power reboot {} response via rest api",
-				request.getMac(), e);
-		    } catch (IOException e) {
-			LOGGER.error("Exception parsing json for device power reboot {} response via rest api",
-				request.getMac(), e);
-		    }
-		}
-	    } else {
-		LOGGER.info("Failed to power reboot device {} ,status {}", request.getMac(), response.getStatus());
-	    }
-	}
-
-    }
-
-    @Override
-    public String getPowerStatus() {
-	PowerStatusResponse statusResponse = null;
-	ResteasyClient client = getClient();
-	String url = BASE_URL + POWER_STATUS_PATH;
-	String macAddress = device.getHostMacAddress();
-	ResteasyWebTarget target = client.target(url);
-	DeviceRequest request = new DeviceRequest();
-	request.setMac(macAddress);
-	LOGGER.info("Power status of device {}", macAddress);
-	Response response = target.request().post(Entity.entity(request, "application/json"));
-	if (null != response) {
-	    if (response.getStatus() == HttpStatus.SC_OK) {
-		String respData = response.readEntity(String.class);
-		if (null != respData && !respData.isEmpty()) {
-		    ObjectMapper mapper = new ObjectMapper();
-		    try {
-			statusResponse = mapper.readValue(respData, PowerStatusResponse.class);
-		    } catch (JsonProcessingException e) {
-			LOGGER.error("Exception parsing json for device power status {} response via rest api",
-				request.getMac(), e);
-		    } catch (IOException e) {
-			LOGGER.error("Exception parsing json for device power status {} response via rest api",
-				request.getMac(), e);
-		    }
-		}
-	    } else {
-		LOGGER.info("Failed to get power status device {} ,status {}", request.getMac(), response.getStatus());
-	    }
-	}
-
-	if (null != statusResponse) {
-	    return statusResponse.getStatus().name();
 	} else {
-	    return PowerStatus.OFF.name();
+	    LOGGER.error("PowerProvider is not initialized with device");
+	}
+	return isPowerOnSuccess;
+    }
+
+    /**
+     * Perform device reboot
+     * 
+     */
+    @Override
+    public boolean reboot() throws PowerProviderException {
+	StatusResponse statusResponse = null;
+	boolean isRebootSuccess = false;
+	String url = BASE_URL + POWER_CYCLE;
+
+	if (null != device) {
+	    String macAddress = device.getHostMacAddress();
+	    ResteasyClient client = getClient();
+	    ResteasyWebTarget target = client.target(url);
+	    DeviceRequest request = new DeviceRequest();
+	    request.setMac(macAddress);
+	    LOGGER.info("Sending request to reboot device {} : {}", macAddress, url);
+	    Response response = target.request().post(Entity.entity(request, "application/json"));
+	    if (null != response) {
+		if (response.getStatus() == HttpStatus.SC_OK) {
+		    String respData = response.readEntity(String.class);
+		    if (null != respData && !respData.isEmpty()) {
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+			    LOGGER.info("Reboot response: {}", respData);
+			    statusResponse = mapper.readValue(respData, StatusResponse.class);
+			    if (StatusMessage.SUCCESS == statusResponse.getStatus()) {
+				isRebootSuccess = true;
+			    }
+			} catch (JsonProcessingException e) {
+			    LOGGER.error("Exception parsing json for device power reboot {} response via rest api",
+				    request.getMac(), e);
+			    throw new PowerProviderException("Failed to reboot");
+			} catch (IOException e) {
+			    LOGGER.error("Exception parsing json for device power reboot {} response via rest api",
+				    request.getMac(), e);
+			    throw new PowerProviderException("Failed to reboot");
+			}
+		    }
+		} else {
+		    LOGGER.info("Failed to power reboot device {} ,status {}", request.getMac(), response.getStatus());
+		}
+	    }
+	} else {
+	    LOGGER.error("PowerProvider is not initialized with device");
+	}
+	return isRebootSuccess;
+    }
+
+    /**
+     * Get device power status
+     */
+    @Override
+    public String getPowerStatus() throws PowerProviderException {
+	PowerStatusResponse statusResponse = null;
+	String powerStatus = null;
+	String url = BASE_URL + POWER_STATUS_PATH;
+
+	if (null != device) {
+	    String macAddress = device.getHostMacAddress();
+	    ResteasyClient client = getClient();
+	    ResteasyWebTarget target = client.target(url);
+	    DeviceRequest request = new DeviceRequest();
+	    request.setMac(macAddress);
+	    LOGGER.info("Sending request to get power status on device {} : {}", macAddress, url);
+	    Response response = target.request().post(Entity.entity(request, "application/json"));
+	    if (null != response) {
+		if (response.getStatus() == HttpStatus.SC_OK) {
+		    String respData = response.readEntity(String.class);
+		    if (null != respData && !respData.isEmpty()) {
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+			    LOGGER.info("Power status response: {}", respData);
+			    statusResponse = mapper.readValue(respData, PowerStatusResponse.class);
+			} catch (JsonProcessingException e) {
+			    LOGGER.error("Exception parsing json for device power status {} response via rest api",
+				    request.getMac(), e);
+			    throw new PowerProviderException("Failed to get device power status");
+			} catch (IOException e) {
+			    LOGGER.error("Exception parsing json for device power status {} response via rest api",
+				    request.getMac(), e);
+			    throw new PowerProviderException("Failed to get device power status");
+			}
+		    }
+		} else {
+		    LOGGER.info("Failed to get power status device {} ,status {}", request.getMac(),
+			    response.getStatus());
+		}
+	    }
+
+	    if (null != statusResponse && null != statusResponse.getStatus()) {
+		powerStatus = statusResponse.getStatus().name();
+	    }
+	} else {
+	    LOGGER.error("PowerProvider is not initialized with device");
 	}
 
+	return powerStatus;
+
+    }
+
+    /**
+     * Perform device power off
+     */
+    @Override
+    public boolean powerOff() throws PowerProviderException {
+	StatusResponse statusResponse = null;
+	boolean isPowerOffSuccess = false;
+	String url = BASE_URL + POWER_OFF_PATH;
+
+	if (null != device) {
+	    String macAddress = device.getHostMacAddress();
+	    ResteasyClient client = getClient();
+	    ResteasyWebTarget target = client.target(url);
+	    DeviceRequest request = new DeviceRequest();
+	    request.setMac(macAddress);
+	    LOGGER.info("Sending request to power off device {} : {}", macAddress, url);
+	    Response response = target.request().post(Entity.entity(request, "application/json"));
+	    if (null != response) {
+		if (response.getStatus() == HttpStatus.SC_OK) {
+		    String respData = response.readEntity(String.class);
+		    if (null != respData && !respData.isEmpty()) {
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+			    LOGGER.info("Power off response: {}", respData);
+			    statusResponse = mapper.readValue(respData, StatusResponse.class);
+			    if (StatusMessage.SUCCESS == statusResponse.getStatus()) {
+				isPowerOffSuccess = true;
+			    }
+			} catch (JsonProcessingException e) {
+			    LOGGER.error("Exception parsing json for device power off {} response via rest api",
+				    request.getMac(), e);
+			    throw new PowerProviderException("Failed to power off");
+			} catch (IOException e) {
+			    LOGGER.error("Exception parsing json for device power off {} response via rest api",
+				    request.getMac(), e);
+			    throw new PowerProviderException("Failed to power off");
+			}
+		    }
+		} else {
+		    LOGGER.info("Failed to power off device {} ,status {}", request.getMac(), response.getStatus());
+		}
+	    }
+	} else {
+	    LOGGER.error("PowerProvider is not initialized with device");
+	}
+	return isPowerOffSuccess;
     }
 
     /**
@@ -173,39 +261,6 @@ public class PowerProviderRestImpl extends AbstractPowerProvider {
     private ResteasyClient getClient() {
 	ResteasyClient client = new ResteasyClientBuilder().build();
 	return client;
-    }
-
-    @Override
-    public void powerOff() throws PowerProviderException {
-	StatusResponse statusResponse = null;
-	ResteasyClient client = getClient();
-	String url = BASE_URL + POWER_OFF_PATH;
-	String macAddress = device.getHostMacAddress();
-	ResteasyWebTarget target = client.target(url);
-	DeviceRequest request = new DeviceRequest();
-	request.setMac(macAddress);
-	LOGGER.info("Power off device {}", macAddress);
-	Response response = target.request().post(Entity.entity(request, "application/json"));
-	if (null != response) {
-	    if (response.getStatus() == HttpStatus.SC_OK) {
-		String respData = response.readEntity(String.class);
-		if (null != respData && !respData.isEmpty()) {
-		    ObjectMapper mapper = new ObjectMapper();
-		    try {
-			statusResponse = mapper.readValue(respData, StatusResponse.class);
-		    } catch (JsonProcessingException e) {
-			LOGGER.error("Exception parsing json for device power off {} response via rest api",
-				request.getMac(), e);
-		    } catch (IOException e) {
-			LOGGER.error("Exception parsing json for device power off {} response via rest api",
-				request.getMac(), e);
-		    }
-		}
-	    } else {
-		LOGGER.info("Failed to power off device {} ,status {}", request.getMac(), response.getStatus());
-	    }
-
-	}
     }
 
 }

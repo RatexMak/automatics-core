@@ -190,7 +190,7 @@ public class CredentialFactory {
     }
 
     /**
-     * This function returns an ArrayList of all the machines used for CCP system. Internally it has a hashmap of fqdns
+     * This function returns an ArrayList of all the machines used. Internally it has a hashmap of fqdns
      * and the objects associated with them. This function will iterate through those and return only the keys
      * associated with Credential objects.
      *
@@ -199,15 +199,15 @@ public class CredentialFactory {
      */
 
     public synchronized List<String> getServerList() {
-	List<String> ccpServers = new ArrayList<String>();
+	List<String> servers = new ArrayList<String>();
 
 	for (String key : SERVER_DETAILS.keySet()) {
 
 	    if (SERVER_DETAILS.get(key) instanceof Credential) {
-		ccpServers.add(key);
+		servers.add(key);
 	    }
 	}
 
-	return ccpServers;
+	return servers;
     }
 }

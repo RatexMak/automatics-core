@@ -26,6 +26,8 @@
    	
 	<bean id="deviceProvider" class="com.automatics.providers.impl.DeviceManagerRestImpl" lazy-init="true"/>
 	
+	<bean id="deviceAccessValidator" class="com.automatics.providers.impl.DeviceAccessValidatorImpl" lazy-init="true"/>
+	
 	<bean id="snmpProviderFactory" class="com.automatics.snmp.impl.DefaultSnmpProviderFactoryImpl" lazy-init="true"/>
 	
 	<bean id="powerProvider" class="com.automatics.providers.rack.impl.PowerProviderRestImpl" lazy-init="true" scope = "prototype"/>

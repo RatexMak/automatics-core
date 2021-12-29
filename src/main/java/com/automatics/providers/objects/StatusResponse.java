@@ -84,45 +84,4 @@ public class StatusResponse {
 	this.errorMsg = errorMsg;
     }
 
-    /**
-     * @return the statusCode
-     */
-    // public int getStatusCode() {
-    // return statusCode;
-    // }
-    //
-    // /**
-    // * @param statusCode the statusCode to set
-    // */
-    // public void setStatusCode(int statusCode) {
-    // this.statusCode = statusCode;
-    // }
-
-    /**
-     * @return the response
-     */
-    // public Object getResponse() {
-    // return response;
-    // }
-    //
-    // /**
-    // * @param response the response to set
-    // */
-    // public void setResponse(Object response) {
-    // this.response = response;
-    // }
-
-    /**
-     * @return the response
-     */
-    /*
-     * public Response getResponse() { return response; }
-     *//**
-     * @param response
-     *            the response to set
-     */
-    /*
-     * public void setResponse(Response response) { this.response = response; }
-     */
-
 }

@@ -115,12 +115,16 @@ public class TestExecutor {
 	// Verifies if stb props configured
 	validateConfigFiles();
 	SupportedModelHandler.initializeSupportedModelInformation();
-	testInitilizationProvider.performPreExecutionInitialization();
+	if (null != testInitilizationProvider) {
+	    testInitilizationProvider.performPreExecutionInitialization();
+	}
     }
 
     void performPostExecutioCleanup() {
 	// Perform partner side post execution cleanup
-	testInitilizationProvider.performPostExecutionCleanup();
+	if (null != testInitilizationProvider) {
+	    testInitilizationProvider.performPostExecutionCleanup();
+	}
 
 	// Releasing devices if any exists
 	rackInitializerInstance.releaseDevices();
@@ -161,16 +165,16 @@ public class TestExecutor {
 	suites.add(suite);
 
 	// Defining the custom listener for the execution.
-	automaticsTestListener = new AutomaticsTestListener();	
+	automaticsTestListener = new AutomaticsTestListener();
 
 	/*
 	 * Defining and running the TestNG object with the created XmlSuite.
 	 */
 	testng = new TestNG();
 	testng.addListener(automaticsTestListener);
-	testng.setAnnotationTransformer(new AutomaticsAnnotationTransformer());	
+	testng.setAnnotationTransformer(new AutomaticsAnnotationTransformer());
 	testng.setXmlSuites(suites);
-	testng.run();	
+	testng.run();
     }
 
     /**
@@ -293,7 +297,8 @@ public class TestExecutor {
 	    LOGGER.error("Error reading device configuration: {}. Cannot continue execution.", e.getMessage());
 	    throw new Exception("Error parsing device configuration");
 	} catch (Exception e) {
-	    LOGGER.error("DeviceConfig props not configured or not valid: {}. Cannot continue execution.", e.getMessage());
+	    LOGGER.error("DeviceConfig props not configured or not valid: {}. Cannot continue execution.",
+		    e.getMessage());
 	    throw new Exception("Error parsing device configuration");
 	}
 

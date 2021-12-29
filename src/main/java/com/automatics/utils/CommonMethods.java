@@ -92,7 +92,6 @@ import com.automatics.device.Device;
 import com.automatics.device.Dut;
 import com.automatics.device.DutImpl;
 import com.automatics.device.config.DeviceConfig;
-import com.automatics.enums.AutomaticsTestTypes;
 import com.automatics.enums.DeviceCategory;
 import com.automatics.enums.ExecutionMode;
 import com.automatics.enums.ProcessRestartOption;
@@ -3499,7 +3498,7 @@ public class CommonMethods {
 	}
 	LOGGER.info("EXITING: getRFCPath");
 	return rfcPath.trim();
-    } 
+    }
 
     /**
      * Utility methods to verify the currently running firmware version using sysDescr SNMP MIBs.
@@ -3794,9 +3793,7 @@ public class CommonMethods {
     public static boolean isSTBAccessible(Dut dut) {
 
 	boolean isAccessible = false;
-	DeviceAccessValidator deviceAccessValidator = (DeviceAccessValidator) BeanUtils.getProviderImpl(
-		BeanConstants.BEAN_ID_DEVICE_ACCESS_VALIDATOR, DeviceAccessValidator.class,
-		BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
+	DeviceAccessValidator deviceAccessValidator = BeanUtils.getDeviceAccessValidator();
 
 	// verifying whether device is accessible or not
 	if (null != deviceAccessValidator) {
@@ -3821,9 +3818,8 @@ public class CommonMethods {
      */
     public static boolean waitForEstbIpAcquisition(AutomaticsTapApi tapEnv, Dut dut) {
 	boolean isIpAcquired = false;
-	DeviceAccessValidator deviceAccessValidator = (DeviceAccessValidator) BeanUtils.getProviderImpl(
-		BeanConstants.BEAN_ID_DEVICE_ACCESS_VALIDATOR, DeviceAccessValidator.class,
-		BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
+	DeviceAccessValidator deviceAccessValidator = BeanUtils.getDeviceAccessValidator();
+
 	// verifying whether device is accessible or not
 	if (null != deviceAccessValidator) {
 	    isIpAcquired = deviceAccessValidator.waitForIpAcquisitionAfterReboot(dut);
@@ -3910,7 +3906,10 @@ public class CommonMethods {
 	    if (deviceConnectionProvider == null) {
 		deviceConnectionProvider = BeanUtils.getDeviceConnetionProvider();
 	    }
-	    yoctoString = deviceConnectionProvider.execute((Device) dut, LinuxCommandConstants.CMD_IS_YOCTO_BUILD);
+
+	    if (null != deviceConnectionProvider) {
+		yoctoString = deviceConnectionProvider.execute((Device) dut, LinuxCommandConstants.CMD_IS_YOCTO_BUILD);
+	    }
 	}
 	if (CommonMethods.isNotNull(yoctoString)) {
 	    yoctoString = yoctoString.toUpperCase();
@@ -4715,22 +4714,23 @@ public class CommonMethods {
 	// Update config in device
 	XConfUtils.updatXconfUrlInDevice(tapEnv, dut);
     }
-    
+
     /**
      * Checking whether the setup is in ETHWAN mode.
+     * 
      * @return true, if ethwan mode
      */
     public static boolean isRunningEthwanMode() {
- 	boolean isTrue = false;
- 	String executionMode = AutomaticsTapApi.getCurrentExecutionMode();
- 	if (CommonMethods.isNotNull(executionMode)) {
- 	    try {
- 		ExecutionMode executionModeFromTm = ExecutionMode.valueOf(executionMode);
+	boolean isTrue = false;
+	String executionMode = AutomaticsTapApi.getCurrentExecutionMode();
+	if (CommonMethods.isNotNull(executionMode)) {
+	    try {
+		ExecutionMode executionModeFromTm = ExecutionMode.valueOf(executionMode);
 
- 	    } catch (Exception e) {
- 		LOGGER.debug("Could not verify ETHWAN mode");
- 	    }
- 	}
- 	return isTrue;
-     }
+	    } catch (Exception e) {
+		LOGGER.debug("Could not verify ETHWAN mode");
+	    }
+	}
+	return isTrue;
+    }
 }

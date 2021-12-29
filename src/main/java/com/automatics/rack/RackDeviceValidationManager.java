@@ -49,7 +49,6 @@ import com.automatics.providers.rack.VideoProvider;
 import com.automatics.providers.trace.TraceProvider;
 import com.automatics.test.AutomaticsTestBase;
 import com.automatics.utils.AutomaticsPropertyUtility;
-import com.automatics.utils.BeanConstants;
 import com.automatics.utils.BeanUtils;
 import com.automatics.utils.CommonMethods;
 import com.automatics.utils.FrameworkHelperUtils;
@@ -98,7 +97,7 @@ public class RackDeviceValidationManager {
     /**
      * Constructor
      * 
-     * @param catsRackHandler
+     * @param rackInitializer
      */
     public RackDeviceValidationManager(RackInitializer rackInitializer) {
 
@@ -106,9 +105,7 @@ public class RackDeviceValidationManager {
 
 	    this.rackInitializer = rackInitializer;
 	    deviceManager = DeviceManager.getInstance();
-	    deviceAccessValidator = (DeviceAccessValidator) BeanUtils.getProviderImplFromConfigFile(
-		    BeanConstants.BEAN_ID_DEVICE_ACCESS_VALIDATOR, DeviceAccessValidator.class,
-		    BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
+	    deviceAccessValidator = BeanUtils.getDeviceAccessValidator();
 
 	} else {
 	    LOGGER.error("RackInitializer needs to be initialized before trying to create dut object");
@@ -805,7 +802,7 @@ public class RackDeviceValidationManager {
 
 	// Add the device type parameter to identify the DELIA and OCAP based builds.
 	AutomaticsBuildType deviceType = TestUtils.getBuildType(device);
-	dut.setBuildType(deviceType);	
+	dut.setBuildType(deviceType);
 
 	ExecuteOnType executeOntype = TestUtils.getExecuteOnType(device);
 	dut.setExecuteOn(executeOntype);

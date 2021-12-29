@@ -17,18 +17,48 @@
  */
 package com.automatics.providers.rack;
 
-import java.net.URI;
-
 import com.automatics.providers.rack.exceptions.PowerProviderException;
 
+/**
+ * Interface for power related operations on device.
+ * 
+ *
+ */
 public abstract interface PowerProvider extends BaseProvider {
-    public abstract URI getPowerLocator();
 
-    public abstract void powerOn() throws PowerProviderException;
+    /**
+     * Power on device.
+     * 
+     * @return Return true, if device power on is success; otherwise false.
+     * @throws PowerProviderException
+     *             when exception occurs during device power on
+     */
+    public abstract boolean powerOn() throws PowerProviderException;
 
-    public abstract void powerOff() throws PowerProviderException;
+    /**
+     * Power off device.
+     * 
+     * @return Return true, if device power off is success; otherwise false.
+     * @throws PowerProviderException
+     *             when exception occurs during device power off
+     */
+    public abstract boolean powerOff() throws PowerProviderException;
 
-    public abstract void reboot() throws PowerProviderException;
+    /**
+     * Reboot the device.
+     * 
+     * @return Return true, if device power reboot is success; otherwise false.
+     * @throws PowerProviderException
+     *             when exception occurs during device reboot
+     */
+    public abstract boolean reboot() throws PowerProviderException;
 
-    public abstract String getPowerStatus();
+    /**
+     * Get the device power status
+     * 
+     * @return Return power status 'ON' or 'OFF'. If no response obtained, then null will be returned.
+     * @throws PowerProviderException
+     *             when exception occurs while fetching device power status
+     */
+    public abstract String getPowerStatus() throws PowerProviderException;
 }

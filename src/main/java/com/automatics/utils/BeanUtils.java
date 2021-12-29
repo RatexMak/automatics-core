@@ -23,6 +23,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.automatics.device.Device;
 import com.automatics.providers.CodeDownloadProvider;
+import com.automatics.providers.DeviceAccessValidator;
 import com.automatics.providers.RdkVideoDeviceProvider;
 import com.automatics.providers.TestInitilizationProvider;
 import com.automatics.providers.appender.BuildAppenderProvider;
@@ -163,6 +164,32 @@ public class BeanUtils {
     }
 
     /**
+     * Gets DeviceAccessValidator instance
+     * 
+     * @return DeviceAccessValidator instance
+     */
+    public static DeviceAccessValidator getDeviceAccessValidator() {
+	DeviceAccessValidator provider = null;
+
+	// Get the device access validator bean from partner.
+	try {
+	    provider = (DeviceAccessValidator) getProviderImpl(BeanConstants.BEAN_ID_DEVICE_ACCESS_VALIDATOR,
+		    DeviceAccessValidator.class, BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
+	} catch (Exception e) {
+	    LOGGER.info(
+		    "Bean {} is not configured in partner : {}. Hence reading default implementation of DeviceAccessValidator.",
+		    BeanConstants.BEAN_ID_DEVICE_ACCESS_VALIDATOR, BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
+	    try {
+		provider = (DeviceAccessValidator) getProviderImpl(BeanConstants.BEAN_ID_DEVICE_ACCESS_VALIDATOR,
+			DeviceAccessValidator.class, BeanConstants.CORE_SPRING_CONFIG_FILE_NAME);
+	    } catch (Exception e1) {
+		LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_DEVICE_ACCESS_VALIDATOR);
+	    }
+	}
+	return provider;
+    }
+
+    /**
      * Gets RdkVideoDeviceProvider instance
      * 
      * @return RdkVideoDeviceProvider instance
@@ -173,7 +200,7 @@ public class BeanUtils {
 	    provider = (RdkVideoDeviceProvider) getProviderImpl(BeanConstants.BEAN_ID_VIDEO_DEVICE_PROVIDER,
 		    RdkVideoDeviceProvider.class, BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_VIDEO_DEVICE_PROVIDER, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_VIDEO_DEVICE_PROVIDER);
 
 	}
 	return provider;
@@ -190,7 +217,7 @@ public class BeanUtils {
 	    provider = (CodeDownloadProvider) getProviderImpl(BeanConstants.BEAN_ID_CODE_DOWNLOAD_PROVIDER,
 		    CodeDownloadProvider.class, BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_CODE_DOWNLOAD_PROVIDER, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_CODE_DOWNLOAD_PROVIDER);
 
 	}
 	return provider;
@@ -207,7 +234,7 @@ public class BeanUtils {
 	    provider = (BuildAppenderProvider) getProviderImpl(BeanConstants.BEAN_ID_BUILD_APPENDER_PROVIDER,
 		    BuildAppenderProvider.class, BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_BUILD_APPENDER_PROVIDER, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_BUILD_APPENDER_PROVIDER);
 
 	}
 	return provider;
@@ -224,7 +251,7 @@ public class BeanUtils {
 	    provider = (TR69Provider) getProviderImpl(BeanConstants.BEAN_ID_TR69_PROVIDER, TR69Provider.class,
 		    BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_TR69_PROVIDER, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_TR69_PROVIDER);
 
 	}
 	return provider;
@@ -241,8 +268,7 @@ public class BeanUtils {
 	    provider = (DeviceConnectionProvider) getProviderImpl(BeanConstants.BEAN_ID_DEVICE_CONNECTION_PROVIDER,
 		    DeviceConnectionProvider.class, BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_DEVICE_CONNECTION_PROVIDER,
-		    e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_DEVICE_CONNECTION_PROVIDER);
 
 	}
 	return provider;
@@ -261,8 +287,7 @@ public class BeanUtils {
 		    BeanConstants.BEAN_ID_SERIAL_COMMAND_EXECUTION_PROVIDER, SerialCommandExecutionProvider.class,
 		    BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_SERIAL_COMMAND_EXECUTION_PROVIDER,
-		    e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_SERIAL_COMMAND_EXECUTION_PROVIDER);
 
 	}
 	return provider;
@@ -279,7 +304,7 @@ public class BeanUtils {
 	    provider = (TestInitilizationProvider) getProviderImpl(BeanConstants.BEAN_ID_TEST_INITIALIZER,
 		    TestInitilizationProvider.class, BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_TEST_INITIALIZER, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_TEST_INITIALIZER);
 
 	}
 	return provider;
@@ -296,7 +321,7 @@ public class BeanUtils {
 	    provider = (ImageUpgradeProviderFactory) getProviderImpl(BeanConstants.BEAN_ID_IMAGE_UPGRADE_PROVIDER,
 		    ImageUpgradeProviderFactory.class, BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_IMAGE_UPGRADE_PROVIDER, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_IMAGE_UPGRADE_PROVIDER);
 
 	}
 	return provider;
@@ -313,7 +338,7 @@ public class BeanUtils {
 	    provider = (CrashAnalysisProvider) getProviderImpl(BeanConstants.BEAN_ID_CRASH_ANALYSIS_PROVIDER,
 		    CrashAnalysisProvider.class, BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_CRASH_ANALYSIS_PROVIDER, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_CRASH_ANALYSIS_PROVIDER);
 
 	}
 	return provider;
@@ -333,7 +358,8 @@ public class BeanUtils {
 		traceProvider.initializeTraceForDevice(device);
 	    }
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_SERIAL_TRACE_PROVIDER, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_SERIAL_TRACE_PROVIDER);
+
 	}
 	return traceProvider;
     }
@@ -352,8 +378,8 @@ public class BeanUtils {
 		traceProvider.initializeTraceForDevice(device);
 	    }
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_DEVICE_CONNECTION_TRACE_PROVIDER,
-		    e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_DEVICE_CONNECTION_TRACE_PROVIDER);
+
 	}
 	return traceProvider;
     }
@@ -370,7 +396,7 @@ public class BeanUtils {
 		    BeanConstants.PROP_KEY_SNMP_FACTORY_PROVIDER, BeanConstants.BEAN_ID_SNMP_PROVIDER_FACTORY,
 		    SnmpProviderFactory.class);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_SNMP_PROVIDER_FACTORY, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_SNMP_PROVIDER_FACTORY);
 	}
 	return snmpProviderFactory;
     }
@@ -386,7 +412,8 @@ public class BeanUtils {
 	    dataProvider = (SnmpDataProvider) getProviderImpl(BeanConstants.BEAN_ID_SNMP_DATA_PROVIDER,
 		    SnmpDataProvider.class, BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_SNMP_DATA_PROVIDER, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_SNMP_DATA_PROVIDER);
+
 	}
 	return dataProvider;
     }
@@ -402,8 +429,8 @@ public class BeanUtils {
 	    provider = (ICrypto) getProviderImpl(BeanConstants.BEAN_ID_CREDENTIAL_CRYPTO_PROVIDER, ICrypto.class,
 		    BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_CREDENTIAL_CRYPTO_PROVIDER,
-		    e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_CREDENTIAL_CRYPTO_PROVIDER);
+
 	}
 	return provider;
     }
@@ -419,7 +446,8 @@ public class BeanUtils {
 	    provider = (WebpaProvider) getProviderImpl(BeanConstants.BEAN_ID_WEBPA_PROVIDER, WebpaProvider.class,
 		    BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_WEBPA_PROVIDER, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_WEBPA_PROVIDER);
+
 	}
 	return provider;
     }
@@ -443,7 +471,8 @@ public class BeanUtils {
 		provider = (XConfDataProvider) getProviderImpl(BeanConstants.BEAN_ID_XCONF_DATA_PROVIDER,
 			XConfDataProvider.class, BeanConstants.CORE_SPRING_CONFIG_FILE_NAME);
 	    } catch (Exception e1) {
-		LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_XCONF_DATA_PROVIDER, e.getMessage());
+		LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_XCONF_DATA_PROVIDER);
+
 	    }
 	}
 	return provider;
@@ -460,7 +489,8 @@ public class BeanUtils {
 	    provider = (PowerProvider) getPartnerProviderImpl(BeanConstants.PROP_KEY_POWER_PROVIDER,
 		    BeanConstants.BEAN_ID_POWER_PROVIDER, PowerProvider.class);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_POWER_PROVIDER, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_POWER_PROVIDER);
+
 	}
 	return provider;
     }
@@ -476,7 +506,8 @@ public class BeanUtils {
 	    provider = (VideoProvider) getProviderImpl(BeanConstants.BEAN_ID_VIDEO_PROVIDER, VideoProvider.class,
 		    BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_VIDEO_PROVIDER, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_VIDEO_PROVIDER);
+
 	}
 	return provider;
     }
@@ -492,7 +523,8 @@ public class BeanUtils {
 	    provider = (RemoteProviderFactory) getProviderImpl(BeanConstants.BEAN_ID_REMOTE_PROVIDER_FACTORY,
 		    RemoteProviderFactory.class, BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_REMOTE_PROVIDER_FACTORY, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_REMOTE_PROVIDER_FACTORY);
+
 	}
 	return provider;
     }
@@ -508,7 +540,8 @@ public class BeanUtils {
 	    ocrProvider = (OcrProvider) getPartnerProviderImpl(BeanConstants.PROP_KEY_OCR_PROVIDER,
 		    BeanConstants.BEAN_ID_OCR_PROVIDER, OcrProvider.class);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_OCR_PROVIDER, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_OCR_PROVIDER);
+
 	}
 	return ocrProvider;
     }
@@ -524,7 +557,8 @@ public class BeanUtils {
 	    provider = (OcrServiceProvider) getProviderImpl(BeanConstants.BEAN_ID_OCR_SERVICE_PROVIDER,
 		    OcrServiceProvider.class, BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_OCR_SERVICE_PROVIDER, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_OCR_SERVICE_PROVIDER);
+
 	}
 	return provider;
     }
@@ -541,7 +575,8 @@ public class BeanUtils {
 	    provider = (ImageCompareProvider) getProviderImpl(BeanConstants.BEAN_ID_IMAGE_COMPARE_PROVIDER,
 		    ImageCompareProvider.class, BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_IMAGE_COMPARE_PROVIDER, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_IMAGE_COMPARE_PROVIDER);
+
 	}
 	return provider;
     }
@@ -557,7 +592,8 @@ public class BeanUtils {
 	    provider = (IssueManagementProvider) getProviderImpl(BeanConstants.BEAN_ID_ISSUE_MANAGEMENT_PROVIDER,
 		    IssueManagementProvider.class, BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_ISSUE_MANAGEMENT_PROVIDER, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_ISSUE_MANAGEMENT_PROVIDER);
+
 	}
 	return provider;
     }
@@ -573,7 +609,8 @@ public class BeanUtils {
 	    provider = (AVAnalysisProvider) getPartnerProviderImpl(BeanConstants.PROP_KEY_AV_ANALYSIS_PROVIDER,
 		    BeanConstants.BEAN_ID_AV_ANALYSIS_PROVIDER, AVAnalysisProvider.class);
 	} catch (Exception e) {
-	    LOGGER.error("Error getting bean {} : {}", BeanConstants.BEAN_ID_AV_ANALYSIS_PROVIDER, e.getMessage());
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_AV_ANALYSIS_PROVIDER);
+
 	}
 	return provider;
     }

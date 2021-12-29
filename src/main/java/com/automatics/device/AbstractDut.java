@@ -338,10 +338,6 @@ public class AbstractDut implements Dut {
 	this.remotes.put(remoteControlType, remote);
     }
 
-    public URI getPowerLocator() {
-	return this.powerProvider.getPowerLocator();
-    }
-
     public PowerProvider getPower() {
 	return this.powerProvider;
     }
@@ -350,22 +346,22 @@ public class AbstractDut implements Dut {
 	this.powerProvider = power;
     }
 
-    public void powerOn() throws PowerProviderException {
+    public boolean powerOn() throws PowerProviderException {
 	LOGGER.info("powerOn");
-	this.powerProvider.powerOn();
+	return this.powerProvider.powerOn();
     }
 
-    public void powerOff() throws PowerProviderException {
+    public boolean powerOff() throws PowerProviderException {
 	LOGGER.info("powerOff");
-	this.powerProvider.powerOff();
+	return this.powerProvider.powerOff();
     }
 
-    public void reboot() throws PowerProviderException {
+    public boolean reboot() throws PowerProviderException {
 	LOGGER.info("reboot");
-	this.powerProvider.reboot();
+	return this.powerProvider.reboot();
     }
 
-    public String getPowerStatus() {
+    public String getPowerStatus() throws PowerProviderException {
 	return this.powerProvider.getPowerStatus();
     }
 
