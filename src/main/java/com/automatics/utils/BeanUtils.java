@@ -90,8 +90,13 @@ public class BeanUtils {
 
     public static void startContext() {
 	if (null == partnerContext) {
-	    LOGGER.info("Initializing application context {}", BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
-	    partnerContext = new ClassPathXmlApplicationContext(BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
+	    try {
+		LOGGER.info("Initializing application context {}", BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
+		partnerContext = new ClassPathXmlApplicationContext(BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
+	    } catch (Exception e) {
+		LOGGER.info("Could not parse partner {} : {}", BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME,
+			e.getMessage());
+	    }
 	}
 
 	if (null == coreContext) {

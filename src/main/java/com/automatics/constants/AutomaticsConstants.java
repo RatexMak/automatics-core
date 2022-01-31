@@ -864,9 +864,6 @@ public class AutomaticsConstants {
     /** Reverse SSH connection name stored in persistent connections of Device **/
     public static final String REV_SSH_CONNECTION_NAME = "revSsh";
 
-    /** DeviceConfig property **/
-    public static final String DEVICE_PROP_HEAD_END = "HEAD_END";
-
     public static final String ANSI_REGEX = "(\\x9B|\\x1B\\[)[0-?]*[ -\\/]*[@-~]";
 
     /** Property key reverse ssh host server. */
@@ -931,5 +928,17 @@ public class AutomaticsConstants {
 
     /** Bean not initialized/found error message */
     public static final String BEAN_NOT_FOUND_LOG = "{} not configured for bean '{}'";
+
+    /** Json key name for property HEAD_END */
+    public static final String DEVICE_PROP_HEAD_END = "HEAD_END";
+
+    /** Json key name for property FIRMWARE_VERSION */
+    public static final String DEVICE_PROP_FIRMWARE_VERSION = "FIRMWARE_VERSION";
+
+    /** Json key name for property ECM_IP_ADDRESS */
+    public static final String DEVICE_PROP_ECM_IP_ADDRESS = "ECM_IP_ADDRESS";
+
+    /** Json key name for property ESTB_IP_ADDRESS */
+    public static final String DEVICE_PROP_ESTB_IP_ADDRESS = "ESTB_IP_ADDRESS";
 
 }

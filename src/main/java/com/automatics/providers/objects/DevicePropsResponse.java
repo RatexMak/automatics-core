@@ -17,10 +17,23 @@
  */
 package com.automatics.providers.objects;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class DevicePropsResponse {
 
     private String mac;
+
+    @JsonProperty("HEAD_END")  
     private String headEnd;
+
+    @JsonProperty("FIRMWARE_VERSION")    
+    private String firmwarename;
+
+    @JsonProperty("ECM_IP_ADDRESS")    
+    private String ecmIpAddress;
+
+    @JsonProperty("ESTB_IP_ADDRESS")    
+    private String estbIpAddress;
 
     public String getMac() {
 	return mac;
@@ -36,6 +49,51 @@ public class DevicePropsResponse {
 
     public void setHeadEnd(String headEnd) {
 	this.headEnd = headEnd;
+    }
+
+    /**
+     * @return the firmwarename
+     */
+    public String getFirmwarename() {
+	return firmwarename;
+    }
+
+    /**
+     * @param firmwarename
+     *            the firmwarename to set
+     */
+    public void setFirmwarename(String firmwarename) {
+	this.firmwarename = firmwarename;
+    }
+
+    /**
+     * @return the ecmIpAddress
+     */
+    public String getEcmIpAddress() {
+	return ecmIpAddress;
+    }
+
+    /**
+     * @param ecmIpAddress
+     *            the ecmIpAddress to set
+     */
+    public void setEcmIpAddress(String ecmIpAddress) {
+	this.ecmIpAddress = ecmIpAddress;
+    }
+
+    /**
+     * @return the estbIpAddress
+     */
+    public String getEstbIpAddress() {
+	return estbIpAddress;
+    }
+
+    /**
+     * @param estbIpAddress
+     *            the estbIpAddress to set
+     */
+    public void setEstbIpAddress(String estbIpAddress) {
+	this.estbIpAddress = estbIpAddress;
     }
 
 }

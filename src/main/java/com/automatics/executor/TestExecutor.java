@@ -94,7 +94,7 @@ public class TestExecutor {
 	    performPostExecutioCleanup();
 
 	} catch (Throwable failed) {
-	    LOGGER.error("Execution thrown error - ", failed.getMessage());
+	    LOGGER.error("Execution thrown error - {}", failed.getMessage());
 	    if (rackInitializerInstance != null) {
 		LOGGER.info("Releasing devices.");
 		rackInitializerInstance.releaseDevices();

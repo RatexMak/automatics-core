@@ -31,6 +31,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.automatics.constants.AutomaticsConstants;
 import com.automatics.providers.objects.DeviceAccountRequest;
 import com.automatics.providers.objects.DeviceAccountResponse;
 import com.automatics.providers.objects.DeviceAllocationResponse;
@@ -77,24 +78,26 @@ public class DeviceManagerRestImpl implements DeviceProvider {
 	ResteasyClient client = getClient();
 	String url = BASE_URL + GET_DEVICE_PATH;
 	ResteasyWebTarget target = client.target(url);
-	LOGGER.info("Fetching device details for", request.getMac(), " Url Path: ", url);
+	LOGGER.info("Fetching device details for {}  Url Path: {}", request.getMac(), url);
 	Response response = target.request().post(Entity.entity(request, "application/json"));
 	if (null != response) {
 	    if (response.getStatus() == HttpStatus.SC_OK) {
 		String respData = response.readEntity(String.class);
+		LOGGER.info("Response: {}", respData);
+
 		if (null != respData && !respData.isEmpty()) {
 		    ObjectMapper mapper = new ObjectMapper();
 		    try {
 			deviceResponse = mapper.readValue(respData, DeviceResponse.class);
 
 		    } catch (JsonProcessingException e) {
-			LOGGER.error("Exception parsing json data for device", request.getMac(),
-				"response via rest api", e);
+			LOGGER.error("Exception parsing json data for device {}", request.getMac(), e);
 		    } catch (IOException e) {
-			LOGGER.error("Exception parsing json data for device", request.getMac(),
-				"response via rest api", e);
+			LOGGER.error("Exception parsing json data for device {}", request.getMac(), e);
 		    }
 		}
+	    } else {
+		LOGGER.info("Failed to get device details {} : Status: {}", request.getMac(), response.getStatus());
 	    }
 
 	}
@@ -111,24 +114,27 @@ public class DeviceManagerRestImpl implements DeviceProvider {
 	String url = BASE_URL + GET_ACCOUNT_DETAILS_PATH;
 	ResteasyWebTarget target = client.target(url);
 
-	LOGGER.info("Fetching account details for", request.getAccountNumber(), " Url Path: ", url);
+	LOGGER.info("Fetching account details for {}  Url Path: {}", request.getAccountNumber(), url);
 	Response response = target.request().post(Entity.entity(request, "application/json"));
 	if (null != response) {
 	    if (response.getStatus() == HttpStatus.SC_OK) {
 		String respData = response.readEntity(String.class);
+		LOGGER.info("Response: {}", respData);
+
 		if (null != respData && !respData.isEmpty()) {
 		    ObjectMapper mapper = new ObjectMapper();
 		    try {
 			accountResponse = mapper.readValue(respData, DeviceAccountResponse.class);
 
 		    } catch (JsonProcessingException e) {
-			LOGGER.error("Exception parsing json data for account", request.getAccountNumber(),
-				"response via rest api", e);
+			LOGGER.error("Exception parsing json data for account {}", request.getAccountNumber(), e);
 		    } catch (IOException e) {
-			LOGGER.error("Exception parsing json data for account  ", request.getAccountNumber(),
-				"response via rest api", e);
+			LOGGER.error("Exception parsing json data for account {}", request.getAccountNumber(), e);
 		    }
 		}
+	    } else {
+		LOGGER.info("Failed to get device account details {} : Status: {}", request.getAccountNumber(),
+			response.getStatus());
 	    }
 
 	}
@@ -145,25 +151,30 @@ public class DeviceManagerRestImpl implements DeviceProvider {
 	ResteasyClient client = getClient();
 	String url = BASE_URL + GET_DEVICE_PROPS_PATH;
 	ResteasyWebTarget target = client.target(url);
-	LOGGER.info("Fetching device props for", request.getMac(), "for props ", request.getRequestedPropsName(),
-		" Url Path: ", url);
+	LOGGER.info("Fetching device props for {} for props {} Url Path: {}", request.getMac(),
+		request.getRequestedPropsName(), url);
 	Response response = target.request().post(Entity.entity(request, "application/json"));
 	if (null != response) {
 	    if (response.getStatus() == HttpStatus.SC_OK) {
 		String respData = response.readEntity(String.class);
+		LOGGER.info("Response: {}", respData);
+
 		if (null != respData && !respData.isEmpty()) {
 		    ObjectMapper mapper = new ObjectMapper();
 		    try {
 			deviceProps = mapper.readValue(respData, DevicePropsResponse.class);
-			result.put("HEAD_END", deviceProps.getHeadEnd());
+			result.put(AutomaticsConstants.DEVICE_PROP_HEAD_END, deviceProps.getHeadEnd());
+			result.put(AutomaticsConstants.DEVICE_PROP_ECM_IP_ADDRESS, deviceProps.getEcmIpAddress());
+			result.put(AutomaticsConstants.DEVICE_PROP_ESTB_IP_ADDRESS, deviceProps.getEstbIpAddress());
+			result.put(AutomaticsConstants.DEVICE_PROP_FIRMWARE_VERSION, deviceProps.getFirmwarename());
 		    } catch (JsonProcessingException e) {
-			LOGGER.error("Exception parsing json properties for device", request.getMac(),
-				"response via rest api", e);
+			LOGGER.error("Exception parsing json properties for device {}", request.getMac(), e);
 		    } catch (IOException e) {
-			LOGGER.error("Exception parsing json properties for device", request.getMac(),
-				"response via rest api", e);
+			LOGGER.error("Exception parsing json properties for device {}", request.getMac(), e);
 		    }
 		}
+	    } else {
+		LOGGER.info("Failed to get device properties {} : Status: {}", request.getMac(), response.getStatus());
 	    }
 
 	}
@@ -180,26 +191,28 @@ public class DeviceManagerRestImpl implements DeviceProvider {
 	ResteasyClient client = getClient();
 	String url = BASE_URL + LOCK_STATUS_PATH;
 	ResteasyWebTarget target = client.target(url);
-	LOGGER.info("Fetching lock status for device", request.getMac(), " Url Path: ", url);
+	LOGGER.info("Fetching lock status for device {} Url Path: {}", request.getMac(), url);
 	Response response = target.request().post(Entity.entity(request, "application/json"));
 	if (null != response) {
 	    if (response.getStatus() == HttpStatus.SC_OK) {
 		String respData = response.readEntity(String.class);
+		LOGGER.info("Response: {}", respData);
+
 		if (null != respData && !respData.isEmpty()) {
 		    ObjectMapper mapper = new ObjectMapper();
 		    try {
 			allocResponse = mapper.readValue(respData, DeviceAllocationResponse.class);
-			LOGGER.info("DeviceConfig allocation status", request.getMac(), allocResponse.getAllocationStatus());
+			LOGGER.info("DeviceConfig allocation status", request.getMac(),
+				allocResponse.getAllocationStatus());
 		    } catch (JsonProcessingException e) {
-			LOGGER.error("Exception parsing json for device allocation", request.getMac(),
-				"response via rest api", e);
+			LOGGER.error("Exception parsing json for device allocation {}", request.getMac(), e);
 		    } catch (IOException e) {
-			LOGGER.error("Exception parsing json for device allocation", request.getMac(),
-				"response via rest api", e);
+			LOGGER.error("Exception parsing json for device allocation {}", request.getMac(), e);
 		    }
 		}
 	    } else {
-		LOGGER.info("Failed to get device allocation status", request.getMac(), response.getStatus());
+		LOGGER.info("Failed to get device allocation status {} : Status: {}", request.getMac(),
+			response.getStatus());
 	    }
 
 	}
@@ -212,25 +225,25 @@ public class DeviceManagerRestImpl implements DeviceProvider {
 	ResteasyClient client = getClient();
 	String url = BASE_URL + LOCK_DEVICE_PATH;
 	ResteasyWebTarget target = client.target(url);
-	LOGGER.info("Locking device", request.getMac(), " Url Path: ", url);
+	LOGGER.info("Locking device {} Url Path: {}", request.getMac(), url);
 	Response response = target.request().post(Entity.entity(request, "application/json"));
 	if (null != response) {
 	    if (response.getStatus() == HttpStatus.SC_OK) {
 		String respData = response.readEntity(String.class);
+		LOGGER.info("Response: {}", respData);
+
 		if (null != respData && !respData.isEmpty()) {
 		    ObjectMapper mapper = new ObjectMapper();
 		    try {
 			statusResponse = mapper.readValue(respData, StatusResponse.class);
 		    } catch (JsonProcessingException e) {
-			LOGGER.error("Exception parsing json for device lock", request.getMac(),
-				"response via rest api", e);
+			LOGGER.error("Exception parsing json for device lock {}", request.getMac(), e);
 		    } catch (IOException e) {
-			LOGGER.error("Exception parsing json for device lock", request.getMac(),
-				"response via rest api", e);
+			LOGGER.error("Exception parsing json for device lock {}", request.getMac(), e);
 		    }
 		}
 	    } else {
-		LOGGER.info("Failed to lock device", request.getMac(), response.getStatus());
+		LOGGER.info("Failed to lock device {} : Status: {}", request.getMac(), response.getStatus());
 	    }
 
 	}
@@ -243,27 +256,27 @@ public class DeviceManagerRestImpl implements DeviceProvider {
 	ResteasyClient client = getClient();
 	String url = BASE_URL + LOCK_UPDATE_PATH;
 	ResteasyWebTarget target = client.target(url);
-	LOGGER.info("Updating lock duration for device", request.getMac(), " Url Path: ", url);
+	LOGGER.info("Updating lock duration for device {} Url Path:{}", request.getMac(), url);
 
 	Response response = target.request().post(Entity.entity(request, "application/json"));
 	if (null != response) {
 	    if (response.getStatus() == HttpStatus.SC_OK) {
 		String respData = response.readEntity(String.class);
+		LOGGER.info("Response: {}", respData);
+
 		if (null != respData && !respData.isEmpty()) {
 		    ObjectMapper mapper = new ObjectMapper();
 		    try {
 			statusResponse = mapper.readValue(respData, StatusResponse.class);
 
 		    } catch (JsonProcessingException e) {
-			LOGGER.error("Exception parsing json for device lock", request.getMac(),
-				"response via rest api", e);
+			LOGGER.error("Exception parsing json for device lock {}", request.getMac(), e);
 		    } catch (IOException e) {
-			LOGGER.error("Exception parsing json for device lock", request.getMac(),
-				"response via rest api", e);
+			LOGGER.error("Exception parsing json for device lock", request.getMac(), e);
 		    }
 		}
 	    } else {
-		LOGGER.info("Failed to extend lock for device ", request.getMac(), response.getStatus(), "");
+		LOGGER.info("Failed to extend lock for device {} : Status: {}", request.getMac(), response.getStatus());
 	    }
 	}
 	return statusResponse;
@@ -275,25 +288,25 @@ public class DeviceManagerRestImpl implements DeviceProvider {
 	ResteasyClient client = getClient();
 	String url = BASE_URL + RELEASE_DEVICE_PATH;
 	ResteasyWebTarget target = client.target(url);
-	LOGGER.info("Releasing device", request.getMac(), " Url Path: ", url);
+	LOGGER.info("Releasing device {} Url Path: {}", request.getMac(), url);
 	Response response = target.request().post(Entity.entity(request, "application/json"));
 	if (null != response) {
 	    if (response.getStatus() == HttpStatus.SC_OK) {
 		String respData = response.readEntity(String.class);
+		LOGGER.info("Response: {}", respData);
+
 		if (null != respData && !respData.isEmpty()) {
 		    ObjectMapper mapper = new ObjectMapper();
 		    try {
 			statusResponse = mapper.readValue(respData, StatusResponse.class);
 		    } catch (JsonProcessingException e) {
-			LOGGER.error("Exception parsing json for device release", request.getMac(),
-				"response via rest api", e);
+			LOGGER.error("Exception parsing json for device release {}", request.getMac(), e);
 		    } catch (IOException e) {
-			LOGGER.error("Exception parsing json for device release", request.getMac(),
-				"response via rest api", e);
+			LOGGER.error("Exception parsing json for device release {}", request.getMac(), e);
 		    }
 		}
 	    } else {
-		LOGGER.info("Failed to release device", request.getMac(), response.getStatus());
+		LOGGER.info("Failed to release device {} : Status: {}", request.getMac(), response.getStatus());
 	    }
 
 	}

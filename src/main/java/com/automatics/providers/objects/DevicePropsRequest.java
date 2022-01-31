@@ -19,6 +19,8 @@ package com.automatics.providers.objects;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Request for DeviceConfig Properties
  * 
@@ -28,6 +30,8 @@ import java.util.List;
 public class DevicePropsRequest {
 
     private String mac;
+    
+    @JsonProperty("deviceProps")
     private List<String> requestedPropsName;
 
     /**

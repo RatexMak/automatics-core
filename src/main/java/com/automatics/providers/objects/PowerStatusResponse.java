@@ -18,15 +18,15 @@
 package com.automatics.providers.objects;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 public class PowerStatusResponse {
 
     private String mac;
 
+    @JsonProperty("powerStatus")
     private PowerStatus status;
-
-    // private int statusCode;
 
     @JsonInclude(Include.NON_NULL)
     private String errorMsg;
@@ -60,19 +60,5 @@ public class PowerStatusResponse {
     public void setStatus(PowerStatus status) {
 	this.status = status;
     }
-
-    /**
-     * @return the errorMsg
-     */
-    // public String getErrorMsg() {
-    // return errorMsg;
-    // }
-    //
-    // /**
-    // * @param errorMsg the errorMsg to set
-    // */
-    // public void setErrorMsg(String errorMsg) {
-    // this.errorMsg = errorMsg;
-    // }
 
 }

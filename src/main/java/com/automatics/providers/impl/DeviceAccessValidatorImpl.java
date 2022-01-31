@@ -56,10 +56,10 @@ public class DeviceAccessValidatorImpl implements DeviceAccessValidator {
 	if (null != deviceConfig) {
 	    checkAccessibilityRequired = deviceConfig.isAccessbilityCheck();
 	    LOGGER.info("Setting accessibility check required to {} for device {} from device config",
-		    checkAccessibilityRequired, dut.getAccessMechanism());
+		    checkAccessibilityRequired, dut.getHostMacAddress());
 	}
 
-	LOGGER.info("Accessibility check required for device {} {} ", dut.getAccessMechanism(),
+	LOGGER.info("Accessibility check required for device {} {} ", dut.getHostMacAddress(),
 		checkAccessibilityRequired);
 	return checkAccessibilityRequired;
     }
@@ -76,7 +76,7 @@ public class DeviceAccessValidatorImpl implements DeviceAccessValidator {
 	if (null != deviceConfig) {
 	    String accesMechanism = deviceConfig.getAccessibleMechanism();
 	    dut.setAccessMechanism(accesMechanism);
-	    LOGGER.info("Setting access mechanism for device {} {}", dut.getAccessMechanism(), accesMechanism);
+	    LOGGER.info("Setting access mechanism for device {} {}", dut.getHostMacAddress(), accesMechanism);
 	} else {
 	    LOGGER.info("Setting default SSH access mechanism for device {}", dut.getAccessMechanism());
 	    dut.setAccessMechanism(SshMechanism.SSH.name());
