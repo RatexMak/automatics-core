@@ -59,7 +59,7 @@ public class DeviceManagerRestImpl implements DeviceProvider {
     private static String GET_DEVICE_PROPS_PATH = "/deviceManagement/getDeviceProps";
     private static String GET_ACCOUNT_DETAILS_PATH = "/deviceManagement/getAccountDetails";
     private static String LOCK_DEVICE_PATH = "/deviceManagement/device/lock";
-    private static String RELEASE_DEVICE_PATH = "/deviceManagement/device/releases";
+    private static String RELEASE_DEVICE_PATH = "/deviceManagement/device/release";
     private static String LOCK_STATUS_PATH = "/deviceManagement/device/allocationStatus";
     private static String LOCK_UPDATE_PATH = "/deviceManagement/device/updateAllocationDuration";
 
