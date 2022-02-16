@@ -135,6 +135,7 @@ import com.automatics.utils.BeanConstants;
 import com.automatics.utils.BeanUtils;
 import com.automatics.utils.CommonMethods;
 import com.automatics.utils.FileUtils;
+import com.automatics.utils.FrameworkHelperUtils;
 import com.automatics.utils.ImageRegionUtils;
 import com.automatics.utils.NonRackUtils;
 import com.automatics.webpa.WebPaConnectionHandler;
@@ -607,6 +608,10 @@ public class AutomaticsTapApi {
      */
     public List<String> getTR69ParameterValuesUsingWebPAWithWildCard(Dut dut, String[] parameter) {
 	List<String> tr69ParamResponse = new ArrayList<String>();
+
+	String commandsCommaSeparated = FrameworkHelperUtils.convertToCommaSeparatedList(parameter);
+	LOGGER.info("About to get values for TR69 params {} via WebPa", commandsCommaSeparated);
+
 	WebPaServerResponse serverResponse = WebPaConnectionHandler.get().getWebPaParamValue(dut, parameter);
 
 	List<WebPaParameter> params = serverResponse.getParams();
@@ -615,6 +620,8 @@ public class AutomaticsTapApi {
 		tr69ParamResponse.add(webPaParameter.getValue());
 	    }
 	}
+
+	LOGGER.info("TR69 Response from WebPa: {}", tr69ParamResponse);
 	return tr69ParamResponse;
     }
 
@@ -711,6 +718,18 @@ public class AutomaticsTapApi {
 	}
 	return response;
 
+    }
+
+    /**
+     * Execute command on device
+     * 
+     * @param dut
+     * @param command
+     * @return
+     */
+    public String executeCommand(Dut dut, String command) {
+
+	return executeCommandUsingSsh(dut, command);
     }
 
     public String executeCommandUsingSsh(Dut dut, String command) {
@@ -857,14 +876,24 @@ public class AutomaticsTapApi {
      */
     public List<String> getTR69ParameterValuesUsingWebPA(Dut dut, String[] parameter) {
 	List<String> tr69ParamResponse = new ArrayList<String>();
+
+	String commandsCommaSeparated = FrameworkHelperUtils.convertToCommaSeparatedList(parameter);
+	LOGGER.info("About to get values for TR69 params {} via WebPa", commandsCommaSeparated);
+
 	WebPaServerResponse serverResponse = WebPaConnectionHandler.get().getWebPaParamValue(dut, parameter);
 
-	List<WebPaParameter> params = serverResponse.getParams();
-	if (null != params && !params.isEmpty()) {
-	    for (WebPaParameter webPaParameter : params) {
-		tr69ParamResponse.add(webPaParameter.getValue());
+	if (null != serverResponse) {
+	    List<WebPaParameter> params = serverResponse.getParams();
+	    if (null != params && !params.isEmpty()) {
+		for (WebPaParameter webPaParameter : params) {
+		    tr69ParamResponse.add(webPaParameter.getValue());
+		}
 	    }
+	} else {
+	    LOGGER.info("WebPA Response is null.");
 	}
+
+	LOGGER.info("TR69 Response via WebPa: {}", tr69ParamResponse);
 
 	return tr69ParamResponse;
     }
@@ -1235,9 +1264,20 @@ public class AutomaticsTapApi {
 		List<DutInfo> lockedDevices = connectedDevices.lockConnectedDevices();
 		List<Dut> duts = connectedDevices.convertDutInfoToSettopInstance(lockedDevices);
 		if (duts.size() > 0) {
-		    LOGGER.info("NUMBER OF CONNECTED CLIENTS ASSOCIATED WITH DEVICE '" + dut.getHostMacAddress()
-			    + "' IS " + duts.size());
+		    StringBuilder clientMacs = new StringBuilder();
+
+		    for (Dut clientDevice : duts) {
+			clientMacs.append(clientDevice.getHostMacAddress()).append(" ");
+		    }
+
+		    LOGGER.info("NUMBER OF CONNECTED CLIENTS ASSOCIATED WITH DEVICE " + dut.getHostMacAddress() + " IS "
+			    + duts.size());
+
+		    LOGGER.info("CONNECTED CLIENTS ASSOCIATED WITH DEVICE {} IS {}", dut.getHostMacAddress(),
+			    clientMacs.toString());
+
 		    ((Device) dut).setConnectedDevices(duts);
+
 		} else {
 		    /*
 		     * Devices with zero connected client should not be added to available device list.
@@ -2386,6 +2426,8 @@ public class AutomaticsTapApi {
      */
     public String setTR69ParameterValuesUsingWebPA(Dut dut, List<WebPaParameter> webPaParameters) {
 
+	LOGGER.info("Setting TR69 param values using WebPa");
+
 	WebPaServerResponse serverResponse = WebPaConnectionHandler.get().setWebPaParameterValue(dut, webPaParameters);
 	LOGGER.info("serverResponse[Message] : " + serverResponse.getMessage() + "\nserverResponse[StatusCode] "
 		+ serverResponse.getStatusCode());
@@ -2859,7 +2901,7 @@ public class AutomaticsTapApi {
      */
     public String getTr69CommandResponseUsingHostIf(Dut dut, String tr69Param) {
 
-	LOGGER.debug("STARTING METHOD: getTr69CommandResponseUsingHostIf()");
+	LOGGER.info("Get Tr69 parameter {} using host-if command", tr69Param);
 
 	String tr69CommandValue = null;
 
@@ -2874,7 +2916,7 @@ public class AutomaticsTapApi {
 	    LOGGER.error("Exception occured in getTr69CommandResponseUsingHostIf()", exception);
 	}
 
-	LOGGER.debug("ENDING METHOD: getTr69CommandResponseUsingHostIf()");
+	LOGGER.info("Tr69 response using host-if command: {}", tr69CommandValue);
 
 	return tr69CommandValue;
     }
@@ -2890,7 +2932,7 @@ public class AutomaticsTapApi {
      */
     public String setTr69ParameterUsingHostIf(Dut dut, String tr69Param, String value) {
 
-	LOGGER.debug("STARTING METHOD: getTr69CommandResponseUsingHostIf()");
+	LOGGER.info("Setting TR69 param value using HostIf commmand: param={} value={}", tr69Param, value);
 	String response = null;
 	try {
 	    response = executeCommandUsingSsh(dut,
@@ -2900,7 +2942,7 @@ public class AutomaticsTapApi {
 	    LOGGER.error("Exception occured in getTr69CommandResponseUsingHostIf()", exception);
 	}
 
-	LOGGER.debug("ENDING METHOD: getTr69CommandResponseUsingHostIf()");
+	LOGGER.info("TR69 Response: {}", response);
 
 	return response;
     }
@@ -5810,7 +5852,8 @@ public class AutomaticsTapApi {
 	String commandResults = null;
 
 	try {
-	    LOGGER.info("STARTING EXECUTE TR69 COMMANDS ");
+	    String commandsCommaSeparated = FrameworkHelperUtils.convertToCommaSeparatedList(commands);
+	    LOGGER.info("About to get values for params {} via TR69", commandsCommaSeparated);
 	    TR69Provider tr69Provider = BeanUtils.getTR69Provider();
 	    if (null != tr69Provider) {
 
@@ -5846,14 +5889,11 @@ public class AutomaticsTapApi {
      */
     public String executeTr69CommandWithTimeOut(final Dut dut, String command, long timeOut) {
 
-	LOGGER.debug("Command run on tr69 client " + command);
 	final String[] commandArray = new String[] { command };
-	LOGGER.debug("Length of Array " + commandArray.length);
-	LOGGER.debug("Command Array" + commandArray[commandArray.length - 1]);
 	String commandResults = null;
 
 	try {
-	    LOGGER.info("STARTING EXECUTE TR69/WEBPA COMMANDS ");
+	    LOGGER.info("About to get values for params {} via TR69", command);
 	    TR69Provider tr69Provider = BeanUtils.getTR69Provider();
 	    if (null != tr69Provider) {
 
@@ -6089,6 +6129,63 @@ public class AutomaticsTapApi {
 				+ e.getMessage());
 	    }
 	}
+    }
+
+    /**
+     * Get the TR-069 parameter values.
+     * 
+     * @param dut
+     *            The dut to be used.
+     * @param parameters
+     *            TR-069 parameter
+     * @return TR69 parameter values
+     */
+    public String getTR69ParameterValues(Dut dut, List<String> paramNameList) {
+
+	String[] commands = null;
+
+	if (null != paramNameList) {
+	    commands = paramNameList.toArray(new String[paramNameList.size()]);
+	}
+
+	return executeTr69Command(dut, commands);
+    }
+
+    /**
+     * Set the TR-069 parameter values.
+     * 
+     * @param dut
+     *            The dut to be used.
+     * @param parameters
+     *            TR-069 parameter
+     * @return The status of execution.
+     */
+    public String setTR69ParameterValues(Dut dut, List<Parameter> parameterList) {
+
+	String response = "Failed to set TR69 param value";
+	TR69Provider tr69Provider = BeanUtils.getTR69Provider();
+
+	LOGGER.info("About to set values for TR69 params {}", parameterList);
+	if (null != tr69Provider) {
+	    for (int i = 1; i <= 2; i++) {
+		response = tr69Provider.setTr69ParameterValues(dut, parameterList);
+
+		LOGGER.info("TR69 set response {}", response);
+
+		// Check response
+		if (CommonMethods.isNotNull(response)) {
+		    break;
+		} else if (i == 2) {
+		    LOGGER.info("Failed to set TR 069 param after retry. No respone received");
+		} else {
+		    AutomaticsUtils.sleep(AutomaticsConstants.THIRTY_SECONDS);
+		}
+	    }
+	} else {
+	    LOGGER.error(AutomaticsConstants.BEAN_NOT_FOUND_LOG, "TR69Provider", BeanConstants.BEAN_ID_TR69_PROVIDER);
+	}
+
+	return response;
     }
 
 }

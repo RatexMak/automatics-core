@@ -25,13 +25,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.automatics.device.ConnectedDeviceInfo;
-import com.automatics.device.DeviceAccountInfo;
 import com.automatics.device.Device;
+import com.automatics.device.DeviceAccountInfo;
 import com.automatics.device.Dut;
-import com.automatics.providers.objects.DeviceObject;
 import com.automatics.providers.objects.DeviceAccountRequest;
 import com.automatics.providers.objects.DeviceAccountResponse;
 import com.automatics.providers.objects.DeviceAllocationResponse;
+import com.automatics.providers.objects.DeviceObject;
 import com.automatics.providers.objects.DevicePropsRequest;
 import com.automatics.providers.objects.DeviceRequest;
 import com.automatics.providers.objects.DeviceResponse;
@@ -41,7 +41,6 @@ import com.automatics.providers.objects.enums.DeviceAllocationStatus;
 import com.automatics.providers.objects.enums.StatusMessage;
 import com.automatics.providers.rack.DeviceProvider;
 import com.automatics.utils.BeanConstants;
-import com.automatics.utils.CommonMethods;
 import com.automatics.utils.BeanUtils;
 
 /**
@@ -136,9 +135,9 @@ public class DeviceManager {
 	    if (allocResponse.getAllocationStatus() == DeviceAllocationStatus.AVAILABLE) {
 		isLocked = false;
 	    } else {
-		LOGGER.info("DeviceConfig allocation details:", " Mac Address-", device.getHostMacAddress(), "Mac Address-",
-			device.getHostMacAddress(), "Locked by-", allocResponse.getUserName(), "Duration-",
-			allocResponse.getStart(), allocResponse.getEnd());
+		LOGGER.info("DeviceConfig allocation details:  Mac Address-{} Locked by-{} Duration start-{} end-{}",
+			device.getHostMacAddress(), allocResponse.getUserName(), allocResponse.getStart(),
+			allocResponse.getEnd());
 	    }
 	}
 	return isLocked;
@@ -171,9 +170,9 @@ public class DeviceManager {
 	statusResponse = deviceProvider.updateLockTime(request);
 	if (null != statusResponse) {
 	    if (statusResponse.getStatus() == StatusMessage.SUCCESS) {
-		LOGGER.info("Successfully extended lock for device", device.getHostMacAddress());
+		LOGGER.info("Successfully extended lock for device {}", device.getHostMacAddress());
 	    } else {
-		LOGGER.info("Failed to extend lock for device", device.getHostMacAddress(),
+		LOGGER.info("Failed to extend lock for device {}", device.getHostMacAddress(),
 			statusResponse.getErrorMsg());
 	    }
 	}
@@ -188,7 +187,7 @@ public class DeviceManager {
 	    if (statusResponse.getStatus() == StatusMessage.SUCCESS) {
 		releaseSuccess = true;
 	    } else {
-		LOGGER.info("Failed to release device", device.getHostMacAddress(), statusResponse.getErrorMsg());
+		LOGGER.info("Failed to release device {} {}", device.getHostMacAddress(), statusResponse.getErrorMsg());
 	    }
 
 	}
@@ -230,7 +229,7 @@ public class DeviceManager {
 	device.setHomeAccountName(deviceResponse.getHomeAccountName());
 	device.setHomeAccountNumber(deviceResponse.getHomeAccountNumber());
 	device.setConnectedGateWaySettopMacs(deviceResponse.getGatewayMac());
-	
+
 	device.setDefaultRemoteControlType(deviceResponse.getDefaultRemoteControlType());
 	device.setRemoteControlTypes(deviceResponse.getRemoteControlTypes());
 	// Set device head end
@@ -239,29 +238,29 @@ public class DeviceManager {
 	device.setExtraProperties(deviceResponse.getExtraProperties());
 	Map<String, String> extraProps = device.getExtraProperties();
 	if (null != extraProps) {
+
+	    // Setting extra props from partner
+	    device.setExtraProperties(extraProps);
+
 	    // Setting login credentials for non-rdk devices
 	    device.setUsername(extraProps.get("username"));
 	    device.setPassword(extraProps.get("password"));
 
 	    // Get connected device info
-	    if (CommonMethods.isNotNull(extraProps.get("deviceIp"))) {
-		ConnectedDeviceInfo connectedDeviceInfo = new ConnectedDeviceInfo();
-		connectedDeviceInfo.setConnectionType(extraProps.get("connectionType"));
-		connectedDeviceInfo.setWifiCapability(extraProps.get("wifiCapability"));
-		connectedDeviceInfo.setWifiMacAddress(extraProps.get("wifiMacAddress"));
-		connectedDeviceInfo.setXfiUserName(extraProps.get("xfiUserName"));
-		connectedDeviceInfo.setXfiPassword(extraProps.get("xfiPassword"));
-		connectedDeviceInfo.setDevicePortAddress(extraProps.get("devicePort"));
-		connectedDeviceInfo.setDeviceIpAddress(extraProps.get("deviceIp"));
-		connectedDeviceInfo.setOsType(extraProps.get("osType"));
-		device.setNodePort(extraProps.get("nodePort"));
-		device.setNatAddress(extraProps.get("deviceIp"));
-		device.setNatPort(extraProps.get("devicePort"));
-		device.setOsType(extraProps.get("osType"));
-		connectedDeviceInfo.setUserName(extraProps.get("username"));
-		connectedDeviceInfo.setPassword(extraProps.get("password"));
-		device.setConnectedDeviceInfo(connectedDeviceInfo);
-	    }
+	    ConnectedDeviceInfo connectedDeviceInfo = new ConnectedDeviceInfo();
+	    connectedDeviceInfo.setConnectionType(extraProps.get("connectionType"));
+	    connectedDeviceInfo.setWifiCapability(extraProps.get("wifiCapability"));
+	    connectedDeviceInfo.setWifiMacAddress(extraProps.get("wifiMacAddress"));
+	    connectedDeviceInfo.setDevicePortAddress(extraProps.get("devicePort"));
+	    connectedDeviceInfo.setDeviceIpAddress(extraProps.get("deviceIp"));
+	    connectedDeviceInfo.setOsType(extraProps.get("osType"));
+	    device.setNodePort(extraProps.get("nodePort"));
+	    device.setNatAddress(extraProps.get("deviceIp"));
+	    device.setNatPort(extraProps.get("devicePort"));
+	    device.setOsType(extraProps.get("osType"));
+	    connectedDeviceInfo.setUserName(extraProps.get("username"));
+	    connectedDeviceInfo.setPassword(extraProps.get("password"));
+	    device.setConnectedDeviceInfo(connectedDeviceInfo);
 	}
 	return device;
 

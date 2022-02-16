@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.automatics.constants.AutomaticsConstants;
+import com.automatics.constants.LinuxCommandConstants;
 import com.automatics.device.Device;
 import com.automatics.device.Dut;
 import com.automatics.device.config.DeviceConfig;
@@ -101,7 +102,8 @@ public class DeviceAccessValidatorImpl implements DeviceAccessValidator {
 	boolean deviceAccessible = false;
 	DeviceConnectionProvider deviceConnectionProvider = BeanUtils.getDeviceConnetionProvider();
 	if (null != deviceConnectionProvider) {
-	    String response = deviceConnectionProvider.execute((Device) device, "echo Test Connection");
+	    String response = deviceConnectionProvider.execute((Device) device,
+		    LinuxCommandConstants.ECHO_TEST_CONNECTION);
 	    LOGGER.info("Response of accessibility check: {}", response);
 	    if (CommonMethods.isNotNull(response) && response.contains("Test Connection")) {
 		deviceAccessible = true;

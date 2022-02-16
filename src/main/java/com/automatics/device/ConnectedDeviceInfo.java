@@ -71,44 +71,6 @@ public class ConnectedDeviceInfo {
     private String osType;
 
     /**
-     * Holds the Xfi Username
-     */
-    private String XfiUserName = null;
-
-    /**
-     * Holds the Xfi password
-     */
-    private String XfiPassword = null;
-
-    /**
-     * @return XfiUserName
-     */
-    public String getXfiUserName() {
-	return XfiUserName;
-    }
-
-    /**
-     * @param xfiUserName
-     */
-    public void setXfiUserName(String xfiUserName) {
-	XfiUserName = xfiUserName;
-    }
-
-    /**
-     * @return XfiPassword
-     */
-    public String getXfiPassword() {
-	return XfiPassword;
-    }
-
-    /**
-     * @param xfiPassword
-     */
-    public void setXfiPassword(String xfiPassword) {
-	XfiPassword = xfiPassword;
-    }
-
-    /**
      * @return the wifiMacAddress
      */
     public String getWifiMacAddress() {
@@ -249,12 +211,13 @@ public class ConnectedDeviceInfo {
     @Override
     public String toString() {
 	StringBuffer connectedDeviceDetails = new StringBuffer();
-	connectedDeviceDetails.append("\nConnected DeviceConfig Info -> ").append("\nIP Address = ").append(deviceIpAddress)
-		.append("\n").append(" Port Address = ").append(devicePortAddress).append("\n").append(" OS Type = ")
-		.append(osType).append("\n").append(" User Name = ").append(userName).append(" Password = ")
-		.append("********").append("\n").append(" Connection Type = ").append(connectionType).append("\n")
-		.append(" Wi-Fi Capability = ").append(wifiCapability).append("\n").append(" Wi-Fi Mac Address = ")
-		.append(wifiMacAddress).append("\n").append(" Ethernet Mac Address = ").append(ethernetMacAddress);
+	connectedDeviceDetails.append("\nConnected DeviceConfig Info -> ").append("\nIP Address = ")
+		.append(deviceIpAddress).append("\n").append(" Port Address = ").append(devicePortAddress).append("\n")
+		.append(" OS Type = ").append(osType).append("\n").append(" User Name = ").append(userName)
+		.append(" Password = ").append("********").append("\n").append(" Connection Type = ")
+		.append(connectionType).append("\n").append(" Wi-Fi Capability = ").append(wifiCapability).append("\n")
+		.append(" Wi-Fi Mac Address = ").append(wifiMacAddress).append("\n").append(" Ethernet Mac Address = ")
+		.append(ethernetMacAddress);
 
 	return connectedDeviceDetails.toString();
     }

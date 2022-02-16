@@ -121,6 +121,8 @@ public class Device extends DutImpl {
     /** Execution mode whether SP or IPLINEAR_OR_GRAM */
     private ExecutionMode executionMode = ExecutionMode.UNKNOWN;
 
+    private Map<String, String> extraProperties = new HashMap<String, String>();
+
     /** Ecm Mac of the box. */
     String ecmMac = null;
 
@@ -1178,6 +1180,21 @@ public class Device extends DutImpl {
      */
     public void setEstbIpAdress(String estbIpAdress) {
 	this.estbIpAdress = estbIpAdress;
+    }
+
+    /**
+     * @return the extraProperties
+     */
+    public Map<String, String> getExtraProperties() {
+	return extraProperties;
+    }
+
+    /**
+     * @param extraProperties
+     *            the extraProperties to set
+     */
+    public void setExtraProperties(Map<String, String> extraProperties) {
+	this.extraProperties = extraProperties;
     }
 
 }

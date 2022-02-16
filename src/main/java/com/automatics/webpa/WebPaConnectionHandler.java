@@ -150,8 +150,8 @@ public class WebPaConnectionHandler {
 		response = restClient.executeAndGetResponse(request);
 
 		int statusCode = response.getResponseCode();
-
 		LOGGER.info("RESPONSE RECIEVED FOR WEBPA GET REQUEST: " + statusCode);
+		webPaEntityResponse.setStatusCode(statusCode);
 
 		String responseAsString = response.getResponseBody();
 		LOGGER.info("WEBPA RESPONSE : {}", responseAsString);
@@ -165,18 +165,16 @@ public class WebPaConnectionHandler {
 
 		if (HttpStatus.SC_OK == response.getResponseCode() || WEBPA_PARAM_FAILURE == statusCode) {
 		    break;
+		} else if (HttpStatus.SC_NOT_FOUND == statusCode) {
+		    LOGGER.info("Device is down . Skipping retry");
+		    break;
 		} else if (retryCount > WEBPA_RETRY_COUNT_IN_CASE_OF_FAILURE) {
 		    LOGGER.error("Got server error response -> Status code =" + statusCode + ", Message = "
 			    + responseAsString);
 		    throw new FailedTransitionException(GeneralError.TR_069_WEB_PA_COMMINICATION_ERROR,
 			    "Status code =" + statusCode + ", Message = " + responseAsString);
-		} else if (statusCode == 404 || statusCode == 530 || statusCode == 531) {
-		    AutomaticsUtils.sleep(AutomaticsConstants.ONE_MINUTE);
 		} else {
-		    // We are seeing large number of failures because of WebPA - 404
-		    // errors and 530 errors which are related with connectivity between WebPA
-		    // server and CPE device which is expected to resume within seconds or minutes.
-		    // Instead of marking the test case as failure, wait for 30 seconds and try once
+		    // Instead of marking the test case as failure, wait for 10 seconds and try once
 		    // again.
 		    AutomaticsUtils.sleep(AutomaticsConstants.TEN_SECONDS);
 		}
@@ -232,6 +230,7 @@ public class WebPaConnectionHandler {
 		int statusCode = response.getResponseCode();
 
 		LOGGER.info("RESPONSE RECIEVED FOR WEBPA GET REQUEST: " + statusCode);
+		webPaServerResponse.setStatusCode(statusCode);
 
 		String responseAsString = response.getResponseBody();
 
@@ -378,6 +377,7 @@ public class WebPaConnectionHandler {
 
 		LOGGER.info("JSON PAYLOAD DATA BUILD FOR WEBPA PUT REQUEST: " + paramDetailsJson.toString());
 		int statusCode = response.getResponseCode();
+		webpaResponse.setStatusCode(statusCode);
 
 		LOGGER.info("RESPONSE RECIEVED FOR WEBPA PUT REQUEST: " + statusCode);
 		String serverResponse = response.getResponseBody();
@@ -391,18 +391,16 @@ public class WebPaConnectionHandler {
 		}
 		if (HttpStatus.SC_OK == statusCode || WEBPA_PARAM_FAILURE == statusCode) {
 		    break;
+		} else if (HttpStatus.SC_NOT_FOUND == statusCode) {
+		    LOGGER.info("Device is down . Skipping retry");
+		    break;
 		} else if (retryCount > WEBPA_RETRY_COUNT_IN_CASE_OF_FAILURE) {
 		    LOGGER.error("Got server error response -> Status code =" + statusCode + ", Message = "
 			    + serverResponse);
 		    throw new FailedTransitionException(GeneralError.TR_069_WEB_PA_COMMINICATION_ERROR,
 			    "Status code =" + statusCode + ", Message = " + serverResponse);
-		} else if (statusCode == 404 || statusCode == 530 || statusCode == 531) {
-		    AutomaticsUtils.sleep(AutomaticsConstants.ONE_MINUTE);
 		} else {
-		    // We are seeing large number of failures because of WebPA - 404
-		    // errors and 530 errors which are related with connectivity between WebPA
-		    // server and CPE device which is expected to resume within seconds or minutes.
-		    // Instead of marking the test case as failure, wait for 30 seconds and try once
+		    // Instead of marking the test case as failure, wait for 10 seconds and try once
 		    // again.
 		    AutomaticsUtils.sleep(AutomaticsConstants.TEN_SECONDS);
 		}
@@ -471,6 +469,7 @@ public class WebPaConnectionHandler {
 		response = restClient.executeAndGetResponse(request);
 
 		int statusCode = response.getResponseCode();
+		webpaResponse.setStatusCode(statusCode);
 
 		LOGGER.info("RESPONSE RECIEVED FOR WEBPA POST REQUEST: " + statusCode);
 		String serverResponse = response.getResponseBody();
@@ -483,18 +482,16 @@ public class WebPaConnectionHandler {
 		}
 		if (HttpStatus.SC_CREATED == statusCode || WEBPA_PARAM_FAILURE == statusCode) {
 		    break;
+		} else if (HttpStatus.SC_NOT_FOUND == statusCode) {
+		    LOGGER.info("Device is down . Skipping retry");
+		    break;
 		} else if (retryCount > WEBPA_RETRY_COUNT_IN_CASE_OF_FAILURE) {
 		    LOGGER.error("Got server error response -> Status code =" + statusCode + ", Message = "
 			    + serverResponse);
 		    throw new FailedTransitionException(GeneralError.TR_069_WEB_PA_COMMINICATION_ERROR,
 			    "Status code =" + statusCode + ", Message = " + serverResponse);
-		} else if (statusCode == 404 || statusCode == 530 || statusCode == 531) {
-		    AutomaticsUtils.sleep(AutomaticsConstants.ONE_MINUTE);
 		} else {
-		    // We are seeing large number of failures because of WebPA - 404
-		    // errors and 530 errors which are related with connectivity between WebPA
-		    // server and CPE device which is expected to resume within seconds or minutes.
-		    // Instead of marking the test case as failure, wait for 30 seconds and try once
+		    // Instead of marking the test case as failure, wait for 10 seconds and try once
 		    // again.
 		    AutomaticsUtils.sleep(AutomaticsConstants.TEN_SECONDS);
 		}
@@ -545,6 +542,8 @@ public class WebPaConnectionHandler {
 		int statusCode = response.getResponseCode();
 
 		LOGGER.info("RESPONSE RECIEVED FOR WEBPA DELETE REQUEST: " + statusCode);
+		webPaServerResponse.setStatusCode(statusCode);
+
 		String serverResponse = response.getResponseBody();
 		LOGGER.info("WEBPA RESPONSE : {}", serverResponse);
 
@@ -555,18 +554,16 @@ public class WebPaConnectionHandler {
 		}
 		if (HttpStatus.SC_OK == statusCode || WEBPA_PARAM_FAILURE == statusCode) {
 		    break;
+		} else if (HttpStatus.SC_NOT_FOUND == statusCode) {
+		    LOGGER.info("Device is down . Skipping retry");
+		    break;
 		} else if (retryCount > WEBPA_RETRY_COUNT_IN_CASE_OF_FAILURE) {
 		    LOGGER.error("Got server error response -> Status code =" + statusCode + ", Message = "
 			    + serverResponse);
 		    throw new FailedTransitionException(GeneralError.TR_069_WEB_PA_COMMINICATION_ERROR,
 			    "Status code =" + statusCode + ", Message = " + serverResponse);
-		} else if (statusCode == 404 || statusCode == 530 || statusCode == 531) {
-		    AutomaticsUtils.sleep(AutomaticsConstants.ONE_MINUTE);
 		} else {
-		    // We are seeing large number of failures because of WebPA - 404
-		    // errors and 530 errors which are related with connectivity between WebPA
-		    // server and CPE device which is expected to resume within seconds or minutes.
-		    // Instead of marking the test case as failure, wait for 30 seconds and try once
+		    // Instead of marking the test case as failure, wait for 10 seconds and try once
 		    // again.
 		    AutomaticsUtils.sleep(AutomaticsConstants.TEN_SECONDS);
 		}
@@ -604,6 +601,7 @@ public class WebPaConnectionHandler {
 
 		response = setWebParamterValue(dut, parameters);
 		int statusCode = response.getResponseCode();
+		webPaServerResponse.setStatusCode(statusCode);
 
 		LOGGER.info("RESPONSE RECIEVED FOR WEBPA SET REQUEST: " + statusCode);
 		String serverResponse = response.getResponseBody();
@@ -617,18 +615,16 @@ public class WebPaConnectionHandler {
 		if (HttpStatus.SC_OK == statusCode || WEBPA_PARAM_FAILURE == statusCode) {
 
 		    break;
+		} else if (HttpStatus.SC_NOT_FOUND == statusCode) {
+		    LOGGER.info("Device is down . Skipping retry");
+		    break;
 		} else if (retryCount > WEBPA_RETRY_COUNT_IN_CASE_OF_FAILURE) {
 		    LOGGER.error("Got server error response -> Status code =" + statusCode + ", Message = "
 			    + serverResponse);
 		    throw new FailedTransitionException(GeneralError.TR_069_WEB_PA_COMMINICATION_ERROR,
 			    "Status code =" + statusCode + ", Message = " + serverResponse);
-		} else if (statusCode == 404 || statusCode == 530 || statusCode == 531) {
-		    AutomaticsUtils.sleep(AutomaticsConstants.ONE_MINUTE);
 		} else {
-		    // We are seeing large number of failures because of WebPA - 404
-		    // errors and 530 errors which are related with connectivity between WebPA
-		    // server and CPE device which is expected to resume within seconds or minutes.
-		    // Instead of marking the test case as failure, wait for 30 seconds and try once
+		    // Instead of marking the test case as failure, wait for 10 seconds and try once
 		    // again.
 		    AutomaticsUtils.sleep(AutomaticsConstants.TEN_SECONDS);
 		}
@@ -716,10 +712,9 @@ public class WebPaConnectionHandler {
 		LOGGER.error("Failed to get the HTTP response from webpa. Retrying attempt - " + retryCount);
 	    }
 	    try {
-		LOGGER.info("STARTING METHOD: getWebPaParamValue");
-		LOGGER.info("STARTING METHOD4 : dut {}", dut);
-		String completeUrl = getFormattedWebPaUrl(dut,
-			FrameworkHelperUtils.convertToCommaSeparatedList(parameters), WebPaType.GET);
+		String params = FrameworkHelperUtils.convertToCommaSeparatedList(parameters);
+		LOGGER.info("getWebPaParamValue: {}", params);
+		String completeUrl = getFormattedWebPaUrl(dut, params, WebPaType.GET);
 
 		Map<String, String> headers = fetchAuthHeaders(WebPaType.GET);
 		RestClient restClient = new RestEasyClientImpl();
@@ -729,6 +724,7 @@ public class WebPaConnectionHandler {
 
 		int statusCode = response.getResponseCode();
 		LOGGER.info("RESPONSE RECIEVED FOR WEBPA GET REQUEST: " + statusCode);
+		webPaServerResponse.setStatusCode(statusCode);
 
 		String responseAsString = response.getResponseBody();
 		LOGGER.info("WEBPA RESPONSE : {}", responseAsString);
@@ -740,18 +736,16 @@ public class WebPaConnectionHandler {
 		}
 		if (HttpStatus.SC_OK == statusCode || WEBPA_PARAM_FAILURE == statusCode) {
 		    break;
+		} else if (HttpStatus.SC_NOT_FOUND == statusCode) {
+		    LOGGER.info("Device is down . Skipping retry");
+		    break;
 		} else if (retryCount > WEBPA_RETRY_COUNT_IN_CASE_OF_FAILURE) {
 		    LOGGER.error("Got server error response -> Status code =" + statusCode + ", Message = "
 			    + responseAsString);
 		    throw new FailedTransitionException(GeneralError.TR_069_WEB_PA_COMMINICATION_ERROR,
 			    "Status code =" + statusCode + ", Message = " + responseAsString);
-		} else if (statusCode == 404 || statusCode == 530 || statusCode == 531) {
-		    AutomaticsUtils.sleep(AutomaticsConstants.ONE_MINUTE);
 		} else {
-		    // We are seeing large number of failures because of WebPA - 404
-		    // errors and 530 errors which are related with connectivity between WebPA
-		    // server and CPE device which is expected to resume within seconds or minutes.
-		    // Instead of marking the test case as failure, wait for 30 seconds and try once
+		    // Instead of marking the test case as failure, wait for 10 seconds and try once
 		    // again.
 		    AutomaticsUtils.sleep(AutomaticsConstants.TEN_SECONDS);
 		}

@@ -30,7 +30,7 @@ import com.automatics.device.Dut;
 public interface TR69Provider {
 
     /**
-     * Method to get TR69 parameter values using ACS Web client.
+     * Method to get TR69 parameter values.
      * 
      * @param dut
      *            The dut to be used.
@@ -40,5 +40,17 @@ public interface TR69Provider {
      * @return List of string values corresponding to each TR69 Parameter.
      */
     public List<String> getTr69ParameterValues(Dut dut, String[] parameters);
-    
+
+    /**
+     * Method to set TR69 parameter values.
+     * 
+     * @param dut
+     *            The dut to be used.
+     * @param parameters
+     *            list of TR69 parameter.
+     * 
+     * @return Status of set operation. Returns 'SUCCESS' if set operation was success else returns 'FAILURE'
+     */
+    public String setTr69ParameterValues(Dut dut, List<Parameter> tr69Param);
+
 }

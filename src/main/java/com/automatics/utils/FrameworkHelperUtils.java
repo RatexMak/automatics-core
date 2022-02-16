@@ -227,22 +227,27 @@ public class FrameworkHelperUtils {
      * @return String in which parameters are separated by comma
      */
     public static String convertToCommaSeparatedList(final String[] parameters) {
-	int parametersLength = parameters.length;
+
 	String requiredParams = null;
-	/*
-	 * If only one parameter, we don't need process anything.
-	 */
-	if (parametersLength > 1) {
-	    StringBuffer paramList = new StringBuffer();
-	    for (int index = 0; index < parametersLength; index++) {
-		paramList.append(parameters[index]);
-		if (index != parametersLength - 1) {
-		    paramList.append(",");
+
+	if (null != parameters) {
+	    int parametersLength = parameters.length;
+	    /*
+	     * If only one parameter, we don't need process anything.
+	     */
+	    if (parametersLength > 1) {
+
+		StringBuffer paramList = new StringBuffer();
+		for (int index = 0; index < parametersLength; index++) {
+		    paramList.append(parameters[index]);
+		    if (index != parametersLength - 1) {
+			paramList.append(",");
+		    }
 		}
+		requiredParams = paramList.toString();
+	    } else {
+		requiredParams = parameters[0];
 	    }
-	    requiredParams = paramList.toString();
-	} else {
-	    requiredParams = parameters[0];
 	}
 	return requiredParams;
     }

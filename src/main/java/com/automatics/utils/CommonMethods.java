@@ -1950,14 +1950,25 @@ public class CommonMethods {
 		    + ") is accessible using the IP address - " + ((Device) dut).getNatAddress() + ":"
 		    + ((Device) dut).getNatPort());
 	    String commandResponse = null;
-	    // SshConnectionHandler.get().executeOneIPClientCommand(eCatsSettop,
-	    // new String[] { "echo test_connection" });
-	    if (CommonMethods.isNull(commandResponse) || commandResponse.indexOf("test_connection") == -1) {
-		LOGGER.error("\n*************************************\n UNABLE TO ACCESS THE STB ("
-			+ dut.getHostMacAddress() + ") USING THE IP " + ((Device) dut).getNatAddress() + ":"
-			+ ((Device) dut).getNatPort() + "\n*************************************");
 
-		isSTBAccessible = false;
+	    if (deviceConnectionProvider == null) {
+		deviceConnectionProvider = BeanUtils.getDeviceConnetionProvider();
+	    }
+
+	    if (null != deviceConnectionProvider) {
+
+		commandResponse = deviceConnectionProvider.execute(device, LinuxCommandConstants.ECHO_TEST_CONNECTION);
+
+		if (CommonMethods.isNull(commandResponse)
+			|| commandResponse.indexOf(LinuxCommandConstants.RESPONSE_TEST_CONNECTION) == -1) {
+		    LOGGER.error("\n*************************************\n UNABLE TO ACCESS THE STB ("
+			    + dut.getHostMacAddress() + ") USING THE IP " + ((Device) dut).getNatAddress() + ":"
+			    + ((Device) dut).getNatPort() + "\n*************************************");
+
+		    isSTBAccessible = false;
+		}
+	    } else {
+		LOGGER.info("DeviceConnectionProvider is null.");
 	    }
 	} else {
 	    isSTBAccessible = true;
@@ -2075,8 +2086,8 @@ public class CommonMethods {
 	for (String os : ostypes) {
 	    osNames.append(AutomaticsPropertyUtility.getProperty(os) + ",");
 	}
-	LOGGER.debug(">>>>>>>>>>>>>>>>>>>>>OS types configured = " + osNames);
-	LOGGER.debug(">>>>>>>>>>>>>>>>>>>>>DeviceConfig OS = " + dut.getOsType());
+	LOGGER.info(">>>>>>>>>>>>>>>>>>>>>OS types configured = " + osNames);
+	LOGGER.info(">>>>>>>>>>>>>>>>>>>>>DeviceConfig OS = " + dut.getOsType());
 	if (dut != null && dut.getOsType() != null && osNames.toString().contains(dut.getOsType())) {
 	    LOGGER.info(" DeviceConfig [" + dut.getHostMacAddress() + "] requires connectivity check.");
 	    isConnectedClient = true;
@@ -3749,7 +3760,7 @@ public class CommonMethods {
     }
 
     /**
-     * Method to check whether the STB is rebooted. This is cross verified by sending an echo test_connection command
+     * Method to check whether the STB is rebooted. 
      * and see if we get the response.
      *
      * @param tapApi
@@ -3803,6 +3814,42 @@ public class CommonMethods {
 		    + BeanConstants.BEAN_ID_DEVICE_ACCESS_VALIDATOR + " is not configured.");
 	}
 	return isAccessible;
+    }
+
+    /**
+     * Method to check whether the device is accessible. This is cross verified by sending an echo test_connection
+     * command and see if we get the response.
+     * 
+     * @param tapApi
+     *            instance of {@link AutomaticsTapApi}
+     * @param dut
+     *            instance of {@link Dut}
+     * @param delay
+     *            delay in between the retry
+     * @param maxLoopCount
+     *            maximum loop count
+     * @return true if STB is accessible else false
+     */
+    public static boolean isSTBAccessible(AutomaticsTapApi tapApi, Dut dut, long delay, int maxLoopCount) {
+	// Device accessible status
+	boolean status = false;
+
+	for (int index = 1; index <= maxLoopCount; index++) {
+	    LOGGER.info(index + "/" + maxLoopCount + "# verify whether the device is accessible or not");
+	    // verifying whether device is accessible or not
+	    if (isSTBAccessible(dut)) {
+		status = true;
+		break;
+	    }
+
+	    if (delay > 0) {
+		LOGGER.info("Waiting " + (delay / 1000) + " seconds to device up");
+	    }
+
+	    tapApi.waitTill(delay);
+	}
+	LOGGER.info("Exiting method isSTBAccessible. Status - " + status);
+	return status;
     }
 
     /**

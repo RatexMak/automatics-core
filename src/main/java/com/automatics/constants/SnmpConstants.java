@@ -37,6 +37,12 @@ public class SnmpConstants {
     /** private string for snmp operations during community string tests. */
     public static final String PUBLIC_COMMUNITY_STRING = "public_community_string";
 
+    /**
+     * Community string name to be used during MTA related snmp tests. This should be replaced with proper community
+     * string by partner during test execution in SnmpDataProvider implementation
+     */
+    public static final String MTA_COMMUNITY_STRING = "MTA_COMMUNITY_STRING";
+
     /** Invalid Community String to verify snmp operations during negative test scenarios */
     public static final String INVALID_COMMUNITY_STRING = "PRIVATE";
 

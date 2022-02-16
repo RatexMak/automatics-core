@@ -135,11 +135,17 @@ public class LinuxCommandConstants {
 
     /** * Constant for storing the command to retrieve output.json */
     public static final String CAT_COMMAND_TO_GET_OPT_OUPUT_JSON = "cat /opt/output.json";
-    
+
     /** Constant holding the redirect operator. */
     public static String REDIRECT_OPERATOR = " > ";
-    
+
     /** Linux command to sync. */
     public static final String CMD_SYNC = "sync";
+
+    /** Linux echo command. */
+    public static final String ECHO_TEST_CONNECTION = "echo Test Connection";
+
+    /** Response of echo command. */
+    public static final String RESPONSE_TEST_CONNECTION = "Test Connection";
 
 }

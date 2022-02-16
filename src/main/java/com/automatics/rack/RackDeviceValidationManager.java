@@ -97,7 +97,7 @@ public class RackDeviceValidationManager {
     /**
      * Constructor
      * 
-     * @param rackInitializer
+     * @param catsRackHandler
      */
     public RackDeviceValidationManager(RackInitializer rackInitializer) {
 
@@ -238,7 +238,9 @@ public class RackDeviceValidationManager {
 		gatewayDevice = getDevice(gatewayMac.trim());
 
 		// Set the corresponding Gateway Dut for the Client
-		dut.addGatewaySettops(gatewayDevice);
+		if (null != gatewayDevice) {
+		    dut.addGatewaySettops(gatewayDevice);
+		}
 	    }
 	}
     }
