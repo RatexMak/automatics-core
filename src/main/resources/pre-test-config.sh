@@ -28,11 +28,9 @@ do
 done
 
 ##Strings to be searched and replaced
-findGroupId=com.automatics.apps
-findArtifactId=automatics-core
-findVersion=2.2.0-SNAPSHOT
+stringToReplace="<dependencies>"
 
-echo "Replacing with <groupId>$groupId</groupId><artifactId>$artifactId</artifactId><version>$version</version>"
+echo "Adding dependency <groupId>$groupId</groupId><artifactId>$artifactId</artifactId><version>$version</version>"
 
 #Take backup of existing pom.xml
 cp pom.xml pom.xml.bk
@@ -41,25 +39,9 @@ cp pom.xml pom.xml.bk
 sed -i 's/\t/ /g' pom.xml
 sed -z -i 's/\n/nnnn/g' pom.xml
 
-#Update artifact id
-sed -i "s/$findArtifactId/${artifactId}/g" pom.xml
+#Add partner dependency
+sed -i "s/$stringToReplace/<dependencies><dependency><groupId>$groupId<\/groupId><artifactId>$artifactId<\/artifactId><version>$version<\/version><\/dependency>/g" pom.xml
 
-#Update group id
-if [[ ! -z "$groupId" ]]; then
-	echo "<dependency>\s*<groupId>$findGroupId"
-	sed -i "s/<dependency>nnnn\s*<groupId>$findGroupId/<dependency>\n<groupId>${groupId}/g" pom.xml
-fi
-
-#Update version
-if [ ! -z "$version" ]; then
-	echo "$artifactId</artifactId>nnnn\s*<version>$findVersion"
-	sed -i  "s/$artifactId<\/artifactId>nnnn\s*<version>$findVersion/$artifactId<\/artifactId>nnnn<version>$version/g" pom.xml
-fi
 sed -i 's/nnnn/\n/g' pom.xml
 
 echo "Finished updating pom.xml"
-
-
-
-
-
