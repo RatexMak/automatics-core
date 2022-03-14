@@ -19,6 +19,7 @@ package com.automatics.providers.connection;
 
 /**
  * Enum for command types
+ * 
  * @author Radhika
  *
  */
@@ -31,9 +32,16 @@ public enum ExecuteCommandType {
     ADDLN_TRACE_INIT_COMMAND_GATEWAY,
 
     SNMP_CODE_DOWNLOAD,
-    
+
     SNMP_COMMAND,
-    
-    XCONF_CONFIG_UPDATE
+
+    XCONF_CONFIG_UPDATE,
+
+    /**
+     * Return execution response with banners. eg: when command is executed within device via ssh connection, ssh
+     * banners should not be truncated from response
+     **/
+
+    COMMAND_RESPONSE_WITH_BANNER
 
 }

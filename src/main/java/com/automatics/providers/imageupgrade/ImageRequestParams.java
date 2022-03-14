@@ -26,6 +26,11 @@ public class ImageRequestParams {
 
     private String firmwareToBeDownloaded;
 
+    /**
+     * Location from where build/images can be downloaded for image upgrade eg: http://partner-vm/Images
+     **/
+    private String firmwareLocation;
+
     private boolean rebootImmediately;
 
     /**
@@ -56,6 +61,21 @@ public class ImageRequestParams {
      */
     public void setFirmwareToBeDownloaded(String firmwareToBeDownloaded) {
 	this.firmwareToBeDownloaded = firmwareToBeDownloaded;
+    }
+
+    /**
+     * @return the firmwareLocation
+     */
+    public String getFirmwareLocation() {
+	return firmwareLocation;
+    }
+
+    /**
+     * @param firmwareLocation
+     *            the firmwareLocation to set
+     */
+    public void setFirmwareLocation(String firmwareLocation) {
+	this.firmwareLocation = firmwareLocation;
     }
 
 }

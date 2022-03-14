@@ -63,7 +63,6 @@ public abstract class AbstractXConfImageUpgradeProvider implements ImageUpgradeP
     public String getImageDownloadUrl(ImageRequestParams request, Dut dut) {
 	String imageDownloadLocation = XConfUtils.getFirmwareLocation(XconfConstants.FIRMWARE_DOWNLOAD_PROTOCOL_HTTP,
 		dut, request.getFirmwareToBeDownloaded());
-	LOGGER.info("Xconf image download location: {}", imageDownloadLocation);
 	return imageDownloadLocation;
     }
 
@@ -72,12 +71,32 @@ public abstract class AbstractXConfImageUpgradeProvider implements ImageUpgradeP
 	String response = "";
 	AutomaticsTapApi tapEnv = AutomaticsTapApi.getInstance();
 
-	String firmwareLocation = getImageDownloadUrl(request, device);
+	/**
+	 * If image download url is provided from tests, then do not override that with default value. For negative
+	 * testing scenarios, invalid image download urls will be set from tests.
+	 */
+	String firmwareLocation = request.getFirmwareLocation();
+	if (CommonMethods.isNull(firmwareLocation)) {
+	    firmwareLocation = getImageDownloadUrl(request, device);
+	} else {
+	    LOGGER.info("Using Xconf image download location set from tests");
+	}
+	LOGGER.info("Xconf image download location {}", firmwareLocation);
+
+	String xConfServerUrl = null;
+	if (request instanceof XConfRequestParams) {
+	    xConfServerUrl = ((XConfRequestParams) request).getxConfServerUrl();
+	}
+	if (CommonMethods.isNull(xConfServerUrl)) {
+	    xConfServerUrl = XConfUtils.getXconfServerUrl(device);
+	}
+	LOGGER.info("Xconf server url {}", xConfServerUrl);
 
 	// Step-1 Sending config data to XConf simulator
 	LOGGER.info("Sending XConf configuration data to XConf Simulator for device: {}", device.getHostMacAddress());
 	// Increment the known reboot Counter.
 	AutomaticsTapApi.incrementKnownRebootCounter(device.getHostMacAddress());
+
 	sendXConfFirmwareDownloadDetails(device, request.getFirmwareToBeDownloaded(), request.isRebootImmediately(),
 		firmwareDownloadProtocol, pdriImageName, firmwareLocation, firmwareUpgradeDelay,
 		factoryResetImmediately);

@@ -92,10 +92,12 @@ import com.automatics.providers.DeviceAccessValidator;
 import com.automatics.providers.RdkVideoDeviceProvider;
 import com.automatics.providers.connection.DeviceConnectionProvider;
 import com.automatics.providers.connection.DeviceConsoleType;
+import com.automatics.providers.connection.ExecuteCommandType;
 import com.automatics.providers.connection.SerialCommandExecutionProvider;
 import com.automatics.providers.crashanalysis.CrashAnalysisProvider;
 import com.automatics.providers.crashanalysis.CrashDetails;
 import com.automatics.providers.crashanalysis.CrashPortalRequest;
+import com.automatics.providers.imageupgrade.ImageRequestParams;
 import com.automatics.providers.imageupgrade.ImageUpgradeMechanism;
 import com.automatics.providers.imageupgrade.ImageUpgradeProvider;
 import com.automatics.providers.imageupgrade.ImageUpgradeProviderFactory;
@@ -2167,6 +2169,32 @@ public class AutomaticsTapApi {
     }
 
     /**
+     * Perform image upgrade on device.
+     * 
+     * @param device
+     *            Device on which image upgrade to be done
+     * @param imageRequestParams
+     *            Holds input for image upgrade
+     * @param downloadType
+     *            Type of image upgrade
+     * @return Response of image upgrade
+     */
+    public String performImageUpgrade(Dut device, ImageRequestParams imageRequestParams,
+	    ImageUpgradeMechanism downloadType) {
+
+	ImageUpgradeProviderFactory imageupgradeProviderFactory = BeanUtils.getImageUpgradeProviderFactory();
+	ImageUpgradeProvider imageProvider = imageupgradeProviderFactory.getImageUpgradeProvider(downloadType, device);
+	String response = null;
+	if (null != imageProvider) {
+	    response = imageProvider.performImageUpgrade(imageRequestParams, device);
+	} else {
+	    LOGGER.error("ImageUpgradeProvider is null. Image upgrade cannot be done!!!");
+	}
+
+	return response;
+    }
+
+    /**
      * Executing linux command by connecing SSH to the server.
      * 
      * @param serverDetails
@@ -3844,19 +3872,22 @@ public class AutomaticsTapApi {
     }
 
     /**
-     * Executes linux commands using telnet.
+     * Executes commands within device.
      * 
      * @param dut
-     *            Set-top to which the telnet to be connected.
+     *            Device in which command to be executed.
      * @param commands
-     *            Linux commands.
+     *            Linux command.
      * 
      * @return the output of linux commands executed.
      */
     public String executeCommandAndReturnResponseWithBanner(Dut dut, String command) {
 	String response = null;
 	if (null != deviceConnectionProvider) {
-	    response = deviceConnectionProvider.execute((Device) dut, command);
+	    List<String> commandList = new ArrayList<>();
+	    commandList.add(command);
+	    response = deviceConnectionProvider.execute((Device) dut, ExecuteCommandType.COMMAND_RESPONSE_WITH_BANNER,
+		    commandList);
 	}
 	return response;
     }

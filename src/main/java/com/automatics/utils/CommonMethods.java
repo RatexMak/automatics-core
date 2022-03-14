@@ -104,6 +104,7 @@ import com.automatics.exceptions.TestException;
 import com.automatics.manager.device.DeviceManager;
 import com.automatics.providers.DeviceAccessValidator;
 import com.automatics.providers.connection.DeviceConnectionProvider;
+import com.automatics.providers.objects.DevicePropsRequest;
 import com.automatics.providers.rack.exceptions.PowerProviderException;
 import com.automatics.providers.snmp.SnmpProvider;
 import com.automatics.providers.snmp.SnmpProviderFactory;
@@ -4779,5 +4780,35 @@ public class CommonMethods {
 	    }
 	}
 	return isTrue;
+    }
+	/**
+     * This method fetched STB IP from Device Manager Properties
+     * 
+     * @param dut
+     *            Dut object
+     * @return Returns the STB IP address
+     */
+    public static String getandSetErouterIpAddress(Dut dut) {
+		LOGGER.info("Inside getandSetErouterIpAddress");
+		String estbIPAddress = null;
+		DevicePropsRequest request = new DevicePropsRequest();
+	    request.setMac(dut.getHostMacAddress());
+	    List<String> requestedPropsName = new ArrayList<String>();
+	    requestedPropsName.add(AutomaticsConstants.DEVICE_PROP_ESTB_IP_ADDRESS);
+	    request.setRequestedPropsName(requestedPropsName);
+
+	    DeviceManager deviceManager = DeviceManager.getInstance();
+	    Map<String, String> response = deviceManager.getDeviceProperties(request);
+	    if(response != null && !response.isEmpty()) {
+		    estbIPAddress = response.get(AutomaticsConstants.DEVICE_PROP_ESTB_IP_ADDRESS);
+		    if(isNotNull(estbIPAddress)) {
+		    	((Device) dut).setErouterIpAddress(estbIPAddress);
+		    }	    	
+	    } else {
+			LOGGER.info("Response from device manager is NULL for MAC : " + dut.getHostMacAddress() + " and property : "
+					+ AutomaticsConstants.DEVICE_PROP_ESTB_IP_ADDRESS);
+		}
+	    LOGGER.info("Exiting getandSetErouterIpAddress with ip =" + estbIPAddress);
+		return estbIPAddress;
     }
 }
