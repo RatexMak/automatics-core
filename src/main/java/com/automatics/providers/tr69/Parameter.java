@@ -30,6 +30,8 @@ public class Parameter {
     private String paramValue;
 
     private String dataType;
+    
+    private boolean isWritable;
 
     public String getParamName() {
 	return paramName;
@@ -53,6 +55,14 @@ public class Parameter {
 
     public void setDataType(String dataType) {
 	this.dataType = dataType;
+    }
+
+    public boolean isWritable() {
+        return isWritable;
+    }
+
+    public void setWritable(boolean isWritable) {
+        this.isWritable = isWritable;
     }
 
 }

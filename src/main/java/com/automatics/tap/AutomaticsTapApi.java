@@ -6219,4 +6219,76 @@ public class AutomaticsTapApi {
 	return response;
     }
 
+    /**
+     * Copies file from VM to device
+     * 
+     * @param dut
+     *            Device in which file to be copied.
+     * @param fileToCopy
+     *            File to be copied to device.
+     * @param destPathInDevice
+     *            Path in device where file to be copied.
+     * 
+     * @return true if file is copied successfully to device.
+     */
+    public boolean copyFileToDevice(Device device, String fileToCopy, String destPathInDevice) {
+	boolean copySuccess = false;
+	if (null != deviceConnectionProvider) {
+	    copySuccess = deviceConnectionProvider.copyFile(device, fileToCopy, destPathInDevice);
+
+	} else {
+	    LOGGER.error("DeviceConnectionProvider not configured.");
+	}
+	LOGGER.info("File copy status for device: {} {}", device.getHostMacAddress(), copySuccess);
+	return copySuccess;
+    }
+
+    /**
+     * Method to get TR69 parameter values.
+     * 
+     * @param dut
+     *            The dut to be used.
+     * @param parameters
+     *            The array of TR69 parameter.
+     * 
+     * @return List of string values corresponding to each TR69 Parameter.
+     */
+    public List<String> getTr69ParameterValue(Dut dut, String[] parameters) {
+
+	TR69Provider tr69Provider = BeanUtils.getTR69Provider();
+	List<String> response = null;
+	if (null != tr69Provider) {
+	    response = tr69Provider.getTr69ParameterValues(dut, parameters);
+	    LOGGER.info("TR69 get response {}", response);
+	} else {
+	    LOGGER.error(AutomaticsConstants.BEAN_NOT_FOUND_LOG, "TR69Provider", BeanConstants.BEAN_ID_TR69_PROVIDER);
+	}
+
+	return response;
+    }
+
+    /**
+     * Method to get TR69 parameter values by path.
+     * 
+     * @param settop
+     *            The settop to be used.
+     * @param parameter
+     *            TR69 parameter path.
+     * 
+     * @return List of Parameter corresponding to each TR69 Parameter.
+     */
+    public List<Parameter> getTr69ParameterNamebyPath(Dut dut, String parameter) {
+	List<Parameter> tr69ParamResponse = new ArrayList<Parameter>();
+
+	TR69Provider tr69Provider = BeanUtils.getTR69Provider();
+	if (null != tr69Provider) {
+	    tr69ParamResponse = tr69Provider.getTr69ParameterNamebyPath(dut, parameter);
+	    LOGGER.info("TR69 get response {}", tr69ParamResponse);
+	} else {
+	    LOGGER.error(AutomaticsConstants.BEAN_NOT_FOUND_LOG, "TR69Provider", BeanConstants.BEAN_ID_TR69_PROVIDER);
+	}
+	LOGGER.info("TR69 Response : " + tr69ParamResponse);
+
+	return tr69ParamResponse;
+    }
 }

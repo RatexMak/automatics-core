@@ -52,5 +52,17 @@ public interface TR69Provider {
      * @return Status of set operation. Returns 'SUCCESS' if set operation was success else returns 'FAILURE'
      */
     public String setTr69ParameterValues(Dut dut, List<Parameter> tr69Param);
+    
+    /**
+     * Method to get TR69 parameter name.
+     * 
+     * @param dut
+     *            The dut to be validated.
+     * @param parameterPath
+     *            The parameter path name.
+     *            
+     * @return List of TR69 Parameter name response.
+     */
+    public List<Parameter> getTr69ParameterNamebyPath(Dut dut, String parameterPath);
 
 }
