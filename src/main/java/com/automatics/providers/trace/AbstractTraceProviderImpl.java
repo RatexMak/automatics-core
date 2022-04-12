@@ -25,17 +25,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.time.ZoneId;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.slf4j.ext.XLogger.Level;
 
 import com.automatics.constants.AutomaticsConstants;
+import com.automatics.constants.LoggingConstants;
 import com.automatics.constants.TraceProviderConstants;
 import com.automatics.core.SupportedModelHandler;
 import com.automatics.dataobjects.TestSessionDO;
@@ -102,7 +104,9 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
     protected volatile boolean isLostConnection = false;
     protected TraceServerConnectionStatus connectionStatus = TraceServerConnectionStatus.DISCONNECTED;
 
-    protected Logger settopTraceLogger;
+    protected Logger deviceTraceLogger;
+
+    protected Logger deviceAdditionalTraceLogger;
 
     protected AdditionalTraceLogger additionalTraceLogger;
 
@@ -118,11 +122,25 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 
     protected String previousLog = null;
 
+    protected String traceFileName;
+
+    protected String additionalTraceFileName;
+
     protected int consecutiveDuplicateLogsReceived = 0;
 
     static final int FIlE_SIZE_LIMIT_KB = 204800; // 200MB
 
     protected long currentCrashTime = 0;
+
+    protected Map<String, String> contextMap = null;
+
+    public String getTraceFileName() {
+	return traceFileName;
+    }
+
+    public void setTraceFileName(String traceFileName) {
+	this.traceFileName = traceFileName;
+    }
 
     /**
      * Get trace logger for device
@@ -130,7 +148,7 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
      * @return trace logger for device
      */
     public Logger getSettopTraceLogger() {
-	return settopTraceLogger;
+	return deviceTraceLogger;
     }
 
     /**
@@ -159,11 +177,12 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 	connectionProvider = BeanUtils.getDeviceConnetionProvider();
 	this.dut = device;
 	clQueue = new ConcurrentLinkedQueue<String>();
-	setupDeviceTraceLogger();
+
 	// Trace for ATOM console initialized based on config in Automatics Props
 	additionalTraceLogger = new AdditionalTraceLogger(dut);
-	LOGGER.debug("isenabled=" + additionalTraceLogger.isEnabled);
+	LOGGER.debug("Additional trace logger enabled =" + additionalTraceLogger.isEnabled);
 
+	setupDeviceTraceLogger();
 	enableCrashAnalysis = TestUtils.isCrashAnalysisEnabled();
 
 	if (enableCrashAnalysis) {
@@ -186,6 +205,8 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 	    return;
 	}
 
+	MDC.put(LoggingConstants.LOGGER_TRACE_FILE_KEY, traceFileName);
+	LOGGER.debug("MDC value = " + MDC.get(LoggingConstants.LOGGER_TRACE_FILE_KEY));
 	command = getTraceStartCommand(dut);
 	LOGGER.info("Starting trace with command : {}", command);
 	loopAlive = true;
@@ -195,6 +216,7 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 	// Clean up all existing trace processes before starting new trace
 	cleanupDeviceTrace();
 
+	contextMap = MDC.getCopyOfContextMap();
 	java.util.concurrent.CountDownLatch synchronizationLatch = new CountDownLatch(1);
 	connectionThread = new ConnectionThread(synchronizationLatch);
 	connectionThread.setName("ConnectionThread_" + connectionThread.getId() + " (" + dut.getHostMacAddress() + ")");
@@ -302,25 +324,27 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 	    LOGGER.info("Skipping Trace operations");
 	    return;
 	}
-	settopTraceLogger = Logger.getLogger(dut.getHostMacAddress());
+
+	String traceFileName = null;
+	String additionalTraceFileName = null;
+
+	deviceTraceLogger = LoggerFactory.getLogger("ConnectionTrace");
 
 	try {
 
-	    StringBuilder sb = new StringBuilder();
-	    sb.append(TraceProviderConstants.SETTOP_TRACE_DIRECTORY)
-		    .append(AutomaticsUtils.getCleanMac(dut.getHostMacAddress()))
-		    .append(TraceProviderConstants.TRACE_LOG_FILE_NAME);
+	    if (additionalTraceLogger.isEnabled) {
+		additionalTraceFileName = AutomaticsUtils.getCleanMac(dut.getHostMacAddress())
+			+ TraceProviderConstants.ADDITIONAL_TRACE_LOG_FILE_NAME.replace("<name>",
+				additionalTraceLogger.traceName);
 
-	    // Setting trace logger file name
-	    String logFileName = sb.toString();
-	    LOGGER.info("Log File location " + logFileName);
-	    FileAppender fileAppender = new FileAppender(TraceProviderConstants.LOG_PATTERN, logFileName);
-	    fileAppender.setThreshold(Level.TRACE);
-	    fileAppender.setAppend(true);
-	    fileAppender.activateOptions();
-	    settopTraceLogger.addAppender(fileAppender);
-	    settopTraceLogger.setLevel(Level.TRACE);
-	    settopTraceLogger.setAdditivity(false);
+		deviceAdditionalTraceLogger = LoggerFactory.getLogger("AdditionalConnectionTrace");
+		setTraceAndLocation(additionalTraceFileName, true);
+	    }
+	    traceFileName = AutomaticsUtils.getCleanMac(dut.getHostMacAddress())
+		    + TraceProviderConstants.TRACE_LOG_FILE_NAME;
+
+	    setTraceAndLocation(traceFileName, false);
+
 	} catch (IOException e) {
 	    LOGGER.error("Unable to create the trace log appender for dut : " + dut.getHostMacAddress(), e);
 	}
@@ -382,7 +406,11 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 	    return;
 	}
 
-	settopTraceLogger.log(logLevel, textToInsert);
+	if (logLevel.equals(Level.INFO)) {
+	    deviceTraceLogger.info(textToInsert);
+	} else if (logLevel.equals(Level.WARN)) {
+	    deviceTraceLogger.warn(textToInsert);
+	}
     }
 
     /**
@@ -751,7 +779,7 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 	    BufferedReader bufferedReaderAdditionalLogger = null;
 	    String eventData = "";
 
-	    LOGGER.info("Reading RDKV Client trace", rdkvClient);
+	    LOGGER.info("Is RDKV Client trace {}", rdkvClient);
 	    do {
 		// Read trace for non-RDKV Client device
 		if (!rdkvClient) {
@@ -800,8 +828,9 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 		    if (CommonMethods.isNull(automationId)) {
 			automationId = "TC-RDK-INIT-1000";
 		    }
-		    String formattedEventData = new StringBuilder().append("[").append(dut.getHostMacAddress())
-			    .append("][").append(automationId).append("]").toString();
+		    String formattedEventData = new StringBuffer().append("[").append(System.getProperty("JMD_ID"))
+			    .append("]").append("[").append(dut.getHostMacAddress()).append("][").append(automationId)
+			    .append("]").toString();
 		    // Write the trace to file
 		    addToBufferSafely(eventData, formattedEventData);
 
@@ -881,7 +910,7 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 	LOGGER.debug("Event = " + (prefix + eventData));
 	if (CommonMethods.isNotNull(evenDataLogToCompare)) {
 	    if (!evenDataLogToCompare.equals(previousLog)) {
-		settopTraceLogger.trace(prefix + eventData);
+		deviceTraceLogger.trace(prefix + eventData);
 		if (bufferTrace) {
 		    clQueue.add(prefix + eventData);
 		}
@@ -889,7 +918,7 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 		consecutiveDuplicateLogsReceived = 0;
 	    } else {
 		if (consecutiveDuplicateLogsReceived < maxLogsRepetetionAloowedValue) {
-		    settopTraceLogger.trace(prefix + eventData);
+		    deviceTraceLogger.trace(prefix + eventData);
 		    if (bufferTrace) {
 			clQueue.add(prefix + eventData);
 		    }
@@ -1008,6 +1037,7 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 	try {
 	    if (CommonMethods.isNotNull(currentTrace) && settop.getTestSessionDetails() != null
 		    && settop.getTestSessionDetails().isShouldPerformCrashAnalysis()) {
+		
 		if (CommonMethods.patternMatcher(currentTrace, crashUploadSuccessRegex)) {
 		    LOGGER.info("Current line =" + currentTrace);
 		    String regexForCoreLog = null;
@@ -1093,8 +1123,10 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 
 	@Override
 	public void run() {
-	    LOGGER.info("Connection Thread");
+	    MDC.setContextMap(contextMap);
 	    this.countDownLatch.countDown();
+	    LOGGER.info("Starting reading..{},", MDC.get(LoggingConstants.LOGGER_TRACE_FILE_KEY));
+	    deviceTraceLogger.info("************************STARTING TRACE***************************");
 	    connectAndRead();
 	}
     }
@@ -1102,6 +1134,7 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
     private class PollingThread extends Thread {
 
 	public void startPolling() {
+	    MDC.setContextMap(contextMap);
 	    keepPollingThreadAlive = true;
 	    keepPollingXg1ThreadAlive = true;
 	    start();
@@ -1196,4 +1229,16 @@ public abstract class AbstractTraceProviderImpl implements ConnectionTraceProvid
 	this.dut = device;
 
     }
+
+    private void setTraceAndLocation(String traceFileName, boolean isAdditionaLogger) throws IOException {
+	StringBuilder sb = new StringBuilder();
+	sb.append(TraceProviderConstants.SETTOP_TRACE_DIRECTORY).append(traceFileName);
+
+	String logFileName = sb.toString();
+	LOGGER.info("Trace Log File location " + logFileName);
+
+	MDC.put(LoggingConstants.LOGGER_TRACE_FILE_KEY, traceFileName);
+	this.traceFileName = traceFileName;
+    }
+
 }

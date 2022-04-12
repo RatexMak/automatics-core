@@ -128,10 +128,13 @@ public final class AutomaticsPropertyUtility {
 	if (CommonMethods.isNotNull(propertyValue)) {
 	    propertyValue = propertyValue.trim();
 	} else {
-	    propertyValue = properties.getProperty(propertyName);
+	    if (properties != null) {
+		propertyValue = properties.getProperty(propertyName);
+	    }
 	    if (CommonMethods.isNotNull(propertyValue)) {
 		propertyValue = propertyValue.trim();
 	    }
+
 	}
 
 	return propertyValue;
@@ -176,7 +179,9 @@ public final class AutomaticsPropertyUtility {
 		    loadProperties();
 		}
 
-		properties.setProperty(propertyName, propertyValue);
+		if (properties != null) {
+		    properties.setProperty(propertyName, propertyValue);
+		}
 	    }
 	}
     }
@@ -223,8 +228,8 @@ public final class AutomaticsPropertyUtility {
 
 		connection.setRequestProperty("content-type", "application/x-www-form-urlencoded");
 		connection.setDoOutput(true);
-		connection.setUseCaches(false);	
-		
+		connection.setUseCaches(false);
+
 		properties.load(connection.getInputStream());
 	    } catch (FileNotFoundException e) {
 		LOGGER.error("AutomaticsPropertyUtility: File Not Found: {}. Cannot continue execution.",

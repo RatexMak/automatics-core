@@ -21,8 +21,6 @@ package com.automatics.constants;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import org.apache.log4j.PatternLayout;
-
 /**
  * Holds the constant that will be used by Trace providers.
  *
@@ -39,21 +37,19 @@ public class TraceProviderConstants {
     /** Name of the trace log file. */
     public static final String TRACE_LOG_FILE_NAME = "settop_trace.log";
 
-    /** Log pattern. */
-    public static final PatternLayout LOG_PATTERN = new PatternLayout("%d %m%n");
+    /** Name of additional trace log file. */
+    public static final String ADDITIONAL_TRACE_LOG_FILE_NAME = "settop_trace_<name>.log";
 
-    /** Log pattern. */
-    public static final PatternLayout LOG_PATTERN_CA = new PatternLayout("[%p][%d][%X{first} %X{last} -|%t|] - %m%n");
-
-    /** Waiting period for hte trace to arrive when connected frst. */
+    /** Waiting period for the trace to arrive when connected first. */
     public static final long TRACE_WAIT_PERIOD = 2000;
 
     /** SimpleDateFormatter to be applied for date time in trace logs. */
     public final DateFormat TRACE_DATE_FORMATTER = new SimpleDateFormat(DATE_FORMAT);
-    
+
     public static final String SETTOP_TRACE_DIRECTORY_NAME = "/settoptrace/";
 
     /** Directory to save dut trace. */
-    public static final String SETTOP_TRACE_DIRECTORY = System.getProperty("user.dir") + AutomaticsConstants.PATH_SEPARATOR + "target"
-	    + AutomaticsConstants.PATH_SEPARATOR + "settoptrace" + AutomaticsConstants.PATH_SEPARATOR;
+    public static final String SETTOP_TRACE_DIRECTORY = System.getProperty("user.dir")
+	    + AutomaticsConstants.PATH_SEPARATOR + "target" + AutomaticsConstants.PATH_SEPARATOR + "settoptrace"
+	    + AutomaticsConstants.PATH_SEPARATOR;
 }

@@ -18,7 +18,7 @@
 
 package com.automatics.constants;
 
-import org.apache.log4j.Level;
+import org.slf4j.ext.XLogger.Level;
 
 /**
  * This class defines the constants used across the testcase.
@@ -940,5 +940,26 @@ public class AutomaticsConstants {
 
     /** Json key name for property ESTB_IP_ADDRESS */
     public static final String DEVICE_PROP_ESTB_IP_ADDRESS = "ESTB_IP_ADDRESS";
+
+    /** Json key name for property MTA_IP_ADDRESS */
+    public static final String DEVICE_PROP_MTA_IP_ADDRESS = "MTA_IP_ADDRESS";
+
+    /** Json key name for property DEVICE_ID */
+    public static final String DEVICE_PROP_DEVICE_ID = "DEVICE_ID";
+
+    /** Json key name for property DEVICE_ID_FOR_IP_DEVICE */
+    public static final String DEVICE_PROP_DEVICE_ID_FOR_IP_DEVICE = "DEVICE_ID_FOR_IP_DEVICE";
+
+    /** Json key name for property BILLING_ACCOUNT_ID */
+    public static final String DEVICE_PROP_BILLING_ACCOUNT_ID = "BILLING_ACCOUNT_ID";
+
+    /** Json key name for property ECM_MAC_ADDRESS */
+    public static final String DEVICE_PROP_ECM_MAC_ADDRESS = "ECM_MAC_ADDRESS";
+
+    /** Json key name for property SERVICE_ACCOUNT_ID */
+    public static final String DEVICE_PROP_SERVICE_ACCOUNT_ID = "SERVICE_ACCOUNT_ID";
+
+    /** Json key name for property NATIVE_PROCESS_ID */
+    public static final String DEVICE_PROP_NATIVE_PROCESS_ID = "NATIVE_PROCESS_ID";
 
 }

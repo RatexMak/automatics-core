@@ -451,7 +451,7 @@ public class AutomaticsTapApi {
 		    request.setMac(dut.getHostMacAddress());
 		    List<String> propsRequested = new ArrayList<String>();
 		    propsRequested.add("ECM_MAC");
-		    request.setRequestedPropsName(propsRequested);
+		    request.setDeviceProps(propsRequested);
 		    Map<String, String> data = deviceManager.getDeviceProperties(request);
 		    if (null != data && null != data.get("ECM_MAC")) {
 			macID = data.get("ECM_MAC");

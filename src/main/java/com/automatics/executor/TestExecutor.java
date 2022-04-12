@@ -172,7 +172,7 @@ public class TestExecutor {
 	 */
 	testng = new TestNG();
 	testng.addListener(automaticsTestListener);
-	testng.setAnnotationTransformer(new AutomaticsAnnotationTransformer());
+	testng.addListener(new AutomaticsAnnotationTransformer());
 	testng.setXmlSuites(suites);
 	testng.run();
     }

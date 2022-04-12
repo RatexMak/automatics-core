@@ -265,6 +265,17 @@ public class Device extends DutImpl {
     }
 
     /**
+     * @return
+     */
+    public String getMtaIpAddress() {
+	if (CommonMethods.isNull(this.mtaIpAddress)) {
+	    LOGGER.info("MTA IP Address is null. Hence fetching from Partner.");
+	    this.mtaIpAddress = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_MTA_IP_ADDRESS);
+	}
+	return this.mtaIpAddress;
+    }
+
+    /**
      * @param mtaIpAddress
      */
     public void setMtaIpAddress(String mtaIpAddress) {
@@ -483,16 +494,9 @@ public class Device extends DutImpl {
 
 	deviceId = AutomaticsTapApi.estbMacDeviceIdMap.get(getHostMacAddress());
 
-	if (null == deviceId) {
-	    DevicePropsRequest request = new DevicePropsRequest();
-	    request.setMac(getHostMacAddress());
-	    List<String> requestedPropsName = new ArrayList<String>();
-	    requestedPropsName.add("deviceId");
-	    request.setRequestedPropsName(requestedPropsName);
+	if (CommonMethods.isNull(deviceId)) {
+	    this.deviceId = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_DEVICE_ID);
 
-	    DeviceManager deviceManager = DeviceManager.getInstance();
-	    Map<String, String> response = deviceManager.getDeviceProperties(request);
-	    deviceId = response.get("deviceId");
 	}
 
 	return deviceId;
@@ -508,16 +512,7 @@ public class Device extends DutImpl {
 	deviceId = AutomaticsTapApi.estbMacDeviceIdMap.get(getHostMacAddress());
 
 	if (null == deviceId) {
-
-	    DevicePropsRequest request = new DevicePropsRequest();
-	    request.setMac(getHostMacAddress());
-	    List<String> requestedPropsName = new ArrayList<String>();
-	    requestedPropsName.add("deviceIdForIpDevices");
-	    request.setRequestedPropsName(requestedPropsName);
-
-	    DeviceManager deviceManager = DeviceManager.getInstance();
-	    Map<String, String> response = deviceManager.getDeviceProperties(request);
-	    deviceId = response.get("deviceIdForIpDevices");
+	    deviceId = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_DEVICE_ID_FOR_IP_DEVICE);
 	}
 
 	return deviceId;
@@ -531,15 +526,7 @@ public class Device extends DutImpl {
     public String getBillingAccountId() {
 
 	if (null == billingAccountId) {
-	    DevicePropsRequest request = new DevicePropsRequest();
-	    request.setMac(getHostMacAddress());
-	    List<String> requestedPropsName = new ArrayList<String>();
-	    requestedPropsName.add("billingAccountId");
-	    request.setRequestedPropsName(requestedPropsName);
-
-	    DeviceManager deviceManager = DeviceManager.getInstance();
-	    Map<String, String> response = deviceManager.getDeviceProperties(request);
-	    billingAccountId = response.get("billingAccountId");
+	    billingAccountId = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_BILLING_ACCOUNT_ID);
 	}
 
 	return billingAccountId;
@@ -610,17 +597,7 @@ public class Device extends DutImpl {
     public String getFirmwareVersion() {
 	LOGGER.debug("Firmware version={}", firmwareVersion);
 	if (CommonMethods.isNull(firmwareVersion) && !SupportedModelHandler.isNonRDKDevice(this)) {
-	    DevicePropsRequest request = new DevicePropsRequest();
-	    request.setMac(getHostMacAddress());
-	    List<String> requestedPropsName = new ArrayList<String>();
-	    requestedPropsName.add("FIRMWARE_VERSION");
-	    request.setRequestedPropsName(requestedPropsName);
-
-	    DeviceManager deviceManager = DeviceManager.getInstance();
-	    LOGGER.info("Fetching Firmware version");
-	    Map<String, String> response = deviceManager.getDeviceProperties(request);
-	    firmwareVersion = response.get("FIRMWARE_VERSION");
-	    LOGGER.info("Firmware version {}", firmwareVersion);
+	    firmwareVersion = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_FIRMWARE_VERSION);
 	}
 	return firmwareVersion;
     }
@@ -746,18 +723,10 @@ public class Device extends DutImpl {
      */
     public String getEcmMac() {
 	if (null == ecmMac) {
-	    // Getting ecmmac
+	    // Getting ecm mac
 	    ecmMac = AutomaticsTapApi.estbMacEcmMap.get(getHostMacAddress());
 	    if (null == ecmMac) {
-		DevicePropsRequest request = new DevicePropsRequest();
-		request.setMac(getHostMacAddress());
-		List<String> requestedPropsName = new ArrayList<String>();
-		requestedPropsName.add("ECM_MAC");
-		request.setRequestedPropsName(requestedPropsName);
-
-		DeviceManager deviceManager = DeviceManager.getInstance();
-		Map<String, String> response = deviceManager.getDeviceProperties(request);
-		ecmMac = response.get("ECM_MAC");
+		ecmMac = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_ECM_MAC_ADDRESS);
 	    }
 	}
 	return ecmMac;
@@ -772,25 +741,19 @@ public class Device extends DutImpl {
 
 	headEnd = AutomaticsTapApi.estbMacHeadEndMap.get(hostMacAddress);
 	LOGGER.info("Head end for device {} {}", hostMacAddress, headEnd);
-	if (null == headEnd) {
-	    DevicePropsRequest request = new DevicePropsRequest();
-	    request.setMac(hostMacAddress);
-	    List<String> requestedPropsName = new ArrayList<String>();
-	    requestedPropsName.add(AutomaticsConstants.DEVICE_PROP_HEAD_END);
-	    request.setRequestedPropsName(requestedPropsName);
-	    LOGGER.debug("Fetching head end for device {}", hostMacAddress);
-	    DeviceManager deviceManager = DeviceManager.getInstance();
-	    Map<String, String> response = deviceManager.getDeviceProperties(request);
-	    if (null != response && null != response.get(AutomaticsConstants.DEVICE_PROP_HEAD_END)) {
-		headEnd = response.get(AutomaticsConstants.DEVICE_PROP_HEAD_END);
-		LOGGER.info("Head end for device {} {}", hostMacAddress, headEnd);
+	if (CommonMethods.isNull(headEnd)) {
+	    headEnd = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_HEAD_END);
+
+	    LOGGER.info("Head end for device {} {}", hostMacAddress, headEnd);
+	    if (CommonMethods.isNotNull(headEnd)) {
 		AutomaticsTapApi.estbMacHeadEndMap.put(hostMacAddress, headEnd);
-	    } else {
-		LOGGER.error("Could not get head end for device {}", hostMacAddress);
 	    }
+	} else {
+	    LOGGER.error("Could not get head end for device {}", hostMacAddress);
 	}
 
 	return headEnd;
+
     }
 
     public void setHeadEnd(String headEnd) {
@@ -955,16 +918,7 @@ public class Device extends DutImpl {
 	serviceAccountId = AutomaticsTapApi.estbMacServiceAccountIdMap.get(getHostMacAddress());
 
 	if (null == serviceAccountId) {
-
-	    DevicePropsRequest request = new DevicePropsRequest();
-	    request.setMac(getHostMacAddress());
-	    List<String> requestedPropsName = new ArrayList<String>();
-	    requestedPropsName.add("serviceAccountId");
-	    request.setRequestedPropsName(requestedPropsName);
-
-	    DeviceManager deviceManager = DeviceManager.getInstance();
-	    Map<String, String> response = deviceManager.getDeviceProperties(request);
-	    serviceAccountId = response.get("serviceAccountId");
+	    serviceAccountId = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_SERVICE_ACCOUNT_ID);
 	}
 
 	return serviceAccountId;
@@ -980,15 +934,7 @@ public class Device extends DutImpl {
 	nativeProcessId = AutomaticsTapApi.estbMacNativeProcessIdMap.get(getHostMacAddress());
 
 	if (null == nativeProcessId) {
-	    DevicePropsRequest request = new DevicePropsRequest();
-	    request.setMac(getHostMacAddress());
-	    List<String> requestedPropsName = new ArrayList<String>();
-	    requestedPropsName.add(AutomaticsConstants.NATIVE_PROCESS_ID);
-	    request.setRequestedPropsName(requestedPropsName);
-
-	    DeviceManager deviceManager = DeviceManager.getInstance();
-	    Map<String, String> response = deviceManager.getDeviceProperties(request);
-	    nativeProcessId = response.get(AutomaticsConstants.NATIVE_PROCESS_ID);
+	    nativeProcessId = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_NATIVE_PROCESS_ID);
 	}
 	return nativeProcessId;
     }
@@ -1195,6 +1141,36 @@ public class Device extends DutImpl {
      */
     public void setExtraProperties(Map<String, String> extraProperties) {
 	this.extraProperties = extraProperties;
+    }
+
+    /**
+     * Gets value for requested device property
+     * 
+     * @param propertyName
+     *            Device Property name
+     * @return Value for requested device property
+     */
+    private String getDeviceProperty(String propertyName) {
+
+	LOGGER.info("Fetching device property: {}", propertyName);
+
+	String propertyValue = null;
+	DevicePropsRequest request = new DevicePropsRequest();
+	request.setMac(getHostMacAddress());
+	List<String> requestedPropsName = new ArrayList<String>();
+	requestedPropsName.add(propertyName);
+	request.setDeviceProps(requestedPropsName);
+	
+	DeviceManager deviceManager = DeviceManager.getInstance();
+	Map<String, String> response = deviceManager.getDeviceProperties(request);
+
+	if (null != response) {
+	    propertyValue = response.get(propertyName);
+	}
+
+	LOGGER.info("Device property name: {} value obtained: {}", propertyName, propertyValue);
+
+	return propertyValue;
     }
 
 }

@@ -19,7 +19,7 @@ package com.automatics.providers.trace;
 
 import java.io.IOException;
 
-import org.apache.log4j.Level;
+import org.slf4j.ext.XLogger.Level;
 
 import com.automatics.device.Dut;
 import com.automatics.providers.rack.BaseProvider;

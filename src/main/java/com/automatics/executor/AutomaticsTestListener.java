@@ -20,14 +20,16 @@ package com.automatics.executor;
 
 import java.util.Map;
 
-import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.slf4j.ext.XLogger.Level;
 import org.testng.ITestContext;
 import org.testng.ITestResult;
 import org.testng.TestListenerAdapter;
 
 import com.automatics.annotations.TestDetails;
+import com.automatics.constants.LoggingConstants;
 import com.automatics.device.Device;
 import com.automatics.device.DeviceAccount;
 import com.automatics.device.DutAccount;
@@ -47,7 +49,7 @@ public class AutomaticsTestListener extends TestListenerAdapter {
 
     /** SLF4J logger implementation. */
     private static final Logger LOGGER = LoggerFactory.getLogger(AutomaticsTestListener.class);
-    
+
     /** The Execution ID associated with this test run. */
     private String executionId;
 
@@ -95,7 +97,7 @@ public class AutomaticsTestListener extends TestListenerAdapter {
 	    } else {
 		testDetails.append(" - null");
 	    }
-	}	
+	}
 
 	return testDetails.toString();
     }
@@ -145,14 +147,18 @@ public class AutomaticsTestListener extends TestListenerAdapter {
 		if (null != device.getTrace()) {
 		    LOGGER.debug("Started appending log");
 
-		    device.getTrace().insertIntoTrace(
-			    " \n<a name=\"" + testResult.getTestClass().getName() + "." + testResult.getName()
-				    + "\">********* Starting Test " + testResult.getName() + " Test ID = " + testUid
-				    + " , Dut MAC ID = " + settopId + "********* </a>\n", Level.WARN);
+		    LOGGER.info("Getting MDC = " + MDC.get(LoggingConstants.LOGGER_TRACE_FILE_KEY));
+		    LOGGER.info("Getting MDC = " + MDC.get(LoggingConstants.LOGGER_DEVICE_MAC_KEY));
+
+		    device.getTrace()
+			    .insertIntoTrace(" \n<a name=\"" + testResult.getTestClass().getName() + "."
+				    + testResult.getName() + "\">********* Starting Test " + testResult.getName()
+				    + " Test ID = " + testUid + " , Dut MAC ID = " + settopId + "********* </a>\n",
+				    Level.WARN);
 		}
 	    }
 	}
-    }   
+    }
 
     /**
      * Invoked after all the tests have run and all their Configuration methods have been called.

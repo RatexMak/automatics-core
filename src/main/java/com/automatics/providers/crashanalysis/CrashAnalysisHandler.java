@@ -18,7 +18,6 @@
 package com.automatics.providers.crashanalysis;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,15 +27,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import com.automatics.constants.AutomaticsConstants;
+import com.automatics.constants.LoggingConstants;
 import com.automatics.constants.ReportsConstants;
-import com.automatics.constants.TraceProviderConstants;
 import com.automatics.device.Device;
 import com.automatics.enums.IssueCreationRequestor;
 import com.automatics.providers.issuemanagement.IssueController;
@@ -64,9 +61,6 @@ public class CrashAnalysisHandler implements Runnable {
     /** Date format in test logs **/
     private static final String TEST_LOG_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss,SSS";
 
-    /** SLF4j logger instance. */
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CrashAnalysisHandler.class);
-
     private static final String FOLDER_NAME = "Crash-Analysis";
 
     /** List of crashes found **/
@@ -92,6 +86,9 @@ public class CrashAnalysisHandler implements Runnable {
     private String crashLogLine = AutomaticsConstants.EMPTY_STRING;
 
     private Logger crashAnalysisLogger = null;
+
+    /** SLF4j logger instance. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(CrashAnalysisHandler.class);
 
     /** LOG FILE LOCATION **/
     static final String logFile = System.getProperty("user.dir") + AutomaticsConstants.PATH_SEPARATOR + "target"
@@ -120,32 +117,6 @@ public class CrashAnalysisHandler implements Runnable {
 
 	    issueController = new IssueController();
 	}
-
-	String logFileName = logFile + requestObject.getTestCaseId() + AutomaticsConstants.PATH_SEPARATOR;
-	logFileName = logFileName + AutomaticsUtils.getCleanMac(dut.getHostMacAddress())
-		+ AutomaticsConstants.PATH_SEPARATOR;
-
-	File directory = new File(logFileName + FOLDER_NAME);
-	if (!directory.exists()) {
-	    directory.mkdirs();
-	}
-	FileAppender crashLoggerFile = null;
-	ConsoleAppender crashConsoleAppender = null;
-	try {
-	    crashLoggerFile = new FileAppender(TraceProviderConstants.LOG_PATTERN_CA, logFileName
-		    + "crash-analysis.log");
-	    crashConsoleAppender = new ConsoleAppender();
-	} catch (IOException e) {
-	    LOGGER.error("Error creating appenders for crash analysis", e);
-	}
-	crashLoggerFile.setThreshold(Level.DEBUG);
-	crashLoggerFile.setAppend(true);
-	crashAnalysisLogger = Logger.getLogger(dut.getHostMacAddress() + "ITERATION_"
-		+ dut.getTestSessionDetails().getIteration());
-	crashAnalysisLogger.addAppender(crashLoggerFile);
-	crashAnalysisLogger.addAppender(crashConsoleAppender);
-	crashAnalysisLogger.setLevel(Level.DEBUG);
-	crashAnalysisLogger.setAdditivity(false);
     }
 
     /**
@@ -157,23 +128,42 @@ public class CrashAnalysisHandler implements Runnable {
      *      added as additional step sfinal in Automatics.
      */
     public void run() {
-	Thread.currentThread().setName(
-		"CrashAnalysis-" + crashPortalRequest.getTestCaseId() + "-"
+	Thread.currentThread()
+		.setName("CrashAnalysis-" + crashPortalRequest.getTestCaseId() + "-"
 			+ AutomaticsUtils.getCleanMac(crashPortalRequest.getSettop().getHostMacAddress()) + "-THREAD_"
 			+ Thread.currentThread().getId());
-
-	List<CrashDetails> crashDetailsMinidumps = new ArrayList<CrashDetails>();
-	List<CrashDetails> crashDetailsCoredumps = new ArrayList<CrashDetails>();
-	Integer currentVal = 0;
-
-	String imagename = crashPortalRequest.getImagename().replaceAll("-signed.*", AutomaticsConstants.EMPTY_STRING);
-	crashPortalRequest.setImagename(imagename);
-
-	LOGGER.info("Starting Crash Analysis with request \n{}", crashPortalRequest.toString());
 
 	try {
 	    device = (Device) crashPortalRequest.getSettop();
 	    testCaseId = crashPortalRequest.getTestCaseId();
+
+	    String logFileName = logFile + crashPortalRequest.getTestCaseId() + AutomaticsConstants.PATH_SEPARATOR;
+	    logFileName = logFileName + AutomaticsUtils.getCleanMac(device.getHostMacAddress())
+		    + AutomaticsConstants.PATH_SEPARATOR;
+
+	    File directory = new File(logFileName + FOLDER_NAME);
+	    if (!directory.exists()) {
+		directory.mkdirs();
+	    }
+
+	    LOGGER.info("Configuring loggers.................");
+	    System.setProperty(LoggingConstants.CRASH_ANALYSIS_FILE_PATH, logFileName);
+	    MDC.put(LoggingConstants.CRASH_ANALYSIS_FILE_PATH, logFileName);
+	    MDC.put(LoggingConstants.LOGGER_DEVICE_MAC_KEY,
+		    AutomaticsUtils.getCleanMac(crashPortalRequest.getSettop().getHostMacAddress()));
+
+	    crashAnalysisLogger = LoggerFactory.getLogger("crash-analysis");
+	    crashAnalysisLogger.info("Inside startCrashAnalysis ------->");
+
+	    List<CrashDetails> crashDetailsMinidumps = new ArrayList<CrashDetails>();
+	    List<CrashDetails> crashDetailsCoredumps = new ArrayList<CrashDetails>();
+	    Integer currentVal = 0;
+
+	    String imagename = crashPortalRequest.getImagename().replaceAll("-signed.*",
+		    AutomaticsConstants.EMPTY_STRING);
+	    crashPortalRequest.setImagename(imagename);
+
+	    LOGGER.info("Starting Crash Analysis with request \n{}", crashPortalRequest.toString());
 
 	    boolean isProcessingStartedCore = false;
 	    boolean isProcessingStartedMinidump = false;
@@ -210,10 +200,10 @@ public class CrashAnalysisHandler implements Runnable {
 			crashDetailsCoredumps = crashAnalysisProvider.getCoreDumpData(crashPortalRequest);
 		    }
 
-		    crashAnalysisLogger.info("Total number of coredumps processed -------> "
-			    + crashDetailsCoredumps.size());
-		    crashAnalysisLogger.info("Total number of minidumps processed -------> "
-			    + crashDetailsMinidumps.size());
+		    crashAnalysisLogger
+			    .info("Total number of coredumps processed -------> " + crashDetailsCoredumps.size());
+		    crashAnalysisLogger
+			    .info("Total number of minidumps processed -------> " + crashDetailsMinidumps.size());
 
 		    crashList.addAll(crashDetailsCoredumps);
 		    crashList.addAll(crashDetailsMinidumps);
@@ -260,6 +250,8 @@ public class CrashAnalysisHandler implements Runnable {
 	    }
 	} catch (Exception e) {
 	    crashAnalysisLogger.error("Exception during thread execution : ", e);
+	} finally {
+	    MDC.clear();
 	}
 
     }
@@ -283,11 +275,8 @@ public class CrashAnalysisHandler implements Runnable {
 	    LOGGER.info("Proceed to download dump - {}", shouldProceedToDownload);
 	    if (shouldProceedToDownload) {
 		String minidumpDownloadLocationInWorkspace = System.getProperty(ReportsConstants.USR_DIR)
-			+ AutomaticsConstants.PATH_SEPARATOR
-			+ AutomaticsConstants.TARGET_FOLDER
-			+ AutomaticsConstants.PATH_SEPARATOR
-			+ testCaseId
-			+ AutomaticsConstants.PATH_SEPARATOR
+			+ AutomaticsConstants.PATH_SEPARATOR + AutomaticsConstants.TARGET_FOLDER
+			+ AutomaticsConstants.PATH_SEPARATOR + testCaseId + AutomaticsConstants.PATH_SEPARATOR
 			+ AutomaticsUtils.getCleanMac(device.getHostMacAddress() + AutomaticsConstants.PATH_SEPARATOR
 				+ FOLDER_NAME + AutomaticsConstants.PATH_SEPARATOR);
 
@@ -295,13 +284,13 @@ public class CrashAnalysisHandler implements Runnable {
 		if (isDirectoryCreated) {
 		    CrashType crashType = CrashUtils.getCrashType(crash);
 		    LOGGER.info("Downloading {} for id {}", crashType, crash.getId());
-		    boolean isSuccess = crashAnalysisProvider.downloadDump(crashType,
-			    crash.getId(), minidumpDownloadLocationInWorkspace);
+		    boolean isSuccess = crashAnalysisProvider.downloadDump(crashType, crash.getId(),
+			    minidumpDownloadLocationInWorkspace);
 		    LOGGER.info("Download status {}", isSuccess);
 		    if (CrashUtils.getCrashType(crash).equals(CrashType.MINIDUMP)) {
 			LOGGER.info("Downloading compressed files");
-			crashAnalysisProvider.downloadCompressedDumpFiles(crashType,
-				crash.getId(), minidumpDownloadLocationInWorkspace);
+			crashAnalysisProvider.downloadCompressedDumpFiles(crashType, crash.getId(),
+				minidumpDownloadLocationInWorkspace);
 		    }
 		    if (!isSuccess) {
 			crashAnalysisLogger.info("## -----> Dump file could not be downloaded<----- ##");
@@ -437,8 +426,8 @@ public class CrashAnalysisHandler implements Runnable {
 	description
 		.append(CrashUtils.DESCRIPTION_TEMPLATE.replace("<step>", getTestStepOfCrash(eachCrash))
 			.replace("<testcaseid>", testCaseId).replace("<buildurl>", buildUrl)
-			.replace("<details>", getDeviceDetails(device))).append("*+Crash Details+*")
-		.append(AutomaticsConstants.NEW_LINE).append(AutomaticsConstants.HYPHEN)
+			.replace("<details>", getDeviceDetails(device)))
+		.append("*+Crash Details+*").append(AutomaticsConstants.NEW_LINE).append(AutomaticsConstants.HYPHEN)
 		.append(AutomaticsConstants.SINGLE_SPACE_CHARACTER).append("DEVICE MAC : ").append(eachCrash.getMac())
 		.append(AutomaticsConstants.NEW_LINE).append(AutomaticsConstants.HYPHEN)
 		.append(AutomaticsConstants.SINGLE_SPACE_CHARACTER).append("DEVICE MODEL : ")
@@ -453,9 +442,9 @@ public class CrashAnalysisHandler implements Runnable {
 		.append("DATE CRASHED : ").append(eachCrash.getDateCrashed()).append(AutomaticsConstants.NEW_LINE)
 		.append(AutomaticsConstants.HYPHEN).append(AutomaticsConstants.SINGLE_SPACE_CHARACTER)
 		.append("FAILURE REASON : ").append(eachCrash.getFailedReason()).append(AutomaticsConstants.NEW_LINE)
-		.append(AutomaticsConstants.HYPHEN).append(AutomaticsConstants.SINGLE_SPACE_CHARACTER)
-		.append("FILE : ").append(eachCrash.getFilename()).append(AutomaticsConstants.NEW_LINE)
-		.append(AutomaticsConstants.HYPHEN).append(AutomaticsConstants.SINGLE_SPACE_CHARACTER);
+		.append(AutomaticsConstants.HYPHEN).append(AutomaticsConstants.SINGLE_SPACE_CHARACTER).append("FILE : ")
+		.append(eachCrash.getFilename()).append(AutomaticsConstants.NEW_LINE).append(AutomaticsConstants.HYPHEN)
+		.append(AutomaticsConstants.SINGLE_SPACE_CHARACTER);
 
 	if (CrashUtils.getCrashType(eachCrash).equals(CrashType.MINIDUMP)
 		&& CommonMethods.isNotNull(eachCrash.getStackTrace())) {
@@ -490,7 +479,7 @@ public class CrashAnalysisHandler implements Runnable {
      */
     private String getTestStepOfCrash(CrashDetails crashdetails) {
 	String stepNumber = "A STEP WHICH COULD NOT BE DETERMINED";
-	crashAnalysisLogger.info(crashdetails.getDateCrashed());
+	crashAnalysisLogger.info(crashdetails.getDateCrashed().toString());
 	// Fri May 17 14:10:44 UTC 2019 --> Sample format
 	String testLogFormat = "yyyy-MM-dd hh:mm:ss,SSS"; // 2019-08-08 07:00:19,029
 	List<String> executionsteps = fetchStepExecutionTimeFromLogs();
@@ -629,8 +618,8 @@ public class CrashAnalysisHandler implements Runnable {
 	    IssueCreateTicketRequest request = new IssueCreateTicketRequest(IssueCreationRequestor.CRASH_ANALYSIS);
 	    request.issueDetails
 		    .setIssueSummary("[MISSING CRASH][AUTO][CRASH_PORTAL]Crash obtained during test execution");
-	    request.issueDetails.setIssueDescription("Observed crash in box logs during test execution of "
-		    + testCaseId + " , but was unable to fetch its details from crash portal.\n JOB URL : "
+	    request.issueDetails.setIssueDescription("Observed crash in box logs during test execution of " + testCaseId
+		    + " , but was unable to fetch its details from crash portal.\n JOB URL : "
 		    + System.getProperty("JOB_URL") + System.getProperty("BUILD_NUMBER") + "\nImagename : "
 		    + device.getFirmwareVersion());
 	    request.issueDetails.setLabelsList(getLabelList(null));
@@ -672,12 +661,8 @@ public class CrashAnalysisHandler implements Runnable {
 		+ AutomaticsConstants.PATH_SEPARATOR + device.getModel() + AutomaticsConstants.HYPHEN
 		+ AutomaticsUtils.getCleanMac(device.getHostMacAddress()) + ReportsConstants.LOG_EXTN;
 
-	String commandToExecute = "grep -ih \"^\\[INFO.*"
-		+ testCaseId
-		+ " : "
-		+ AutomaticsUtils.getCleanMac(device.getHostMacAddress())
-		+ ".*step Number :.*\" "
-		+ logSaveLocation
+	String commandToExecute = "grep -ih \"^\\[INFO.*" + testCaseId + " : "
+		+ AutomaticsUtils.getCleanMac(device.getHostMacAddress()) + ".*step Number :.*\" " + logSaveLocation
 		+ " |sed -r \"s/\\[INFO\\].([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}).*step Number : (s[0-9]\\.{0,1}[0-9]*).*/\\1=\\2/i\"";
 	crashAnalysisLogger.debug("Executing command in server =" + commandToExecute);
 	String response = CommonMethods.executeCommandInExecutionServer(commandToExecute);

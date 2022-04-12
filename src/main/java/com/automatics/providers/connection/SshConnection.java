@@ -33,7 +33,6 @@ import com.automatics.providers.connection.auth.CredentialFactory;
 import com.automatics.providers.connection.auth.ICrypto;
 import com.automatics.utils.BeanUtils;
 import com.automatics.utils.CommonMethods;
-import com.automatics.utils.ExpectImplementationUtils;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
@@ -946,53 +945,9 @@ public class SshConnection implements Connection {
      */
     public String send(String command, String expectStr, String[] options)
 	    throws IOException, InterruptedException, JSchException {
+	String result = "";
+	return result;
 
-	StringBuffer responseBuilder = null;
-	Channel channel = session.openChannel("shell");
-
-	String[] arrExpectStr = null;
-	int expectReturn = 0;
-	// Added to accommodate if multiple values to be entered against
-	// multiple exepect strings.
-	if (expectStr.contains(AutomaticsConstants.COMMA)) {
-	    LOGGER.debug("Multiple Expect Strings to be validated");
-	    arrExpectStr = expectStr.split(AutomaticsConstants.COMMA);
-	    expectStr = arrExpectStr[0];
-	}
-
-	ExpectImplementationUtils expectImpl = new ExpectImplementationUtils(channel.getInputStream(),
-		channel.getOutputStream());
-	channel.connect();
-	expectImpl.expectPattern("$");
-	LOGGER.debug("Test Expect Command Prompt Validation: " + expectImpl.getMatch());
-
-	expectImpl.send(command);
-	expectImpl.expectPattern(expectStr);
-	LOGGER.info("Expect String = " + expectStr + ", Expect Match Result = " + expectImpl.getMatch());
-	if (expectImpl.isSuccess()) {
-	    responseBuilder = new StringBuffer();
-	    for (int iCounter = 0; iCounter < options.length; iCounter++) {
-		expectImpl.send(options[iCounter]);
-		expectReturn = expectImpl.expectPattern(expectStr);
-		// Added to accommodate if multiple values to be entered against
-		// multiple expect strings.
-		if (expectReturn < 0 && arrExpectStr != null) {
-		    for (int jCounter = 1; jCounter < arrExpectStr.length; jCounter++) {
-			expectReturn = expectImpl.expectPattern(arrExpectStr[jCounter]);
-			if (expectReturn >= 0) {
-			    break;
-			}
-		    } // End For Loop jCounter
-		} // End if expectReturn < 0 && arrExpectStr != null
-		responseBuilder.append(expectImpl.getBefore());
-		LOGGER.debug("Expect Result = " + expectImpl.isSuccess());
-		LOGGER.debug("Before Expect = " + expectImpl.getBefore());
-		LOGGER.debug("Expect Match = " + expectImpl.getMatch());
-	    } // End For Loop iCounter
-	} // End if (expectImpl.isSuccess)
-
-	LOGGER.info("Expect Response = " + responseBuilder.toString());
-	return responseBuilder.toString();
     }
 
     public String getPrivateKeyLocation() {

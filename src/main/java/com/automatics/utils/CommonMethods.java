@@ -4795,7 +4795,7 @@ public class CommonMethods {
 	    request.setMac(dut.getHostMacAddress());
 	    List<String> requestedPropsName = new ArrayList<String>();
 	    requestedPropsName.add(AutomaticsConstants.DEVICE_PROP_ESTB_IP_ADDRESS);
-	    request.setRequestedPropsName(requestedPropsName);
+	    request.setDeviceProps(requestedPropsName);
 
 	    DeviceManager deviceManager = DeviceManager.getInstance();
 	    Map<String, String> response = deviceManager.getDeviceProperties(request);

@@ -19,24 +19,25 @@ package com.automatics.providers.impl;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
 import org.apache.http.HttpStatus;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.automatics.constants.AutomaticsConstants;
 import com.automatics.providers.objects.DeviceAccountRequest;
 import com.automatics.providers.objects.DeviceAccountResponse;
 import com.automatics.providers.objects.DeviceAllocationResponse;
 import com.automatics.providers.objects.DevicePropsRequest;
-import com.automatics.providers.objects.DevicePropsResponse;
 import com.automatics.providers.objects.DeviceRequest;
 import com.automatics.providers.objects.DeviceResponse;
 import com.automatics.providers.objects.DeviceUpdateDurationRequest;
@@ -147,12 +148,12 @@ public class DeviceManagerRestImpl implements DeviceProvider {
     @Override
     public Map<String, String> getDeviceProperties(DevicePropsRequest request) {
 	Map<String, String> result = new HashMap<String, String>();
-	DevicePropsResponse deviceProps = null;
+
 	ResteasyClient client = getClient();
 	String url = BASE_URL + GET_DEVICE_PROPS_PATH;
 	ResteasyWebTarget target = client.target(url);
 	LOGGER.info("Fetching device props for {} for props {} Url Path: {}", request.getMac(),
-		request.getRequestedPropsName(), url);
+		request.getDeviceProps(), url);
 	Response response = target.request().post(Entity.entity(request, "application/json"));
 	if (null != response) {
 	    if (response.getStatus() == HttpStatus.SC_OK) {
@@ -160,16 +161,22 @@ public class DeviceManagerRestImpl implements DeviceProvider {
 		LOGGER.info("Response: {}", respData);
 
 		if (null != respData && !respData.isEmpty()) {
-		    ObjectMapper mapper = new ObjectMapper();
+
 		    try {
-			deviceProps = mapper.readValue(respData, DevicePropsResponse.class);
-			result.put(AutomaticsConstants.DEVICE_PROP_HEAD_END, deviceProps.getHeadEnd());
-			result.put(AutomaticsConstants.DEVICE_PROP_ECM_IP_ADDRESS, deviceProps.getEcmIpAddress());
-			result.put(AutomaticsConstants.DEVICE_PROP_ESTB_IP_ADDRESS, deviceProps.getEstbIpAddress());
-			result.put(AutomaticsConstants.DEVICE_PROP_FIRMWARE_VERSION, deviceProps.getFirmwarename());
-		    } catch (JsonProcessingException e) {
-			LOGGER.error("Exception parsing json properties for device {}", request.getMac(), e);
-		    } catch (IOException e) {
+			JSONObject jsonObj = new JSONObject(respData);
+
+			List<String> propNames = request.getDeviceProps();
+			if (null != propNames) {
+			    for (String propName : propNames) {
+				LOGGER.info("Getting value for property: {}", propName);
+				if (jsonObj.has(propName)) {
+				    LOGGER.info("Value: {}", jsonObj.getString(propName));
+				    result.put(propName, jsonObj.getString(propName));
+				}
+			    }
+			}
+
+		    } catch (JSONException e) {
 			LOGGER.error("Exception parsing json properties for device {}", request.getMac(), e);
 		    }
 		}
@@ -177,6 +184,8 @@ public class DeviceManagerRestImpl implements DeviceProvider {
 		LOGGER.info("Failed to get device properties {} : Status: {}", request.getMac(), response.getStatus());
 	    }
 
+	} else {
+	    LOGGER.error("Device Props response is null.");
 	}
 	return result;
     }

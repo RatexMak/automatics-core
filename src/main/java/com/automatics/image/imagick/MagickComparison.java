@@ -29,16 +29,17 @@ import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
-import com.automatics.error.GeneralError;
-import com.automatics.exceptions.FailedTransitionException;
-
-import org.apache.log4j.Logger;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
 import org.im4java.core.ImageCommand;
 import org.im4java.core.Info;
 import org.im4java.core.InfoException;
 import org.im4java.core.Stream2BufferedImage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.automatics.error.GeneralError;
+import com.automatics.exceptions.FailedTransitionException;
 
 /**
  * Class which holds the ImageMagick comparison utilities for crop, compare, standard deviation, color space conversion
@@ -68,7 +69,7 @@ public class MagickComparison {
     private static final double RMSE_ERROR_PERCENTAGE = 0.150;
 
     /** <code>Log4j</code> logger for {@link MagickComparison} class. */
-    private static final Logger LOGGER = Logger.getLogger(MagickComparison.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MagickComparison.class);
 
     /** NCC comparison exit code pattern. */
     private static final Pattern NCC_PATTERN = Pattern

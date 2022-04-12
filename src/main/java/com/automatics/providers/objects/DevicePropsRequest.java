@@ -19,8 +19,6 @@ package com.automatics.providers.objects;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Request for DeviceConfig Properties
  * 
@@ -30,9 +28,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DevicePropsRequest {
 
     private String mac;
-    
-    @JsonProperty("deviceProps")
-    private List<String> requestedPropsName;
+
+    private List<String> deviceProps;
+
+    public List<String> getDeviceProps() {
+	return deviceProps;
+    }
+
+    public void setDeviceProps(List<String> deviceProps) {
+	this.deviceProps = deviceProps;
+    }
 
     /**
      * @return the mac
@@ -47,21 +52,6 @@ public class DevicePropsRequest {
      */
     public void setMac(String mac) {
 	this.mac = mac;
-    }
-
-    /**
-     * @return the requestedPropsName
-     */
-    public List<String> getRequestedPropsName() {
-	return requestedPropsName;
-    }
-
-    /**
-     * @param requestedPropsName
-     *            the requestedPropsName to set
-     */
-    public void setRequestedPropsName(List<String> requestedPropsName) {
-	this.requestedPropsName = requestedPropsName;
     }
 
 }

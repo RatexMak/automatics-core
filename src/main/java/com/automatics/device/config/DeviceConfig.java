@@ -26,22 +26,23 @@ public class DeviceConfig {
     public String[] groups;
     public String category;
     public String accessibleMechanism;
-    public boolean accessbilityCheck;    
+    public boolean accessbilityCheck;
     private int waitTimeAfterHardReboot;
-    public String outputPath;
+    public String outputPath;  
 
     /**
      * @return the outputPath
      */
     public String getOutputPath() {
-        return outputPath;
+	return outputPath;
     }
 
     /**
-     * @param outputPath the outputPath to set
+     * @param outputPath
+     *            the outputPath to set
      */
     public void setOutputPath(String outputPath) {
-        this.outputPath = outputPath;
+	this.outputPath = outputPath;
     }
 
     /**
@@ -85,11 +86,11 @@ public class DeviceConfig {
     }
 
     public String getInventoryModelName() {
-        return inventoryModelName;
+	return inventoryModelName;
     }
 
     public void setInventoryModelName(String inventoryModelName) {
-        this.inventoryModelName = inventoryModelName;
+	this.inventoryModelName = inventoryModelName;
     }
 
     public String[] getGroups() {
@@ -122,5 +123,5 @@ public class DeviceConfig {
 
     public void setAccessbilityCheck(boolean accessbilityCheck) {
 	this.accessbilityCheck = accessbilityCheck;
-    }
+    }   
 }

@@ -77,4 +77,18 @@ public interface ConnectionTraceProvider extends TraceProvider {
      */
     String getLastTraceLine();
 
+    /**
+     * Get Trace file name
+     * 
+     * @return trace file name
+     */
+    public String getTraceFileName();
+
+    /**
+     * Set trace file
+     * 
+     * @param traceFileName
+     */
+    public void setTraceFileName(String traceFileName);
+
 }

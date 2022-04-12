@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+	<appender name="stdOutAppender"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+		<encoder>
+			<pattern>[%p][%d][%X{device_mac_address}[%t] - %m%n</pattern>
+		</encoder>
+	</appender>
+	<appender name="deviceSiftingAppender"
+		class="ch.qos.logback.classic.sift.SiftingAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+		<discriminator>
+			<key>log_file_name</key>
+			<defaultValue>test-suite</defaultValue>
+		</discriminator>
+		<sift>
+			<appender name="FILE-${log_file_name}"
+				class="ch.qos.logback.core.FileAppender">
+				<file>target/logs/${log_file_name}.log</file>
+				<append>false</append>
+				<encoder
+					class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+					<pattern>[%p][%d][%X{job_manager_id}][%X{device_mac_address}|%t|%C:%M:%L] %m%n</pattern>
+				</encoder>
+			</appender>
+		</sift>
+	</appender>
+	<appender name="TraceLogger"
+		class="ch.qos.logback.classic.sift.SiftingAppender">
+		<discriminator>
+			<key>trace_log_file_name</key>
+			<defaultValue>settoptrace.log</defaultValue>
+		</discriminator>
+		<sift>
+			<appender name="FILE-${trace_log_file_name}"
+				class="ch.qos.logback.core.FileAppender">
+				<file>target/settoptrace/${trace_log_file_name}</file>
+				<append>false</append>
+				<encoder
+					class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+					<pattern>%d %m%n</pattern>
+				</encoder>
+			</appender>
+		</sift>
+	</appender>
+	<appender name="SerialTrace"
+		class="ch.qos.logback.classic.sift.SiftingAppender">
+		<discriminator>
+			<key>traceFilePath</key>
+			<defaultValue>settoptrace.log</defaultValue>
+		</discriminator>
+		<sift>
+			<appender name="FILE-${trace_log_file_name}" class="ch.qos.logback.core.FileAppender">
+				<file>target/settoptrace/${traceFilePath}</file>
+				<append>false</append>
+				<encoder
+					class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+					<pattern>%d %m%n</pattern>
+				</encoder>
+			</appender>
+		</sift>
+	</appender>	
+	<appender name="crash-analysis" class="ch.qos.logback.classic.sift.SiftingAppender">		
+		<discriminator>
+			<key>crashAnalysislogPath</key>
+			<defaultValue>target/logs/</defaultValue>
+		</discriminator>
+		<sift>
+			<appender name="FILE-${trace_log_file_name}"
+				class="ch.qos.logback.core.FileAppender">
+				<file>${crashAnalysislogPath}/crash-analysis.log</file>
+				<append>false</append>
+				<encoder
+					class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+					<pattern>[%p][%d][%X{device_mac_address}|%t|%C:%M:%L] %m%n</pattern>
+				</encoder>
+			</appender>
+		</sift> 
+	</appender>
+	<logger name="org.apache.http" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="deviceSiftingAppender" />
+	</logger>
+	<!--'additivity' flag is important! Without it logback will double-log log 
+		messages -->
+	<logger name="ConnectionTrace" level="TRACE"
+		additivity="false">
+		<appender-ref ref="TraceLogger" />
+	</logger>	
+	<logger name="SerialTrace" level="TRACE"
+		additivity="false">
+		<appender-ref ref="SerialTrace" />
+	</logger>
+	<logger name="crash-analysis" level="DEBUG"
+		additivity="false">
+		<appender-ref ref="crash-analysis" />
+	</logger>
+	<root>
+		<appender-ref ref="stdOutAppender" />
+		<appender-ref ref="deviceSiftingAppender" />
+	</root>
+</configuration>

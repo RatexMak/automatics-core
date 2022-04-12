@@ -74,7 +74,7 @@ public class WebSocketClient {
     /**
      * Trace logger object of dut for logging responses to trace
      */
-    private org.apache.log4j.Logger settopTraceLogger = null;
+    private Logger settopTraceLogger = null;
 
     /**
      * boolean attribute to enable/disable trace logging
@@ -268,5 +268,5 @@ public class WebSocketClient {
     public void error(Session session, Throwable t) {
 	LOGGER.error("<<<< Error during socket communication session >>>>");
 	LOGGER.error("<<<< " + t.toString() + " >>>>");
-    }    
+    }
 }

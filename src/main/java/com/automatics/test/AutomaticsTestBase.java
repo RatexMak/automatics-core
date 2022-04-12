@@ -18,8 +18,7 @@
 
 package com.automatics.test;
 
-import static com.automatics.constants.LoggingConstants.LOGGER_LOG_FILE_NAME_KEY;
-import static com.automatics.constants.LoggingConstants.LOGGER_STB_MAC_KEY;
+import com.automatics.constants.LoggingConstants;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -69,6 +68,7 @@ import org.testng.annotations.Test;
 
 import com.automatics.annotations.TestDetails;
 import com.automatics.constants.AutomaticsConstants;
+import com.automatics.constants.LoggingConstants;
 import com.automatics.constants.ReportsConstants;
 import com.automatics.constants.TraceProviderConstants;
 import com.automatics.core.SupportedModelHandler;
@@ -91,6 +91,7 @@ import com.automatics.executor.RetryAnalyzer;
 import com.automatics.logger.HtmlLogGenerator;
 import com.automatics.manager.device.DeviceManager;
 import com.automatics.providers.TestInitilizationProvider;
+import com.automatics.providers.trace.ConnectionTraceProvider;
 import com.automatics.providers.trace.TraceProvider;
 import com.automatics.rack.RackInitializer;
 import com.automatics.restclient.RestClient;
@@ -366,8 +367,8 @@ public class AutomaticsTestBase {
 
 	stepStatus = "BEFORE_METHOD";
 	Device device = getTestDevice(data);
-	LOGGER.info(">>>[BEFORE_METHOD]: Perform before method initialization {}", device.getHostMacAddress());
 	if (null != device) {
+	    LOGGER.info(">>>[BEFORE_METHOD]: Perform before method initialization {}", device.getHostMacAddress());
 	    TestDetails testDetailsAnnotation = itestResult.getMethod().getConstructorOrMethod().getMethod()
 		    .getAnnotation(TestDetails.class);
 	    String testCaseTobeExecuted = testDetailsAnnotation.testUID();
@@ -390,8 +391,16 @@ public class AutomaticsTestBase {
 	    captureAutomationScriptExecutionTime(device, testCaseTobeExecuted, true);
 	    device.setTestSessionDetails(testSessionDetails);
 
-	    MDC.put(LOGGER_LOG_FILE_NAME_KEY, CommonMethods.getSettopDetails(device));
-	    MDC.put(LOGGER_STB_MAC_KEY, device.getHostMacAddress());
+	    MDC.put(LoggingConstants.LOGGER_LOG_FILE_NAME_KEY, CommonMethods.getSettopDetails(device));
+	    MDC.put(LoggingConstants.LOGGER_DEVICE_MAC_KEY, device.getHostMacAddress());
+
+	    TraceProvider provider = device.getTrace();
+	    if (null != provider && provider instanceof ConnectionTraceProvider
+		    && CommonMethods.isNotNull(((ConnectionTraceProvider) provider).getTraceFileName())) {
+		MDC.put(LoggingConstants.LOGGER_TRACE_FILE_KEY,
+			((ConnectionTraceProvider) provider).getTraceFileName());
+		MDC.put(LoggingConstants.LOGGER_JMD_ID_KEY, System.getProperty("JMD_ID"));
+	    }
 
 	    TestEnvData testEnvData = new TestEnvData();
 	    // Perform partner specific before method initialization
@@ -408,8 +417,10 @@ public class AutomaticsTestBase {
 	    // Clear trace buffering
 	    clearDeviceTraceBuffer(device);
 	} else {
-	    MDC.remove(LOGGER_LOG_FILE_NAME_KEY);
-	    MDC.remove(LOGGER_STB_MAC_KEY);
+	    MDC.remove(LoggingConstants.LOGGER_LOG_FILE_NAME_KEY);
+	    MDC.remove(LoggingConstants.LOGGER_DEVICE_MAC_KEY);
+	    MDC.remove(LoggingConstants.LOGGER_TRACE_FILE_KEY);
+	    MDC.remove(LoggingConstants.LOGGER_JMD_ID_KEY);
 	}
     }
 

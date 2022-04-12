@@ -28,6 +28,18 @@ public class LoggingConstants {
     /** SLF4j key value for log file. */
     public static final String LOGGER_LOG_FILE_NAME_KEY = "log_file_name";
 
-    /** SLF4j key value for STB MAC. */
-    public static final String LOGGER_STB_MAC_KEY = "stb_mac_address";
+    /** SLF4j key value for Device MAC. */
+    public static final String LOGGER_DEVICE_MAC_KEY = "device_mac_address";
+
+    /** SLF4j key value for trace log file. */
+    public static final String LOGGER_TRACE_FILE_KEY = "trace_log_file_name";
+
+    /** SLF4j key value for Job_manager_id. */
+    public static final String LOGGER_JMD_ID_KEY = "job_manager_id";
+
+    /** SLF4j key value for TRACE LOGGER. */
+    public static final String SERIAL_LOGGER_TRACE_FILE_PATH = "traceFilePath";
+
+    /** SLF4j key value for Crash LOGGER. */
+    public static final String CRASH_ANALYSIS_FILE_PATH = "crashAnalysisLogPath";
 }
