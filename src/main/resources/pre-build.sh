@@ -30,7 +30,7 @@ done
 ##Strings to be searched and replaced
 findGroupId=com.automatics.apps
 findArtifactId=automatics-core
-findVersion=2.3.0
+findVersion=2.4.0-SNAPSHOT
 
 echo "Replacing with <groupId>$groupId</groupId><artifactId>$artifactId</artifactId><version>$version</version>"
 

@@ -80,6 +80,7 @@ import com.automatics.enums.ExecutionMode;
 import com.automatics.enums.ExecutionStatus;
 import com.automatics.enums.RackType;
 import com.automatics.enums.RemoteControlType;
+import com.automatics.enums.TR181AccessMethods;
 import com.automatics.error.GeneralError;
 import com.automatics.exceptions.FailedTransitionException;
 import com.automatics.exceptions.TestException;
@@ -411,6 +412,25 @@ public class AutomaticsTapApi {
 
 	return propertyValue;
     }
+    
+    /**
+     * Uses the partial key by appending it with the device platform to get the property value
+     *
+     * @param device
+     *            The Dut instance.
+     * @param partialPropsKey
+     *            Partial property key which will be appended with the device platform to form the complete
+     *            key.(Example:- "cdl.unsigned.image.name." it get resolved to "cdl.unsigned.image.name.{manufacturer}_{model}")
+     *
+     * @return Device specific property value
+     */
+    public static String getAutomaticsPropsValueByResolvingPlatform(Dut device, String partialPropsKey) {
+	String propertyToCheck = partialPropsKey + device.getManufacturer().toLowerCase() + "_"
+		+ device.getModel().toLowerCase();
+	LOGGER.info("Platform specific resolved property key is : " + propertyToCheck);
+	return AutomaticsTapApi.getSTBPropsValue(propertyToCheck);
+    }
+
 
     /**
      * Method to retrieve eSTB MAC address
@@ -6290,5 +6310,160 @@ public class AutomaticsTapApi {
 	LOGGER.info("TR69 Response : " + tr69ParamResponse);
 
 	return tr69ParamResponse;
+    }
+
+    /**
+     * 
+     * Method to get TR181 parameter values.
+     * 
+     * @param dut
+     * @param parameterList
+     * @param tr181AccessMethod
+     * @return
+     */
+    public List<Parameter> getTR181ParameterValues(Dut dut, List<String> parameterList,
+	    TR181AccessMethods tr181AccessMethod) {
+	List<Parameter> response = null;
+	String resp = null;
+	if (null != parameterList && !parameterList.isEmpty()) {
+	    if (tr181AccessMethod == null) {
+		tr181AccessMethod = TR181AccessMethods.valueOf(
+			AutomaticsPropertyUtility.getProperty(AutomaticsConstants.DEFAULT_TR181_ACCESS_METHOD));
+	    }
+	    if (TR181AccessMethods.WEBPA == tr181AccessMethod) {
+		response = getTR181ParameterValuesUsingWebPA(dut, parameterList);
+	    } else if (TR181AccessMethods.TR69 == tr181AccessMethod) {
+		String[] paramArray = null;
+		List<String> tr69Response = getTr69ParameterValue(dut, parameterList.toArray(paramArray));
+		response = convertListStringtoParams(tr69Response);
+	    } else if (TR181AccessMethods.TR181 == tr181AccessMethod) {
+		if (null != deviceConnectionProvider) {
+		    resp = deviceConnectionProvider.execute((Device) dut, parameterList);
+		    LOGGER.info("TR181 get parameter value : " + resp);
+		    response = convertListStringtoParams(Arrays.asList(resp));
+		} else {
+		    LOGGER.error("DeviceConnectionProvider not configured. Failed to get TR181 parameters");
+		}
+	    } else {
+		LOGGER.error("NO valid device data model received !! GET TR-181 parameter values failed");
+	    }
+	} else {
+	    LOGGER.error("TR181 parameter is null.");
+	}
+	LOGGER.info("TR181 Response : " + response);
+
+	return response;
+    }
+
+    /**
+     * Method to convert List of string to list of parameter
+     * 
+     * @param paramValues
+     * @return
+     */
+    private List<Parameter> convertListStringtoParams(List<String> paramValues) {
+	List<Parameter> response = null;
+	if (paramValues != null) {
+	    response = new ArrayList<Parameter>();
+	    for (String value : paramValues) {
+		Parameter param = new Parameter();
+		param.setParamValue(value);
+		response.add(param);
+	    }
+	}
+	return response;
+    }
+
+    /**
+     * 
+     * Method to set TR181 parameter values.
+     * 
+     * @param dut
+     * @param parameterArray
+     * @param tr181AccessMethod
+     * @return
+     */
+    public String setTR181ParameterValues(Dut dut, List<Parameter> parameterArray,
+	    TR181AccessMethods tr181AccessMethod) {
+	String response = null;
+	if (tr181AccessMethod == null) {
+	    tr181AccessMethod = TR181AccessMethods
+		    .valueOf(AutomaticsPropertyUtility.getProperty(AutomaticsConstants.DEFAULT_TR181_ACCESS_METHOD));
+	}
+	if (tr181AccessMethod != null && TR181AccessMethods.WEBPA == tr181AccessMethod) {
+	    List<WebPaParameter> webpaParams = new ArrayList<WebPaParameter>();
+	    if (parameterArray != null) {
+		for (Parameter params : parameterArray) {
+		    WebPaParameter webPaParameter = new WebPaParameter();
+		    webPaParameter.setName(params.getParamName());
+		    webPaParameter.setValue(params.getParamValue());
+		    webpaParams.add(webPaParameter);
+		}
+	    }
+	    response = setTR69ParameterValuesUsingWebPA(dut, webpaParams);
+	} else if (tr181AccessMethod != null && TR181AccessMethods.TR69 == tr181AccessMethod) {
+	    response = setTR69ParameterValues(dut, parameterArray);
+	} else if (tr181AccessMethod != null && TR181AccessMethods.TR181 == tr181AccessMethod) {
+	    if (null != deviceConnectionProvider) {
+		List<String> commands = new ArrayList<String>();
+		if (parameterArray != null) {
+		    for (Parameter parameter : parameterArray) {
+			commands.add(parameter.getParamValue());
+		    }
+		}
+		response = deviceConnectionProvider.execute((Device) dut, commands);
+		LOGGER.info("TR181 set parameter response : " + response);
+	    } else {
+		LOGGER.error("DeviceConnectionProvider not configured. Failed to set TR181 commands");
+	    }
+	} else {
+	    LOGGER.error("NO valid Device data model received !! SET TR-181 parameter values failed");
+	}
+	LOGGER.info("TR181 Response : " + response);
+
+	return response;
+    }
+
+    /**
+     * Get the TR-181 parameter values using WebPA.
+     * 
+     * @param dut
+     *            The dut to be used.
+     * @param parameters
+     *            TR-181 parameter
+     * @return The value corresponding to TR-181 parameter
+     */
+    private List<Parameter> getTR181ParameterValuesUsingWebPA(Dut dut, List<String> parameterList) {
+	List<Parameter> tr181ParamResponse = new ArrayList<Parameter>();
+
+	LOGGER.info("About to get values for TR181 params {} via WebPa", parameterList);
+
+	if (null != parameterList && !parameterList.isEmpty()) {
+
+	    String[] paramArray = null;
+
+	    WebPaServerResponse serverResponse = WebPaConnectionHandler.get().getWebPaParamValue(dut,
+		    parameterList.toArray(paramArray));
+
+	    if (null != serverResponse) {
+		List<WebPaParameter> params = serverResponse.getParams();
+		if (null != params && !params.isEmpty()) {
+		    for (WebPaParameter webPaParameter : params) {
+			Parameter param = new Parameter();
+			param.setParamName(webPaParameter.getName());
+			param.setParamValue(webPaParameter.getValue());
+			tr181ParamResponse.add(param);
+		    }
+		}
+	    } else {
+		LOGGER.info("WebPA Response is null.");
+	    }
+	} else {
+	    LOGGER.error("TR181 parameter list is null");
+	}
+
+	LOGGER.info("TR181 Response via WebPa: {}", tr181ParamResponse);
+
+	return tr181ParamResponse;
     }
 }

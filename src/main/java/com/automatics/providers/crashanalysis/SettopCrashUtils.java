@@ -18,6 +18,7 @@
 package com.automatics.providers.crashanalysis;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -27,9 +28,9 @@ import org.slf4j.LoggerFactory;
 
 import com.automatics.constants.AutomaticsConstants;
 import com.automatics.constants.CrashConstants;
-import com.automatics.constants.ReportsConstants;
 import com.automatics.core.DeviceProcess;
 import com.automatics.core.SupportedModelHandler;
+import com.automatics.dataobjects.StbDetailsDO.StbDetails;
 import com.automatics.device.Dut;
 import com.automatics.enums.CrashFileGenerationDelay;
 import com.automatics.enums.ProcessRestartOption;
@@ -48,6 +49,9 @@ import com.automatics.utils.CommonMethods;
  *
  */
 public class SettopCrashUtils {
+
+    /** Maximum length of the process name in crash details */
+    private static final int MAXIMUM_LENGTH_OF_PROCESS_NAME = 15;
 
     /** Text to retrieve crash file name from core_log.txt */
     public static final String TEXT_TO_RETRIEVE_CRASH_FILE_NAME_FROM_LOG_GILE = "Success Compressing the files,";
@@ -87,6 +91,9 @@ public class SettopCrashUtils {
 
     /** Temporary core log file path in RDKV */
     public static final String CORE_LOG_FILE_TEMP_PATH_IN_RDKV = PREVIOUS_LOG_FOLDER_PATH + "/core_log.txt";
+    
+    /** Default interface to retrieve estb mac */
+    private static final String DEFAULT_INTERFACE_NAME_TO_RETRIEVE_ESTB_MAC_ADDRESS = "erouter0";
 
     private CrashAnalysisProvider crashAnalysisProvider;
 
@@ -311,7 +318,8 @@ public class SettopCrashUtils {
      *            file name to verify
      * @return crash verification status
      */
-    public boolean verifyCrashFileInCrashPortal(AutomaticsTapApi tapApi, Dut dut, CrashType crashType, String fileName) {
+    public boolean verifyCrashFileInCrashPortal(AutomaticsTapApi tapApi, Dut dut, CrashType crashType,
+	    String fileName) {
 
 	LOGGER.debug("STARTING METHOD: verifyCrashFileInCrashPortal()");
 
@@ -443,7 +451,7 @@ public class SettopCrashUtils {
 	    filePath = CrashConstants.LOG_FILE_FOR_CRASHES_RDKV;
 	}
 	return filePath;
-    }   
+    }
 
     /**
      * Method to restartProcess in ARM Console
@@ -757,11 +765,11 @@ public class SettopCrashUtils {
 		    if (CommonMethods.isNull(value)) {
 			String alternativePatternsForDump = AutomaticsConstants.EMPTY_STRING;
 			if (crashType == CrashType.MINIDUMP) {
-			    alternativePatternsForDump = AutomaticsPropertyUtility.getProperty(
-				    "alternative.minidump.filename.matcher", "");
+			    alternativePatternsForDump = AutomaticsPropertyUtility
+				    .getProperty("alternative.minidump.filename.matcher", "");
 			} else {
-			    alternativePatternsForDump = AutomaticsPropertyUtility.getProperty(
-				    "alternative.coredump.filename.matcher", "");
+			    alternativePatternsForDump = AutomaticsPropertyUtility
+				    .getProperty("alternative.coredump.filename.matcher", "");
 			}
 			List<String> listOfPatterns = CommonMethods.splitStringByDelimitor(alternativePatternsForDump,
 				AutomaticsConstants.COMMA);
@@ -778,8 +786,8 @@ public class SettopCrashUtils {
 
 		// retrieve crash file upload string
 		if (!crashDetails.containsKey(PROPERTY_KEY_CRASH_FILE_UPLOAD_SUCCESS)) {
-		    List<String> listOfPatterns = crashAnalysisProvider.getRegexForSuccessfulCrashUpload(dut,
-			    crashType, stbProcess);
+		    List<String> listOfPatterns = crashAnalysisProvider.getRegexForSuccessfulCrashUpload(dut, crashType,
+			    stbProcess);
 		    for (String eachPattern : listOfPatterns) {
 			value = CommonMethods.caseInsensitivePatternFinder(response, eachPattern);
 			if (CommonMethods.isNotNull(value)) {
@@ -917,4 +925,287 @@ public class SettopCrashUtils {
 	}
 	return true;
     }
+
+    /**
+     * Method to validate each properties of the crash details
+     * 
+     * @param tapApi
+     *            instance of {@link AutomaticsTapApi}
+     * @param dut
+     *            instance of {@link Dut}
+     * @param crashDetails
+     *            Crash details
+     * @param stbProcess
+     *            STB Process details
+     * @param fileName
+     *            crash file name
+     * @param executeInAtomConsole
+     *            true if it required to execute in atom console
+     * @return error message if any validation failure else null
+     */
+    public String verifyIndividualCrashDetails(AutomaticsTapApi tapApi, Dut dut, CrashDetails crashDetails,
+	    DeviceProcess deviceProcess, String fileName, boolean executeInAtomConsole) {
+
+	// variable to hold error message
+	String errorMessage = null;
+	// Variable to store the validation error details
+	StringBuilder messages = new StringBuilder();
+
+	/* Verify 'app' details in crash details */
+	errorMessage = verifyAppNameInCrashDetails(deviceProcess, crashDetails);
+	if (CommonMethods.isNotNull(errorMessage)) {
+	    messages.append(errorMessage);
+	}
+
+	/* Verify 'deviceModel' details in crash details */
+	// Reworked as part of RTAUTO-5702
+	errorMessage = validateDeviceModelInCrashDetails("deviceModel", dut, crashDetails.getDeviceModel(),
+		getDeviceModelForCrashDetailsVerfication(dut, tapApi));
+
+	if (CommonMethods.isNotNull(errorMessage)) {
+	    messages.append(errorMessage);
+	}
+
+	/* Verify 'deviceType' details in crash details */
+	// Not available in backtrace.Hence commenting out
+	/*
+	 * errorMessage = validateCrashDetails("deviceType", crashDetails.getDeviceType(),
+	 * getDeviceTypeForCrashDetailsVerfication(dut, tapApi)); if (CommonMethods.isNotNull(errorMessage)) {
+	 * messages.append(errorMessage); }
+	 */
+
+	/* Verify 'filename' details in crash details */
+	errorMessage = validateCrashDetails("filename", crashDetails.getFilename(), fileName);
+	if (CommonMethods.isNotNull(errorMessage)) {
+	    messages.append(errorMessage);
+	}
+
+	/* Verify 'mac' details in crash details */
+	errorMessage = validateCrashDetails("mac", crashDetails.getMac(),
+		getSettopMacAddressForCrashDetailsValidation(dut, tapApi, executeInAtomConsole));
+	if (CommonMethods.isNotNull(errorMessage)) {
+	    messages.append(errorMessage);
+	}
+
+	/* Verify 'ver' details in crash details */
+	errorMessage = validateCrashDetails("ver", crashDetails.getVersion(), dut.getFirmwareVersion());
+	if (CommonMethods.isNotNull(errorMessage)) {
+	    messages.append(errorMessage);
+	}
+
+	/* Verify 'failedReason' details in crash details */
+	if (CommonMethods.isNull(crashDetails.getFailedReason())) {
+	    messages.append("'failedReason' is empty, ");
+	}
+
+	/* Verify 'dateCrashed' details in crash details */
+	if (crashDetails.getDateCrashed() != null) {
+	    if (!verifyDate(crashDetails.getDateCrashed())) {
+		messages.append("retrieved 'dateCrashed' value " + crashDetails.getDateCrashed()
+			+ " is very older than current date " + new Date() + ", ");
+	    }
+	} else {
+	    messages.append("Unable to retrieve the 'dateCrashed' from crash portal");
+	}
+
+	return messages.toString();
+    }
+
+    /**
+     * Method to verify App name from crash details
+     * 
+     * @param stbProcess
+     *            STB Process
+     * @param crashDetails
+     *            crash details
+     * @return error message during validation failure else null
+     */
+    private String verifyAppNameInCrashDetails(DeviceProcess deviceProcess, CrashDetails crashDetails) {
+	String processName = deviceProcess.getProcessName();
+	// truncating the process name
+	if (processName.length() > MAXIMUM_LENGTH_OF_PROCESS_NAME) {
+	    processName = processName.substring(0, MAXIMUM_LENGTH_OF_PROCESS_NAME);
+	}
+	return validateCrashDetails("app", crashDetails.getApp(), processName);
+    }
+
+    /**
+     * Method to validate the crash details property
+     * 
+     * @param crashProperty
+     *            crash property
+     * @param actual
+     *            actual value
+     * @param expected
+     *            expected value
+     * @return error message if validation failed
+     */
+    private String validateCrashDetails(String crashProperty, String actual, String expected) {
+
+	String errorMessage = null;
+
+	/* Verify crash property value in crash details */
+	if (CommonMethods.isNull(actual)) {
+	    errorMessage = "'" + crashProperty + "' is empty, ";
+	} else {
+	    if (!actual.equalsIgnoreCase(expected)) {
+		errorMessage = "Unable to verify the '" + crashProperty + "' details. ie, actual=" + actual
+			+ " & expected=" + expected + ", ";
+	    }
+	}
+	return errorMessage;
+    }
+
+    /**
+     * Method to retrieve the deviceModel from crash details verification
+     * 
+     * @param dut
+     *            instance of {@link Dut}
+     * @return deviceModel
+     */
+    public String getDeviceModelForCrashDetailsVerfication(Dut dut, AutomaticsTapApi tapApi) {
+	// RTAUTO-7235 Bringing back initial model number approach for RDKV devices
+
+	String modelName = null;
+	if (SupportedModelHandler.isRDKV(dut)) {
+	    // retrieve model number from the device.properties file
+	    modelName = CommonMethods.getPropertyFromDeviceProperties(dut, tapApi, "MODEL_NUM", "MODEL_NUM=(\\w+)");
+	    // retrieve model number from the version.txt file
+	    if (CommonMethods.isNull(modelName)) {
+		modelName = getDeviceModelFromVersionFile(dut, tapApi);
+	    }
+	    // retrieve model number from the MDS
+	    if (CommonMethods.isNull(modelName)) {
+		modelName = dut.getModel();
+		// The model name which configured in MDS is having one additional
+		// character at last
+		if (CommonMethods.isNotNull(modelName)) {
+		    modelName = modelName.substring(0, modelName.length() - 1);
+		}
+	    }
+	    LOGGER.info("Model Name Obtained: " + modelName);
+	    return modelName;
+
+	}
+
+	modelName = AutomaticsTapApi.getAutomaticsPropsValueByResolvingPlatform(dut, "crash.model.name.");
+	if (CommonMethods.isNull(modelName)) {
+	    modelName = dut.getModel();
+	}
+
+	LOGGER.info("Model Name Obtained: " + modelName);
+	return modelName;
+    }
+
+    /**
+     * Method to retrieve device model from version.txt file
+     * 
+     * @param dut
+     *            instance of {@link Dut}
+     * @param tapApi
+     *            instance of {@link AutomaticsTapApi}
+     * @return device model
+     */
+    public String getDeviceModelFromVersionFile(Dut dut, AutomaticsTapApi tapApi) {
+	String modelName = null;
+	String response = tapApi.executeCommandInSettopBox(dut, "head /version.txt | grep -i imagename");
+	if (CommonMethods.isNotNull(response)) {
+	    modelName = CommonMethods.patternFinder(response, "imagename:\\s*([A-Z0-9]+)_");
+	}
+	return modelName;
+    }
+
+    /**
+     * Method to validate the device model in crash details property
+     * 
+     * @param crashProperty
+     *            crash property
+     * @param actual
+     *            actual value
+     * @param expected
+     *            expected value
+     * @return error message if validation failed
+     */
+    private String validateDeviceModelInCrashDetails(String crashProperty, Dut dut, String actual, String expected) {
+
+	String errorMessage = null;
+
+	/* Verify crash property value in crash details */
+	if (CommonMethods.isNull(actual)) {
+	    errorMessage = "'" + crashProperty + "' is empty, ";
+	} else {
+	    errorMessage = (actual.contains(expected)) ? null
+		    : "Unable to verify the '" + crashProperty + "' details. ie, actual=" + actual + " & expected="
+			    + expected + ", ";
+	}
+	return errorMessage;
+    }
+    
+    /**
+     * Method to retrieve the STB MAC address for crash details validation
+     * 
+     * @param dut
+     *            instance of {@link Dut}
+     * @return MAC address for crash details validation
+     */
+    public String getSettopMacAddressForCrashDetailsValidation(Dut dut, AutomaticsTapApi tapApi,
+	    boolean executeInAtomConsole) {
+	LOGGER.debug("STARTING METHOD: getSettopMacAddressForCrashDetailsValidation()");
+	// MAC Address
+	String mac = null;
+	// server response
+	String response = null;
+	// Regular expression to retrieve MAC Address from interface details
+	String regexForMacAddress = "HWaddr\\s*(" + AutomaticsConstants.REG_EX_MAC_ADDRESS_FORMAT + ")";
+	String regexForMacAddressInRdkV = "(" + AutomaticsConstants.REG_EX_MAC_ADDRESS_FORMAT + ")";
+
+
+	if (SupportedModelHandler.isRDKB(dut)) {
+	    // by default the interface name is erouter0
+	    response = tapApi.executeCommandUsingSsh(dut, "/sbin/ifconfig "
+		    + DEFAULT_INTERFACE_NAME_TO_RETRIEVE_ESTB_MAC_ADDRESS);
+	    LOGGER.info("Response for /sbin/ifconfig : " + response);
+	} else if (SupportedModelHandler.isRDKV(dut)) {
+	    // for rdkv boxes get estb mac
+	    response = CommonMethods.getSTBDetails(dut, tapApi, StbDetails.ESTB_MAC);
+	    LOGGER.info("Response for getSTBDetails : " + response);
+	} else if (SupportedModelHandler.isRDKC(dut)) {
+	    response = tapApi.executeCommandUsingSsh(dut, " /sbin/ifconfig | grep HWaddr");
+	    LOGGER.info("Response for /sbin/ifconfig : " + response);
+	}
+
+	if (CommonMethods.isNotNull(response)) {
+	    if (SupportedModelHandler.isRDKB(dut) || SupportedModelHandler.isRDKC(dut)) {
+		mac = CommonMethods.patternFinder(response, regexForMacAddress);
+	    } else if (SupportedModelHandler.isRDKV(dut)) {
+		mac = CommonMethods.patternFinder(response, regexForMacAddressInRdkV);
+	    }
+	}
+	// format the mac address
+	if (CommonMethods.isNotNull(mac)) {
+	    LOGGER.info("MAC obtained : " + mac);
+	    mac = mac.replaceAll(AutomaticsConstants.COLON, AutomaticsConstants.EMPTY_STRING);
+	    mac = mac.toUpperCase();
+	}
+
+	LOGGER.info("MAC Address retrieved from the interface is " + mac);
+
+	LOGGER.debug("ENDING METHOD: getSettopMacAddressForCrashDetailsValidation()");
+
+	return mac;
+    }
+    
+    /**
+     * Method to verify the given date is not older than 4 hours
+     * 
+     * @param date
+     *            date to verify
+     * @return true if date is not older than 4 Hours else false
+     */
+    private boolean verifyDate(Date date) {
+	boolean status = date.getTime() > (new Date().getTime() - (1 * 60 * 60 * 1000));
+	return status;
+    }
+
+
 }

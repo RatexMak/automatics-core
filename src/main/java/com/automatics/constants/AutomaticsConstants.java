@@ -962,4 +962,7 @@ public class AutomaticsConstants {
     /** Json key name for property NATIVE_PROCESS_ID */
     public static final String DEVICE_PROP_NATIVE_PROCESS_ID = "NATIVE_PROCESS_ID";
 
+    /** DEFAULT Access method for TR181 data model */
+    public static final String DEFAULT_TR181_ACCESS_METHOD = "DEFAULT_TR181_ACCESS_METHOD";
+
 }
