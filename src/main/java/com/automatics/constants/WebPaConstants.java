@@ -25,4 +25,10 @@ public class WebPaConstants {
     
     /** WebPa parameter for device reboot. The value should be of string type - "Device" */
     public static final String WEBPA_PARAM_DEVICE_CONTROL_DEVICE_REBOOT = "Device.X_CISCO_COM_DeviceControl.RebootDevice";
+    
+    /** WEBA PA PARAM NAME For uploading log to log server **/
+    public static final String WEBPA_PARAMETER_TRIGGER_UPLOAD = "Device.DeviceInfo.X_RDKCENTRAL-COM_xOpsDeviceMgmt.Logging.xOpsDMUploadLogsNow";
+
+    /** WEBA PA PARAM NAME For checking upload status to log server **/
+    public static final String WEBPA_PARAMETER_UPLOAD_STATUS = "Device.DeviceInfo.X_RDKCENTRAL-COM_xOpsDeviceMgmt.Logging.xOpsDMLogsUploadStatus";
 }

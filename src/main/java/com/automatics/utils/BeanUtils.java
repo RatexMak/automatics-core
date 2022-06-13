@@ -34,6 +34,7 @@ import com.automatics.providers.connection.auth.ICrypto;
 import com.automatics.providers.crashanalysis.CrashAnalysisProvider;
 import com.automatics.providers.imageupgrade.ImageUpgradeProviderFactory;
 import com.automatics.providers.issuemanagement.IssueManagementProvider;
+import com.automatics.providers.logupload.DeviceLogUploadProvider;
 import com.automatics.providers.ocr.OcrServiceProvider;
 import com.automatics.providers.rack.ImageCompareProvider;
 import com.automatics.providers.rack.OcrProvider;
@@ -448,11 +449,20 @@ public class BeanUtils {
     public static WebpaProvider getWebpaProvider() {
 	WebpaProvider provider = null;
 	try {
+	    LOGGER.info("Reading {} from partner {}", BeanConstants.BEAN_ID_WEBPA_PROVIDER,
+		    BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	    provider = (WebpaProvider) getProviderImpl(BeanConstants.BEAN_ID_WEBPA_PROVIDER, WebpaProvider.class,
 		    BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
 	} catch (Exception e) {
-	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_WEBPA_PROVIDER);
+	    LOGGER.info("Since {} not configured in partner, reading default implementation in Automatics.",
+		    BeanConstants.BEAN_ID_WEBPA_PROVIDER);
+	    try {
+		provider = (WebpaProvider) getProviderImpl(BeanConstants.BEAN_ID_WEBPA_PROVIDER, WebpaProvider.class,
+			BeanConstants.CORE_SPRING_CONFIG_FILE_NAME);
+	    } catch (Exception e1) {
+		LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_WEBPA_PROVIDER);
 
+	    }
 	}
 	return provider;
     }
@@ -615,6 +625,23 @@ public class BeanUtils {
 		    BeanConstants.BEAN_ID_AV_ANALYSIS_PROVIDER, AVAnalysisProvider.class);
 	} catch (Exception e) {
 	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_AV_ANALYSIS_PROVIDER);
+
+	}
+	return provider;
+    }
+
+    /**
+     * Gets DeviceLogUploadProvider
+     * 
+     * @return DeviceLogUploadProvider instance
+     */
+    public static DeviceLogUploadProvider getDeviceLogUploadProvider() {
+	DeviceLogUploadProvider provider = null;
+	try {
+	    provider = (DeviceLogUploadProvider) getProviderImpl(BeanConstants.BEAN_ID_DEVICE_LOG_UPLOAD_PROVIDER,
+		    DeviceLogUploadProvider.class, BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
+	} catch (Exception e) {
+	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_DEVICE_LOG_UPLOAD_PROVIDER);
 
 	}
 	return provider;

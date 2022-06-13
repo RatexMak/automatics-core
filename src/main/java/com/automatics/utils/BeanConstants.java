@@ -118,6 +118,9 @@ public class BeanConstants {
     /** Bean name for AV Analysis provider **/
     public static final String BEAN_ID_AV_ANALYSIS_PROVIDER = "avAnalysisProvider";
 
+    /** Bean name for device log upload provider **/
+    public static final String BEAN_ID_DEVICE_LOG_UPLOAD_PROVIDER = "deviceLogUploadProvider";
+
     /** Bean not initialized/found error message */
     public static final String BEAN_NOT_FOUND_LOG = "{} not configured for bean '{}'";
 
