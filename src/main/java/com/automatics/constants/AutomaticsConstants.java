@@ -558,6 +558,9 @@ public class AutomaticsConstants {
 
     /** HTTP link */
     public static String STRING_HTTP = "http://";
+    
+    /** Selenium Hub to Node Conection */
+    public static String STRING_HUB = "/wd/hub";
 
     /** RDKV DeviceConfig CATEGORY */
     public static final String RDK_DEVICE_CATEGORY_RDKV = "RDKV";

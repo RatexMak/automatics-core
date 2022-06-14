@@ -238,7 +238,25 @@ public enum StbProcess {
     XVISIONDGST("xvisiondgst"),
     CAM_STREAM_SERVER("cam_stream_server"),
     XCVAAD("xcvaad"),
-    SMARTRC("smartrc");
+    SMARTRC("smartrc"),
+	/** BLE process */
+	BLEPROCESS("bleconfd"),
+	/** CcspHotspot process */
+	CCSP_HOTSPOT("CcspHotspot"),
+	/** snmp_subagent process */
+	SNMP_SUBAGENT("snmp_subagent"),
+	/** CcspEPONAgentSsp process */
+	CCSP_EPONAGENT("CcspEPONAgentSsp"),
+	/** trigger process */
+	CCSP_TRIGGER("trigger"),
+	/** rdkbPowerMgr process */
+	CCSP_RDKBPWRMGR("rdkbPowerMgr"),
+	/** IGD process */
+	CCSP_IGD("IGD"),
+	/** psmcli process */
+	CCSP_PSMCLI("psmcli"),
+	/** dmcli process */
+	CCSP_DMCLI("dmcli");
 
     private static final String DEFUALT_REGEX_FOR_MINI_DUMP_FILE = "\\s*((\\w+_)?mac\\w+_dat\\d+-\\d+-\\d+-\\d+-\\d+-\\d+_box\\d+-\\d+-\\d+-\\d+-\\d+-\\d+_mod\\w+.*dmp.tgz)";
 
