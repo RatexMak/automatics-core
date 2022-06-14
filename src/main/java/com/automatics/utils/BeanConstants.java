@@ -123,5 +123,8 @@ public class BeanConstants {
 
     /** Bean not initialized/found error message */
     public static final String BEAN_NOT_FOUND_LOG = "{} not configured for bean '{}'";
+    
+    /** Automatics props name for device connection provider **/
+    public static final String PROP_KEY_DEVICE_CONNECTION_PROVIDER = "partner.impl.deviceConnectionProvider";
 
 }

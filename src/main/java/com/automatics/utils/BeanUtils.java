@@ -168,6 +168,37 @@ public class BeanUtils {
 	}
 
     }
+    
+    /**
+     * Gets the provider implementation object via spring xml bean configuration
+     * 
+     * @param beanName
+     *            bean name in spring xml file
+     * @param path
+     *            clazz Class that is loading via spring
+     * @param configFileName
+     *            spring xml config file name
+     * @return Bean object, if no bean definition in xml file, then null will be returned
+     */
+    public static Object getPartnerProviderImplasDefault(String stbPropsName, String beanName, Class clazz) {
+
+	String configFileName = BeanConstants.CORE_SPRING_CONFIG_FILE_NAME;
+	boolean isPartnerImplReq = Boolean.parseBoolean(AutomaticsPropertyUtility.getProperty(stbPropsName, "true"));
+
+	if (isPartnerImplReq) {
+	    configFileName = BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME;
+	    LOGGER.info("Reading implementation from partner for {}", beanName);
+	} else {
+	    LOGGER.info("Reading implementation from core for {}", beanName);
+	}
+
+	if (BeanConstants.CORE_SPRING_CONFIG_FILE_NAME.equals(configFileName)) {
+	    return coreContext.getBean(beanName, clazz);
+	} else {
+	    return partnerContext.getBean(beanName, clazz);
+	}
+
+    }
 
     /**
      * Gets DeviceAccessValidator instance
@@ -271,8 +302,8 @@ public class BeanUtils {
     public static DeviceConnectionProvider getDeviceConnetionProvider() {
 	DeviceConnectionProvider provider = null;
 	try {
-	    provider = (DeviceConnectionProvider) getProviderImpl(BeanConstants.BEAN_ID_DEVICE_CONNECTION_PROVIDER,
-		    DeviceConnectionProvider.class, BeanConstants.PARTNER_SPRING_CONFIG_FILE_NAME);
+	    provider = (DeviceConnectionProvider) getPartnerProviderImplasDefault(BeanConstants.PROP_KEY_DEVICE_CONNECTION_PROVIDER,
+		    BeanConstants.BEAN_ID_DEVICE_CONNECTION_PROVIDER,DeviceConnectionProvider.class);
 	} catch (Exception e) {
 	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_DEVICE_CONNECTION_PROVIDER);
 

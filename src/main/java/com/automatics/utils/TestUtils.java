@@ -325,5 +325,15 @@ public class TestUtils {
 	}
 	return performCrashAnalysis;
     }
+    
+    /**
+     * Gets the base url for device connection provider
+     * 
+     * @return base url for device connection provider
+     */
+    public static String getDeviceConnectionProviderUrl() {
+	return AutomaticsPropertyUtility.getProperty("DEVICE_CONNECTION_PROVIDER_URL", AutomaticsConstants.EMPTY_STRING);
+
+    }
 
 }
