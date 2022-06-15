@@ -38,6 +38,8 @@
 	
 	<bean id="xconfDataProvider" class="com.automatics.providers.xconf.DefaultXConfDataProviderImpl" lazy-init="true"/>
 	
+	<bean id="webpaProvider" class="com.automatics.webpa.impl.WebPaProviderImpl" lazy-init="true"/>
+	
 	
 	
 </beans>
