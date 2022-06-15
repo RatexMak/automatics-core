@@ -43,6 +43,7 @@ import com.automatics.providers.objects.DeviceResponse;
 import com.automatics.providers.objects.DeviceUpdateDurationRequest;
 import com.automatics.providers.objects.StatusResponse;
 import com.automatics.providers.rack.DeviceProvider;
+import com.automatics.utils.CommonMethods;
 import com.automatics.utils.TestUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -77,7 +78,7 @@ public class DeviceManagerRestImpl implements DeviceProvider {
     public DeviceResponse getDevice(DeviceRequest request) {
 	DeviceResponse deviceResponse = null;
 	ResteasyClient client = getClient();
-	String url = BASE_URL + GET_DEVICE_PATH;
+	String url = CommonMethods.getNormalizedUrl(BASE_URL + GET_DEVICE_PATH);
 	ResteasyWebTarget target = client.target(url);
 	LOGGER.info("Fetching device details for {}  Url Path: {}", request.getMac(), url);
 	Response response = target.request().post(Entity.entity(request, "application/json"));
@@ -112,7 +113,7 @@ public class DeviceManagerRestImpl implements DeviceProvider {
     public DeviceAccountResponse getAccountDetailsForDevice(DeviceAccountRequest request) {
 	DeviceAccountResponse accountResponse = null;
 	ResteasyClient client = getClient();
-	String url = BASE_URL + GET_ACCOUNT_DETAILS_PATH;
+	String url = CommonMethods.getNormalizedUrl(BASE_URL + GET_ACCOUNT_DETAILS_PATH);
 	ResteasyWebTarget target = client.target(url);
 
 	LOGGER.info("Fetching account details for {}  Url Path: {}", request.getAccountNumber(), url);
@@ -150,7 +151,7 @@ public class DeviceManagerRestImpl implements DeviceProvider {
 	Map<String, String> result = new HashMap<String, String>();
 
 	ResteasyClient client = getClient();
-	String url = BASE_URL + GET_DEVICE_PROPS_PATH;
+	String url = CommonMethods.getNormalizedUrl(BASE_URL + GET_DEVICE_PROPS_PATH);
 	ResteasyWebTarget target = client.target(url);
 	LOGGER.info("Fetching device props for {} for props {} Url Path: {}", request.getMac(),
 		request.getDeviceProps(), url);
@@ -198,7 +199,7 @@ public class DeviceManagerRestImpl implements DeviceProvider {
 	DeviceAllocationResponse allocResponse = null;
 
 	ResteasyClient client = getClient();
-	String url = BASE_URL + LOCK_STATUS_PATH;
+	String url = CommonMethods.getNormalizedUrl(BASE_URL + LOCK_STATUS_PATH);
 	ResteasyWebTarget target = client.target(url);
 	LOGGER.info("Fetching lock status for device {} Url Path: {}", request.getMac(), url);
 	Response response = target.request().post(Entity.entity(request, "application/json"));
@@ -232,7 +233,7 @@ public class DeviceManagerRestImpl implements DeviceProvider {
     public StatusResponse lock(DeviceRequest request) {
 	StatusResponse statusResponse = null;
 	ResteasyClient client = getClient();
-	String url = BASE_URL + LOCK_DEVICE_PATH;
+	String url = CommonMethods.getNormalizedUrl(BASE_URL + LOCK_DEVICE_PATH);
 	ResteasyWebTarget target = client.target(url);
 	LOGGER.info("Locking device {} Url Path: {}", request.getMac(), url);
 	Response response = target.request().post(Entity.entity(request, "application/json"));
@@ -263,7 +264,7 @@ public class DeviceManagerRestImpl implements DeviceProvider {
     public StatusResponse updateLockTime(DeviceUpdateDurationRequest request) {
 	StatusResponse statusResponse = null;
 	ResteasyClient client = getClient();
-	String url = BASE_URL + LOCK_UPDATE_PATH;
+	String url = CommonMethods.getNormalizedUrl(BASE_URL + LOCK_UPDATE_PATH);
 	ResteasyWebTarget target = client.target(url);
 	LOGGER.info("Updating lock duration for device {} Url Path:{}", request.getMac(), url);
 
@@ -295,7 +296,7 @@ public class DeviceManagerRestImpl implements DeviceProvider {
     public StatusResponse release(DeviceRequest request) {
 	StatusResponse statusResponse = null;
 	ResteasyClient client = getClient();
-	String url = BASE_URL + RELEASE_DEVICE_PATH;
+	String url = CommonMethods.getNormalizedUrl(BASE_URL + RELEASE_DEVICE_PATH);
 	ResteasyWebTarget target = client.target(url);
 	LOGGER.info("Releasing device {} Url Path: {}", request.getMac(), url);
 	Response response = target.request().post(Entity.entity(request, "application/json"));

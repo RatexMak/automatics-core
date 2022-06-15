@@ -35,6 +35,7 @@ import com.automatics.providers.objects.StatusResponse;
 import com.automatics.providers.objects.enums.StatusMessage;
 import com.automatics.providers.rack.AbstractPowerProvider;
 import com.automatics.providers.rack.exceptions.PowerProviderException;
+import com.automatics.utils.CommonMethods;
 import com.automatics.utils.TestUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,7 +64,7 @@ public class PowerProviderRestImpl extends AbstractPowerProvider {
     public boolean powerOn() throws PowerProviderException {
 	StatusResponse statusResponse = null;
 	boolean isPowerOnSuccess = false;
-	String url = BASE_URL + POWER_ON_PATH;
+	String url = CommonMethods.getNormalizedUrl(BASE_URL + POWER_ON_PATH);
 
 	if (null != device) {
 	    String macAddress = device.getHostMacAddress();
@@ -112,7 +113,7 @@ public class PowerProviderRestImpl extends AbstractPowerProvider {
     public boolean reboot() throws PowerProviderException {
 	StatusResponse statusResponse = null;
 	boolean isRebootSuccess = false;
-	String url = BASE_URL + POWER_CYCLE;
+	String url = CommonMethods.getNormalizedUrl(BASE_URL + POWER_CYCLE);
 
 	if (null != device) {
 	    String macAddress = device.getHostMacAddress();
@@ -160,7 +161,7 @@ public class PowerProviderRestImpl extends AbstractPowerProvider {
     public String getPowerStatus() throws PowerProviderException {
 	PowerStatusResponse statusResponse = null;
 	String powerStatus = null;
-	String url = BASE_URL + POWER_STATUS_PATH;
+	String url = CommonMethods.getNormalizedUrl(BASE_URL + POWER_STATUS_PATH);
 
 	if (null != device) {
 	    String macAddress = device.getHostMacAddress();
@@ -212,7 +213,7 @@ public class PowerProviderRestImpl extends AbstractPowerProvider {
     public boolean powerOff() throws PowerProviderException {
 	StatusResponse statusResponse = null;
 	boolean isPowerOffSuccess = false;
-	String url = BASE_URL + POWER_OFF_PATH;
+	String url = CommonMethods.getNormalizedUrl(BASE_URL + POWER_OFF_PATH);
 
 	if (null != device) {
 	    String macAddress = device.getHostMacAddress();

@@ -33,6 +33,7 @@ import com.automatics.enums.RemoteControlType;
 import com.automatics.providers.objects.RemoteProviderRequest;
 import com.automatics.providers.objects.StatusResponse;
 import com.automatics.providers.rack.AbstractRemoteProvider;
+import com.automatics.utils.CommonMethods;
 import com.automatics.utils.TestUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,7 +64,7 @@ public class RemoteProviderRestImpl extends AbstractRemoteProvider {
 	ResteasyClient client = new ResteasyClientBuilder().build();
 	return client;
     }
-    
+
     /**
      * Does the presskey operations based on the command
      * 
@@ -76,7 +77,7 @@ public class RemoteProviderRestImpl extends AbstractRemoteProvider {
 	StatusResponse statusResponse = null;
 	boolean result = false;
 	ResteasyClient client = getClient();
-	String url = BASE_URL + REMOTE_PRESS_KEY_PATH;
+	String url = CommonMethods.getNormalizedUrl(BASE_URL + REMOTE_PRESS_KEY_PATH);
 	String macAddress = device.getHostMacAddress();
 	ResteasyWebTarget target = client.target(url);
 	RemoteProviderRequest request = new RemoteProviderRequest();
@@ -124,7 +125,7 @@ public class RemoteProviderRestImpl extends AbstractRemoteProvider {
 	StatusResponse statusResponse = null;
 	boolean result = false;
 	ResteasyClient client = getClient();
-	String url = BASE_URL + REMOTE_PRESS_KEY_AND_HOLD_PATH;
+	String url = CommonMethods.getNormalizedUrl(BASE_URL + REMOTE_PRESS_KEY_AND_HOLD_PATH);
 	String macAddress = device.getHostMacAddress();
 	ResteasyWebTarget target = client.target(url);
 	RemoteProviderRequest request = new RemoteProviderRequest();
@@ -172,7 +173,7 @@ public class RemoteProviderRestImpl extends AbstractRemoteProvider {
 	StatusResponse statusResponse = null;
 	boolean result = false;
 	ResteasyClient client = getClient();
-	String url = BASE_URL + REMOTE_SEND_TEXT_PATH;
+	String url = CommonMethods.getNormalizedUrl(BASE_URL + REMOTE_SEND_TEXT_PATH);
 	String macAddress = device.getHostMacAddress();
 	ResteasyWebTarget target = client.target(url);
 	RemoteProviderRequest request = new RemoteProviderRequest();
@@ -221,7 +222,7 @@ public class RemoteProviderRestImpl extends AbstractRemoteProvider {
 	StatusResponse statusResponse = null;
 	boolean result = false;
 	ResteasyClient client = getClient();
-	String url = BASE_URL + REMOTE_TUNE_PATH;
+	String url = CommonMethods.getNormalizedUrl(BASE_URL + REMOTE_TUNE_PATH);
 	String macAddress = device.getHostMacAddress();
 	ResteasyWebTarget target = client.target(url);
 	RemoteProviderRequest request = new RemoteProviderRequest();
