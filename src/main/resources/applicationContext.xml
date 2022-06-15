@@ -39,5 +39,6 @@
 	<bean id="xconfDataProvider" class="com.automatics.providers.xconf.DefaultXConfDataProviderImpl" lazy-init="true"/>
 	
 	
+	<bean id="deviceConnectionProvider" class="com.automatics.providers.connection.impl.DeviceConnectionProviderRestImpl"  lazy-init="true"/>
 	
 </beans>
