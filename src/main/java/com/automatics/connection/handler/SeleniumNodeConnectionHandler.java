@@ -38,6 +38,7 @@ import com.automatics.device.Dut;
 import com.automatics.enums.Browser;
 import com.automatics.enums.ProcessRestartOption;
 import com.automatics.providers.connection.DeviceConnectionProvider;
+import com.automatics.selenium.CustomizableBrowserCapabilities;
 import com.automatics.tap.AutomaticsTapApi;
 import com.automatics.utils.AutomaticsPropertyUtility;
 import com.automatics.utils.AutomaticsUtils;
@@ -93,6 +94,9 @@ public class SeleniumNodeConnectionHandler {
 
     /** Selenium configuration windows bat file name to be read from property file */
     private static final String SELENIUM_CONFIG_WIN_BAT_FILE_NAME = "selenium.config.win.bat.file.name";
+    
+    /** Selenium configuration windows schbat file name to be read from property file */
+    private static final String SELENIUM_CONFIG_SCH_VBS_FILE_NAME = "selenium.config.win.schbat.file.name";
 
     /** Selenium configuration for windows/liunx os supporting jar file name to be read from property file */
     private static final String SELENIUM_CONFIG_WIN_LIUNX_OS_JAR_FILE_NAME = "selenium.config.win.linux.os.jar.file.name";
@@ -110,6 +114,11 @@ public class SeleniumNodeConnectionHandler {
     private static final String SELENIUM_CONFIG_EDGE_DRIVER_FILE_NAME = "selenium.config.edge.driver.file.name";
 
     private static final String ERROR_CALCS_DEPRECATED = "NOTE: Cacls is now deprecated, please use Icacls.";
+    
+    /** Selenium configuration windows bat file name to be read from property file */
+    private static final String SELENIUM_SCHEDULE_CR_TASK_CMD = "selenium.schedule.task.windows";    
+    private static final String SELENIUM_SCHEDULE_LS_TASK_CMD = "selenium.list.task.windows";
+    private static final String SELENIUM_SCHEDULE_RUN_TASK_CMD = "selenium.run.task.windows"; 
 
     private static String SED_COMMAND_REPLACE = LinuxCommandConstants.SED + LinuxCommandConstants.OPTION_I
 	    + AutomaticsConstants.SYMBOL_SINGLE_QUOTE + "s" + AutomaticsConstants.UNDERSCORE + "<valueToReplace>"
@@ -197,15 +206,143 @@ public class SeleniumNodeConnectionHandler {
 	return driver;
     }
 
-    private boolean validateBrowserSupportForNode(Device ecatsSettop, Browser name) {
+    /**
+     * Method to invoke browser in the Connected client PC and set all the necessary preconditions
+     * 
+     * @param dut
+     * @param name
+     * @param capabilities
+     * @return
+     */
+    public WebDriver invokeBrowserInNode(Dut dut, Browser name, CustomizableBrowserCapabilities capabilities) {
+	LOGGER.info("STARTING METHOD: invokeBrowserInNode()");
+	String nodeIP = null;
+	String nodePort = null;
+	String osType = null;
+	int reTryCount = 0;
+	try {
+	    AutomaticsTapApi tapEnv = AutomaticsTapApi.getInstance();
+	    Device device = (Device) dut;
+	    nodeIP = device.getNatAddress();
+	    nodePort = device.getNodePort();
+	    osType = device.getOsType();
+	    if (osType.equalsIgnoreCase(SeleniumConstants.OS_WINDOWS)) {
+		copyFilesForscheduling(device, tapEnv, Browser.CHROME);
+	    }
+
+	    if (validateBrowserSupportForNode(device, name)) {
+		validateSeleniunNodeRegisteredStatus(device, nodeIP, nodePort, name, capabilities);
+		if (driver == null) {
+		    LOGGER.info("SELENIUM NODE STATUS VERIFICATION FAILED.TRYING TO REGISTER THE " + nodeIP + ":"
+			    + nodePort + "IN SELENIUM HUB");
+		    do {
+			reTryCount++;
+			// forceConfigInstall = true;
+			driver = registerSeleniumNode(device, tapEnv, name);
+		    } while (driver == null && reTryCount <= AutomaticsConstants.RETRY_COUNT);
+		}
+	    } else {
+		LOGGER.error("Invalid browser selected for this OS type!!");
+	    }
+	} catch (Exception e) {
+	    LOGGER.error("[Selenium Node Connection Failed] : " + nodeIP + ":" + nodePort + e.getMessage());
+	}
+	LOGGER.debug("ENDING METHOD: invokeBrowserInNode()");
+	return driver;
+    }
+    
+    /**
+     * Scheduling selenium process as windows scheduled task
+     * 
+     * @param dut
+     * @param tapEnv
+     * @param name
+     */
+    private static void copyFilesForscheduling(Device dut, AutomaticsTapApi tapEnv, Browser name) {
+	LOGGER.info("Entering copyFilesForScehduling");
+	boolean status = false;
+	String command = null;
+	String response = null;
+	try {
+	    if (!checkScheduledTaskRunning(dut, tapEnv)) {
+
+		String seleniumHomeLocation = AutomaticsPropertyUtility.getProperty(SELENIUM_CONFIG_PATH_FOR_WINDOWS_OS,
+			"C:\\Selenium\\");
+		String windowsBatFile = AutomaticsPropertyUtility.getProperty(SELENIUM_CONFIG_WIN_BAT_FILE_NAME,
+			"Node.bat");
+		String nodeVbsFile = AutomaticsPropertyUtility.getProperty(SELENIUM_CONFIG_SCH_VBS_FILE_NAME,
+			"SeleniumSchedule.vbs");
+		if (copyAndModifyResourceToClient(seleniumHomeLocation, nodeVbsFile, dut)) {
+		    if (copyAndModifyResourceToClient(seleniumHomeLocation, windowsBatFile, dut)) {
+			if (editScript(dut, seleniumHomeLocation, windowsBatFile, tapEnv, name)) {
+			    status = true;
+			    grantFullFilePermission(tapEnv, dut, seleniumHomeLocation);
+			}
+		    }
+		}
+		if (status) {
+		    LOGGER.info("Copied the files successfully");
+		    command = AutomaticsPropertyUtility.getProperty(SELENIUM_SCHEDULE_CR_TASK_CMD,
+			    "cmd /c schtasks /create /tn \"SeleniumTask\" /sc minute /mo 5 /tr \"wscript.exe C:/Selenium/SeleniumSchedule.vbs\" /ST 00:00:01");
+		    tapEnv.executeCommandOnOneIPClients(dut, command);
+		    LOGGER.info("Created Scheduled Task and checking the status");
+		    command = AutomaticsPropertyUtility.getProperty(SELENIUM_SCHEDULE_LS_TASK_CMD,
+			    "cmd /c schtasks /Query | grep \"SeleniumTask\"");
+		    response = tapEnv.executeCommandOnOneIPClients(dut, command);
+		    LOGGER.info("Scheduled Task Created" + response.toString());
+		    command = AutomaticsPropertyUtility.getProperty(SELENIUM_SCHEDULE_RUN_TASK_CMD,
+			    "cmd /c  schtasks /Run /TN \"SeleniumTask\"");
+		    response = tapEnv.executeCommandOnOneIPClients(dut, command);
+		    LOGGER.info("Scheduled Task executed first time manually" + response.toString());
+		}
+	    }
+
+	} catch (Exception e) {
+	    LOGGER.info("Exception in Method copyFilesForScheduling" + e.getMessage());
+	}
+
+	LOGGER.info("Copied the files and created task successfully " + status);
+
+    }
+    
+    /**
+     * 
+     * @param device
+     * @param tapEnv
+     * @return
+     */
+    private static boolean checkScheduledTaskRunning(Device device,AutomaticsTapApi tapEnv)
+    {
+    	LOGGER.info("Entering checkScheduledTaskRunning");
+    	boolean status = false;
+    	try
+    	{
+    		String command = AutomaticsPropertyUtility.getProperty(SELENIUM_SCHEDULE_LS_TASK_CMD,"cmd /c schtasks /Query | grep \"SeleniumTask\"");
+    		String response = tapEnv.executeCommandOnOneIPClients(device, command);
+    		LOGGER.info("Whether Scheduled Task already running"+response);
+    		if(CommonMethods.isNotNull(response)) {
+    			LOGGER.info("Scheduled Task is already running");
+    			status = true;
+    		}
+    		LOGGER.info("Scheduled Task running status "+status);
+    	}
+    	catch(Exception e)
+    	{
+    		LOGGER.info("Exception in checkScheduledTaskRunning "+e.getMessage());
+    		
+    	}
+    	return status;
+    }
+    
+    private boolean validateBrowserSupportForNode(Device device, Browser name) {
 	String supportedBrowsers = AutomaticsConstants.EMPTY_STRING;
 	boolean isValidSelection = false;
-	if (ecatsSettop.isWindows()) {
+	if (device.isWindows()) {
 	    supportedBrowsers = AutomaticsPropertyUtility.getProperty("broswer.support.windows",
 		    "firefox_gecko,chrome,edge");
-	} else if (ecatsSettop.isLinux() || ecatsSettop.isRaspbianLinux()) {
+	} else if (device.isLinux() || device.isRaspbianLinux()) {
 	    supportedBrowsers = AutomaticsPropertyUtility.getProperty("broswer.support.linux", "firefox_gecko,chrome");
-	} else if (ecatsSettop.isMacOS()) {
+	} else if (device.isMacOS()) {
 	    supportedBrowsers = AutomaticsPropertyUtility.getProperty("broswer.support.mac", "safari,chrome");
 	}
 	if (supportedBrowsers.contains(name.getValue())) {
@@ -365,6 +502,58 @@ public class SeleniumNodeConnectionHandler {
 	}
 	LOGGER.debug(LOGGER_PREFIX_CONFIG_VALIDATION + "ENDING METHOD: validateSeleniunNodeRegisteredStatus()");
 	return driver;
+    }
+    
+    /**
+     * Method used to validate the Selenium node registered status
+     * 
+     * @param nodeIP
+     *            Selenium node IP for connected client
+     * @param nodePort
+     *            Selenium node port for connected client
+     * @param osType
+     *            Connected client OS type
+     * @return driver instance of{@link WebDriver}
+     * 
+     * @throws Exception
+     */
+    private void validateSeleniunNodeRegisteredStatus(Device ecatsSettop, String nodeIP, String nodePort,
+	    Browser name, CustomizableBrowserCapabilities capabilities) {
+	Platform platform = null;
+	if (ecatsSettop.isLinux() || ecatsSettop.isRaspbianLinux()) {
+	    platform = Platform.LINUX;
+	} else if (ecatsSettop.isWindows()) {
+	    platform = Platform.WINDOWS;
+	} else if (ecatsSettop.isMacOS()) {
+	    platform = Platform.MAC;
+	}
+	if (capabilities == null) {
+	    // Browser initialized with default framework parameters
+	    LOGGER.info("Confguring driver Options to default configurations in framework");
+	    capabilities = new CustomizableBrowserCapabilities(name, platform,ecatsSettop);
+	}
+	LOGGER.debug(LOGGER_PREFIX_CONFIG_VALIDATION + "STARTING METHOD: validateSeleniunNodeRegisteredStatus()");
+	URL nodeURL = null;
+	try {
+	    if (CommonMethods.isNotNull(nodeIP) && CommonMethods.isNotNull(nodePort) && name != null) {
+		nodeURL = new URL(AutomaticsConstants.STRING_HTTP + nodeIP + ":" + nodePort + AutomaticsConstants.STRING_HUB);
+		LOGGER.info(LOGGER_PREFIX_CONFIG_VALIDATION + "Connecting to Selenium Node:" + nodeURL);
+		LOGGER.info(LOGGER_PREFIX_CONFIG_VALIDATION + "Browser Type:" + name.getValue());
+		driver = new RemoteWebDriver(nodeURL, capabilities);
+	    } else {
+		LOGGER.error(LOGGER_PREFIX_CONFIG_VALIDATION
+			+ "NODE PORT OR NODE IP OR OS TYPE NOT CONFIURED PROPERLY IN CATS INVENTORY");
+	    }
+	} catch (MalformedURLException ex) {
+	    LOGGER.error(LOGGER_PREFIX_CONFIG_VALIDATION + "[Selenium Node Connection Failed] : " + nodeIP + ":"
+		    + nodePort + " Problem with the URL formed");
+	} catch (Exception e) {
+	    LOGGER.error(
+		    LOGGER_PREFIX_CONFIG_VALIDATION
+			    + "Exception Occurred validateSeleniunNodeRegisteredStatus() {} : {} {}",
+		    nodeIP, nodePort, e.getMessage());
+	    e.printStackTrace();
+	}
     }
 
     /**

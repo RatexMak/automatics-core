@@ -260,6 +260,7 @@ public class DeviceManager {
 	    device.setOsType(extraProps.get("osType"));
 	    connectedDeviceInfo.setUserName(extraProps.get("username"));
 	    connectedDeviceInfo.setPassword(extraProps.get("password"));
+	    connectedDeviceInfo.setEthernetMacAddress(extraProps.get("ethernetMacAddress"));
 	    device.setConnectedDeviceInfo(connectedDeviceInfo);
 	}
 	return device;
