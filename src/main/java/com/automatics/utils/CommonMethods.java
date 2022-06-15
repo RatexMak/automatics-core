@@ -32,6 +32,8 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
@@ -3761,8 +3763,7 @@ public class CommonMethods {
     }
 
     /**
-     * Method to check whether the STB is rebooted. 
-     * and see if we get the response.
+     * Method to check whether the STB is rebooted. and see if we get the response.
      *
      * @param tapApi
      *            instance of {@link AutomaticsTapApi}
@@ -4781,7 +4782,24 @@ public class CommonMethods {
 	}
 	return isTrue;
     }
-	/**
+
+    /**
+     * Normalizing the url.
+     * 
+     * @return string, Normalized Url
+     */
+    public static String getNormalizedUrl(String url) {
+	if (isNotNull(url)) {
+	    try {
+		url = new URI(url).normalize().toString();
+	    } catch (URISyntaxException e) {
+		LOGGER.error("Invalid URL ", url);
+	    }
+	}
+	return url;
+    }
+
+    /**
      * This method fetched STB IP from Device Manager Properties
      * 
      * @param dut
@@ -4789,26 +4807,26 @@ public class CommonMethods {
      * @return Returns the STB IP address
      */
     public static String getandSetErouterIpAddress(Dut dut) {
-		LOGGER.info("Inside getandSetErouterIpAddress");
-		String estbIPAddress = null;
-		DevicePropsRequest request = new DevicePropsRequest();
-	    request.setMac(dut.getHostMacAddress());
-	    List<String> requestedPropsName = new ArrayList<String>();
-	    requestedPropsName.add(AutomaticsConstants.DEVICE_PROP_ESTB_IP_ADDRESS);
-	    request.setDeviceProps(requestedPropsName);
+	LOGGER.info("Inside getandSetErouterIpAddress");
+	String estbIPAddress = null;
+	DevicePropsRequest request = new DevicePropsRequest();
+	request.setMac(dut.getHostMacAddress());
+	List<String> requestedPropsName = new ArrayList<String>();
+	requestedPropsName.add(AutomaticsConstants.DEVICE_PROP_ESTB_IP_ADDRESS);
+	request.setDeviceProps(requestedPropsName);
 
-	    DeviceManager deviceManager = DeviceManager.getInstance();
-	    Map<String, String> response = deviceManager.getDeviceProperties(request);
-	    if(response != null && !response.isEmpty()) {
-		    estbIPAddress = response.get(AutomaticsConstants.DEVICE_PROP_ESTB_IP_ADDRESS);
-		    if(isNotNull(estbIPAddress)) {
-		    	((Device) dut).setErouterIpAddress(estbIPAddress);
-		    }	    	
-	    } else {
-			LOGGER.info("Response from device manager is NULL for MAC : " + dut.getHostMacAddress() + " and property : "
-					+ AutomaticsConstants.DEVICE_PROP_ESTB_IP_ADDRESS);
-		}
-	    LOGGER.info("Exiting getandSetErouterIpAddress with ip =" + estbIPAddress);
-		return estbIPAddress;
+	DeviceManager deviceManager = DeviceManager.getInstance();
+	Map<String, String> response = deviceManager.getDeviceProperties(request);
+	if (response != null && !response.isEmpty()) {
+	    estbIPAddress = response.get(AutomaticsConstants.DEVICE_PROP_ESTB_IP_ADDRESS);
+	    if (isNotNull(estbIPAddress)) {
+		((Device) dut).setErouterIpAddress(estbIPAddress);
+	    }
+	} else {
+	    LOGGER.info("Response from device manager is NULL for MAC : " + dut.getHostMacAddress() + " and property : "
+		    + AutomaticsConstants.DEVICE_PROP_ESTB_IP_ADDRESS);
+	}
+	LOGGER.info("Exiting getandSetErouterIpAddress with ip =" + estbIPAddress);
+	return estbIPAddress;
     }
 }

@@ -74,10 +74,11 @@ public class ServerCommunicator {
 
 	try {
 
-	    URL url = new URL(target);
+	    URL url;
 	    URI uri;
 
 	    try {
+		url = new URI(target).normalize().toURL();
 		uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(),
 			url.getQuery(), url.getRef());
 		target = uri.toASCIIString();		

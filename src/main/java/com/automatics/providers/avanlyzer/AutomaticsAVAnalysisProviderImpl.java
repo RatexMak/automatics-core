@@ -99,7 +99,7 @@ public class AutomaticsAVAnalysisProviderImpl implements AVAnalysisProvider {
 		jsonObject.put("durationInMins", durationInMinutes);
 	    }
 
-	    String url = BASE_URL + START_AV_MONITOR;
+	    String url = CommonMethods.getNormalizedUrl(BASE_URL + START_AV_MONITOR);
 	    LOGGER.info("Sending request to start AV Monitoring: {} \n {}", url, jsonObject);
 	    RestEasyClientImpl restClient = new RestEasyClientImpl();
 
@@ -162,7 +162,7 @@ public class AutomaticsAVAnalysisProviderImpl implements AVAnalysisProvider {
 
 	    RestEasyClientImpl restClient = new RestEasyClientImpl();
 
-	    String url = BASE_URL + GET_AV_FREEZE;
+	    String url = CommonMethods.getNormalizedUrl(BASE_URL + GET_AV_FREEZE);
 	    LOGGER.info("Sending request to get AV freeze: {} \n {}", url, jsonObject);
 
 	    RestRequest request = new RestRequest(url, HttpRequestMethod.POST, null);
@@ -215,7 +215,7 @@ public class AutomaticsAVAnalysisProviderImpl implements AVAnalysisProvider {
     public List<Double> getAudioDBLevelValue(Dut dut) {
 	RestEasyClientImpl restClient = new RestEasyClientImpl();
 	List<Double> audioDbLevelValues = new ArrayList<Double>();
-	String url = BASE_URL + GET_AUDIO_DB_LEVEL;
+	String url = CommonMethods.getNormalizedUrl(BASE_URL + GET_AUDIO_DB_LEVEL);
 
 	RestRequest request = new RestRequest(url, HttpRequestMethod.POST, null);
 	request.setTimeoutInMilliSeconds(CONNECTION_TIMEOUT);
@@ -275,7 +275,7 @@ public class AutomaticsAVAnalysisProviderImpl implements AVAnalysisProvider {
 
 	    RestEasyClientImpl restClient = new RestEasyClientImpl();
 
-	    String url = BASE_URL + STOP_AV_MONITOR;
+	    String url = CommonMethods.getNormalizedUrl(BASE_URL + STOP_AV_MONITOR);
 	    LOGGER.info("Sending request to stop AV monitoring: {} \n {}", url, jsonObject);
 
 	    RestRequest request = new RestRequest(url, HttpRequestMethod.POST, headers);
@@ -318,7 +318,7 @@ public class AutomaticsAVAnalysisProviderImpl implements AVAnalysisProvider {
 
 	    RestEasyClientImpl restClient = new RestEasyClientImpl();
 
-	    String url = BASE_URL + SUBMIT_VIDEO_QUALITY_CHECK;
+	    String url = CommonMethods.getNormalizedUrl(BASE_URL + SUBMIT_VIDEO_QUALITY_CHECK);
 	    LOGGER.info("Sending request to start video quality compare job: {} \n {}", url, jsonObject);
 	    RestRequest request = new RestRequest(url, HttpRequestMethod.POST, null);
 	    request.setTimeoutInMilliSeconds(CONNECTION_TIMEOUT);
@@ -359,7 +359,7 @@ public class AutomaticsAVAnalysisProviderImpl implements AVAnalysisProvider {
 	    jsonObject.put("taskId", taskId);
 
 	    RestEasyClientImpl restClient = new RestEasyClientImpl();
-	    String url = BASE_URL + GET_VIDEO_QUALITY_JOB_STATUS;
+	    String url = CommonMethods.getNormalizedUrl(BASE_URL + GET_VIDEO_QUALITY_JOB_STATUS);
 	    LOGGER.info("Sending request to get video quality compare job status: {} \n {}", url, jsonObject);
 
 	    RestRequest request = new RestRequest(url, HttpRequestMethod.POST, null);
@@ -405,7 +405,7 @@ public class AutomaticsAVAnalysisProviderImpl implements AVAnalysisProvider {
 
 	    RestEasyClientImpl restClient = new RestEasyClientImpl();
 
-	    String url = BASE_URL + GET_VIDEO_QUALITY_METRICS_VALUE;
+	    String url = CommonMethods.getNormalizedUrl(BASE_URL + GET_VIDEO_QUALITY_METRICS_VALUE);
 	    LOGGER.info("Sending request to get video quality metric value: {} \n {}", url, jsonObject);
 
 	    RestRequest request = new RestRequest(url, HttpRequestMethod.POST, null);
@@ -448,7 +448,7 @@ public class AutomaticsAVAnalysisProviderImpl implements AVAnalysisProvider {
 	    jsonObject.put("jobName", jobName);
 	    RestEasyClientImpl restClient = new RestEasyClientImpl();
 
-	    String url = BASE_URL + START_VIDEO_CAPTURE;
+	    String url = CommonMethods.getNormalizedUrl(BASE_URL + START_VIDEO_CAPTURE);
 	    LOGGER.info("Sending request to start video capturing: {} \n {}", url, jsonObject);
 
 	    RestRequest request = new RestRequest(url, HttpRequestMethod.POST, null);
@@ -496,7 +496,7 @@ public class AutomaticsAVAnalysisProviderImpl implements AVAnalysisProvider {
 	    jsonObject.put("jobName", jobName);
 	    RestEasyClientImpl restClient = new RestEasyClientImpl();
 
-	    String url = BASE_URL + STOP_VIDEO_CAPTURE;
+	    String url = CommonMethods.getNormalizedUrl(BASE_URL + STOP_VIDEO_CAPTURE);
 	    LOGGER.info("Sending request to stop video capture: {} \n {}", url, jsonObject);
 
 	    RestRequest request = new RestRequest(url, HttpRequestMethod.POST, null);
