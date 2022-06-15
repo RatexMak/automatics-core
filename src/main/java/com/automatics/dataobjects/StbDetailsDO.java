@@ -76,6 +76,9 @@ public class StbDetailsDO {
     /** Variable to hold the serial_number */
     private String serial_number;
 
+    /** Variable to hold the bluetooth_mac */
+    private String bluetooth_mac;
+
     /**
      * STB Details
      */
@@ -97,7 +100,8 @@ public class StbDetailsDO {
 	MODEL("model=(.*)[\n\r]"),
 	MODEL_NUMBER("model_number=(.*)[\n\r]"),
 	SERIAL_NUMBER("serial_number=(.*)[\n\r]"),
-	BOX_IP("boxIP=(.*)[\n\r]");
+	BOX_IP("boxIP=(.*)[\n\r]"),
+	BLUETOOTH_MAC("bluetooth_mac=(.*)[\n\r]");
 
 	private String regex;
 
@@ -267,6 +271,14 @@ public class StbDetailsDO {
 
     public void setSerial_number(String serial_number) {
 	this.serial_number = serial_number;
+    }
+
+    public String getBluetooth_mac() {
+	return bluetooth_mac;
+    }
+
+    public void setBluetooth_mac(String bluetooth_mac) {
+	this.bluetooth_mac = bluetooth_mac;
     }
 
 }
