@@ -836,7 +836,8 @@ public class SshConnection implements Connection {
 	}
 	LOGGER.debug("Response from reader thread " + commandResponse.toString());
 	return commandResponse.toString().replaceAll(AutomaticsConstants.ANSI_REGEX, AutomaticsConstants.EMPTY_STRING)
-		.replaceAll(AutomaticsConstants.EMPTY_LINE_REMOVER_REGEX, AutomaticsConstants.EMPTY_STRING);
+		.replaceAll(AutomaticsConstants.EMPTY_LINE_REMOVER_REGEX, AutomaticsConstants.EMPTY_STRING)
+		.replaceAll("\\[\\[[;\\d]*m", "");
     }
 
     /**
