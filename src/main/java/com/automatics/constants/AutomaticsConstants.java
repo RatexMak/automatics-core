@@ -967,5 +967,8 @@ public class AutomaticsConstants {
 
     /** DEFAULT Access method for TR181 data model */
     public static final String DEFAULT_TR181_ACCESS_METHOD = "DEFAULT_TR181_ACCESS_METHOD";
+    
+    /** Regular expression to get DMCLI command value. */
+    public static final String REGULAR_EXPRESSION_DMCLI_COMMAND_VALUE = "value:\\s*(.*)";
 
 }

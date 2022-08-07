@@ -148,4 +148,10 @@ public class LinuxCommandConstants {
     /** Response of echo command. */
     public static final String RESPONSE_TEST_CONNECTION = "Test Connection";
 
+    /** dmcli get command. */
+    public static final String DMCLI_GET_COMMAND = "dmcli eRT getv ";
+
+    /** dmcli set command. */
+    public static final String DMCLI_SET_COMMAND = "dmcli eRT setv";
+
 }

@@ -22,6 +22,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 import com.automatics.error.GeneralError;
 import com.automatics.exceptions.FailedTransitionException;
+import com.automatics.tr181.TR181Parameter;
 
 /**
  * Holds the parameter details like name, value, data type, error message etc.
@@ -29,35 +30,8 @@ import com.automatics.exceptions.FailedTransitionException;
  * @author smariy003c
  * 
  */
-public class WebPaParameter {
+public class WebPaParameter extends TR181Parameter {
 
-    /**
-     * WebPA supported data type.
-     *
-     */
-    public enum DataType {
-	STRING,
-	INT,
-	UNSIGNEDINT,
-	BOOLEAN,
-	DATETIME,
-	BASE64,
-	LONG,
-	UNSIGNEDLONG,
-	FLOAT,
-	DOUBLE,
-	BYTE,
-	INVALID;
-    };
-
-    /**
-     * Instance variable for parameter name.
-     */
-    private String name;
-    /**
-     * Instance variable for parameter value.
-     */
-    private String value;
     /**
      * Instance variable for parameter data type.
      */
@@ -77,42 +51,6 @@ public class WebPaParameter {
      * Instance variable for parameter error message.
      */
     private String message;
-
-    /**
-     * Get the parameter name.
-     * 
-     * @return
-     */
-    public String getName() {
-	return name;
-    }
-
-    /**
-     * Set the parameter name.
-     * 
-     * @param name
-     */
-    public void setName(String name) {
-	this.name = name;
-    }
-
-    /**
-     * Get the parameter value.
-     * 
-     * @return
-     */
-    public String getValue() {
-	return value;
-    }
-
-    /**
-     * Set the parameter value.
-     * 
-     * @param value
-     */
-    public void setValue(String value) {
-	this.value = value;
-    }
 
     /**
      * Get the data type.
@@ -233,10 +171,6 @@ public class WebPaParameter {
 	    throw new FailedTransitionException(GeneralError.INCORRECT_JSON, jex);
 	}
 	return webpaParam;
-    }
-
-    public int getDataTypeInt(String dataTypeName) {
-	return DataType.valueOf(dataTypeName.toUpperCase()).ordinal();
     }
 
 }

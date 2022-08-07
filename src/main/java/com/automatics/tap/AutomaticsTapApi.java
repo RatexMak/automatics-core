@@ -131,6 +131,7 @@ import com.automatics.snmp.SnmpCommand;
 import com.automatics.snmp.SnmpParams;
 import com.automatics.snmp.SnmpProtocol;
 import com.automatics.test.AutomaticsTestBase;
+import com.automatics.tr181.TR181Parameter;
 import com.automatics.utils.AutomaticsPropertyUtility;
 import com.automatics.utils.AutomaticsSnmpUtils;
 import com.automatics.utils.AutomaticsUtils;
@@ -141,6 +142,7 @@ import com.automatics.utils.FileUtils;
 import com.automatics.utils.FrameworkHelperUtils;
 import com.automatics.utils.ImageRegionUtils;
 import com.automatics.utils.NonRackUtils;
+import com.automatics.utils.TR181Utils;
 import com.automatics.webpa.WebPaConnectionHandler;
 import com.automatics.webpa.WebPaEntityResponse;
 import com.automatics.webpa.WebPaParameter;
@@ -412,7 +414,7 @@ public class AutomaticsTapApi {
 
 	return propertyValue;
     }
-    
+
     /**
      * Uses the partial key by appending it with the device platform to get the property value
      *
@@ -420,7 +422,8 @@ public class AutomaticsTapApi {
      *            The Dut instance.
      * @param partialPropsKey
      *            Partial property key which will be appended with the device platform to form the complete
-     *            key.(Example:- "cdl.unsigned.image.name." it get resolved to "cdl.unsigned.image.name.{manufacturer}_{model}")
+     *            key.(Example:- "cdl.unsigned.image.name." it get resolved to
+     *            "cdl.unsigned.image.name.{manufacturer}_{model}")
      *
      * @return Device specific property value
      */
@@ -430,7 +433,6 @@ public class AutomaticsTapApi {
 	LOGGER.info("Platform specific resolved property key is : " + propertyToCheck);
 	return AutomaticsTapApi.getSTBPropsValue(propertyToCheck);
     }
-
 
     /**
      * Method to retrieve eSTB MAC address
@@ -527,6 +529,7 @@ public class AutomaticsTapApi {
      */
     public List<WebPaParameter> setWebPaParamsWithWildCard(Dut dut, String parameter, String value, int dataType) {
 
+	/*** webPa specific **/
 	LOGGER.debug("STARTING METHOD: AutomaticsTapApi.setWebPaParams");
 	WebPaParameter webPaParam = new WebPaParameter();
 
@@ -555,10 +558,61 @@ public class AutomaticsTapApi {
      * @return The response of the execution of webpa parameter.
      */
     public WebPaServerResponse setWebPaParameterValuesWithWildCard(Dut dut, List<WebPaParameter> webPaParameters) {
+
+	/*** webPa specific **/
 	LOGGER.debug("STARTING METHOD: setWebPaParameterValues");
 	WebPaServerResponse serverResponse = WebPaConnectionHandler.get().setWebPaParameterValue(dut, webPaParameters);
 	LOGGER.info("ENDING METHOD: setWebPaParameterValues : " + serverResponse.getMessage());
 	return serverResponse;
+    }
+
+    /**
+     * Helper method to set WebPa parameter values
+     * 
+     * @param dut
+     *            The device under test
+     * @param webPaParameters
+     *            The WebPa parameter to set
+     * @return The response of the execution of webpa parameter.
+     */
+    public WebPaServerResponse setWebPaParameterValue(Dut dut, WebPaParameter webPaParameter) {
+
+	// ********WebPA Specific********//
+	LOGGER.debug("STARTING METHOD: webPaParameter");
+
+	List<WebPaParameter> webPaParameters = new ArrayList<WebPaParameter>();
+	webPaParameters.add(webPaParameter);
+
+	WebPaServerResponse serverResponse = WebPaConnectionHandler.get().setWebPaParameterValue(dut, webPaParameters);
+	LOGGER.info("ENDING METHOD: setWebPaParameterValue : " + serverResponse.getMessage());
+
+	return serverResponse;
+    }
+
+    /**
+     * Helper method to get WebPa parameter value
+     * 
+     * @param dut
+     *            The device under test
+     * @param webPaParameters
+     *            The WebPa parameter to get
+     * @return The response of the execution of webpa parameter.
+     */
+    public WebPaServerResponse getWebPaParameterValue(Dut dut, String webPaParameterName) {
+
+	// ********WebPA Specific********//
+	LOGGER.debug("STARTING METHOD: getWebPaParamValuesUsingRestApi");
+	WebPaServerResponse response = null;
+	try {
+	    response = WebPaConnectionHandler.get().getWebPaParamValue(dut, new String[] { webPaParameterName });
+
+	} catch (Exception exception) {
+	    LOGGER.error("FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA GET PARAMS REQUEST: "
+		    + exception.getMessage());
+	    throw new TestException(exception.getMessage());
+	}
+	LOGGER.debug("ENDING METHOD: getWebPaParamValuesUsingRestApi");
+	return response;
     }
 
     /**
@@ -572,6 +626,8 @@ public class AutomaticsTapApi {
      * @return the WebPa command response
      */
     public String executeWebPaCommandWithWildCardSupport(Dut dut, String parameter) {
+
+	/*** webPa specific **/
 
 	LOGGER.debug("STARTING METHOD: AutomaticsTapApi.executeWebPaCommand");
 	// for the storing response from executeWebPaCommands API
@@ -609,6 +665,8 @@ public class AutomaticsTapApi {
      */
     public List<String> executeWebPaCommandsWithWildCardSupport(Dut dut, String[] parameterArray) {
 
+	/*** webPa specific **/
+
 	LOGGER.debug("STARTING METHOD: AutomaticsTapApi.executeWebPaCommands");
 
 	LOGGER.debug("Length of Array " + parameterArray.length);
@@ -629,6 +687,8 @@ public class AutomaticsTapApi {
      * @return The value corresponding to TR-069 parameter
      */
     public List<String> getTR69ParameterValuesUsingWebPAWithWildCard(Dut dut, String[] parameter) {
+
+	/*** webPa specific **/
 	List<String> tr69ParamResponse = new ArrayList<String>();
 
 	String commandsCommaSeparated = FrameworkHelperUtils.convertToCommaSeparatedList(parameter);
@@ -648,6 +708,247 @@ public class AutomaticsTapApi {
     }
 
     /**
+     * Helper method to set WebPa parameter values
+     * 
+     * @param dut
+     *            The device under test
+     * @param webPaParameters
+     *            The WebPa parameter to set
+     * @return The response of the execution of webpa parameter.
+     * 
+     * @author Susheela C
+     */
+    public WebPaServerResponse setWebPaParameterValuesUsingRestApi(Dut dut, List<WebPaParameter> webPaParameters) {
+
+	/** webpa specific **/
+	WebPaServerResponse response = null;
+	try {
+	    LOGGER.debug("STARTING METHOD: setWebPaParameterValuesUsingRestApi");
+	    response = WebPaConnectionHandler.get().setWebPaParameterValue(dut, webPaParameters);
+
+	} catch (Exception exception) {
+	    LOGGER.error("FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA SET REQUEST: " + exception.getMessage());
+	    throw new TestException(exception.getMessage());
+	}
+
+	LOGGER.debug("ENDING METHOD: setWebPaParameterValuesUsingRestApi");
+	return response;
+    }
+
+    /**
+     * Helper method to add new entry to dynamic table by providing Table Name and their Parameter Name & Value pairs
+     * (WebPA GET)
+     * 
+     * @param dut
+     *            The device under test
+     * @param tableName
+     *            String representing the Table Name
+     * 
+     * @return The response of the execution of WebPA parameter.
+     * 
+     * @author Susheela C
+     */
+    public WebPaServerResponse getWebPaParamValuesUsingRestApi(Dut dut, String tableName) {
+
+	/** webpa specific **/
+	LOGGER.debug("STARTING METHOD: getWebPaParamValuesUsingRestApi");
+	WebPaServerResponse response = null;
+	try {
+	    response = WebPaConnectionHandler.get().getWebPaParamValue(dut, new String[] { tableName });
+	} catch (Exception exception) {
+	    LOGGER.error("FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA GET PARAMS REQUEST: "
+		    + exception.getMessage());
+	    throw new TestException(exception.getMessage());
+	}
+	LOGGER.debug("ENDING METHOD: getWebPaParamValuesUsingRestApi");
+	return response;
+    }
+
+    /**
+     * Helper method to add new entry to dynamic table by providing Table Name and their Parameter Name & Value pairs
+     * (WebPA GET)
+     * 
+     * @param dut
+     *            The device under test
+     * @param tableName
+     *            String representing the Table Name
+     * 
+     * @return The response of the execution of WebPA parameter.
+     * 
+     * @author Susheela C
+     */
+    public WebPaEntityResponse getWebPaTableParamValuesUsingRestApi(Dut dut, String tableName) {
+
+	/** webpa specific **/
+	LOGGER.debug("STARTING METHOD: getWebPaTableParamValuesUsingRestApi");
+	WebPaEntityResponse response = null;
+	try {
+	    response = WebPaConnectionHandler.get().getWebPaTableParamValue(dut, tableName);
+	} catch (Exception exception) {
+	    LOGGER.error("FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA GET PARAMS REQUEST: "
+		    + exception.getMessage());
+	    throw new TestException(exception.getMessage());
+	}
+	LOGGER.debug("ENDING METHOD: getWebPaTableParamValuesUsingRestApi");
+	return response;
+    }
+
+    /**
+     * Set the TR-069 parameter value using WebPA.
+     * 
+     * @param dut
+     *            The dut to be used.
+     * @param parameters
+     *            TR-069 parameter
+     * @return The status of execution.
+     */
+    public String setTR69ParameterValuesUsingWebPA(Dut dut, List<WebPaParameter> webPaParameters) {
+
+	/** webpa specific **/
+	LOGGER.info("Setting TR69 param values using WebPa");
+
+	WebPaServerResponse serverResponse = WebPaConnectionHandler.get().setWebPaParameterValue(dut, webPaParameters);
+	LOGGER.info("serverResponse[Message] : " + serverResponse.getMessage() + "\nserverResponse[StatusCode] "
+		+ serverResponse.getStatusCode());
+	return serverResponse.getMessage();
+    }
+
+    /**
+     * Get the TR-069 parameter values using WebPA.
+     * 
+     * @param dut
+     *            The dut to be used.
+     * @param parameters
+     *            List of TR-069 parameter of type WebPaParameter
+     * @return The status message of setting the corresponding to TR-069 parameter
+     */
+    public Map<String, String> executeMultipleWebPaSetCommands(Dut dut, List<WebPaParameter> webPaParameters) {
+	LOGGER.debug("STARTING METHOD: AutomaticsTapApi.executeMultipleWebPaCommands");
+	Map<String, String> webPAParamResponse = new HashMap<String, String>();
+
+	List<TR181Parameter> tr181ParameterList = TR181Utils.convertWebPaToTR181ParamObject(webPaParameters);
+	Map<String, String> response = setTR181ParameterValues(dut, tr181ParameterList, null);
+	List<WebPaParameter> responseWebPaParams = TR181Utils.convertTR181ToWebPaParamObject(response);
+
+	if (null != responseWebPaParams && !responseWebPaParams.isEmpty()) {
+
+	    boolean responseFound = false;
+	    for (WebPaParameter webPaParam : webPaParameters) {
+		for (WebPaParameter responseParameter : responseWebPaParams) {
+
+		    responseFound = false;
+		    if (responseParameter.getName().equals(webPaParam.getName())
+			    && CommonMethods.isNotNull(responseParameter.getValue())) {
+			webPAParamResponse.put(webPaParam.getName(), AutomaticsConstants.SUCCESS);
+			responseFound = true;
+			break;
+		    }
+
+		    if (!responseFound) {
+			webPAParamResponse.put(webPaParam.getName(), AutomaticsConstants.FAILED);
+		    }
+
+		}
+	    }
+
+	}
+
+	LOGGER.debug("COMPLETED METHOD: AutomaticsTapApi.executeMultipleWebPaCommands");
+	return webPAParamResponse;
+    }
+
+    /**
+     * Method to execute the WebPA command and get the appropriate error message in case of any failure.
+     * 
+     * @param dut
+     *            The {@link Dut} to be used.
+     * @param parameters
+     *            The TR-181 parameter to be verified.
+     * @return List of {@link WebPaParameter} with WebPA response.
+     */
+    public List<WebPaParameter> executeWebPaGetCommand(Dut dut, String... parameters) {
+
+	List<String> tr181Params = new ArrayList<String>();
+
+	for (String webPaParam : parameters) {
+	    tr181Params.add(webPaParam);
+	}
+
+	List<TR181Parameter> tr181ResponseList = getTR181ParameterValues(dut, tr181Params, null);
+	List<WebPaParameter> webPaParams = TR181Utils.convertTR181ToWebPaParamObject(tr181ResponseList);
+
+	return webPaParams;
+    }
+
+    /**
+     * Helper method to set WebPa Attribute Values and Execute the command
+     * 
+     * @param dut
+     *            The device under test
+     * @param webPaParameters
+     *            The WebPa parameter to set
+     * @return The response of the execution of webpa parameter.
+     * 
+     * @author sgunas200
+     */
+    public boolean setWebPaAttributeValues(Dut dut, List<WebPaParameter> webPaParameters) {
+	LOGGER.debug("STARTING METHOD: setWebPaAttributeValues");
+	boolean status = false;
+
+	List<TR181Parameter> tr181ParameterList = TR181Utils.convertWebPaToTR181ParamObject(webPaParameters);
+	Map<String, String> response = setTR181ParameterValues(dut, tr181ParameterList, null);
+
+	if (null != response) {
+	    for (String key : response.keySet()) {
+		if ("FAILED".equals(response.get(key))) {
+		    status = false;
+		    break;
+		} else {
+		    status = true;
+		}
+	    }
+	}
+
+	LOGGER.debug("ENDING METHOD: setWebPaAttributeValues");
+	return status;
+    }
+
+    /**
+     * Get the TR-069 parameter values using WebPA and executing the webpa command
+     * 
+     * @param dut
+     *            The dut to be used.
+     * @param parameters
+     *            TR-069 parameter
+     * @return The value corresponding to TR-069 parameter
+     * 
+     * @author sgunas200
+     */
+    public boolean getWebPaAttributeValues(Dut dut, String[] parameters) {
+	LOGGER.debug("STARTING METHOD: getTR69ParameterValuesUsingWebPA");
+	boolean status = false;
+
+	List<TR181Parameter> tr181Parameters = getTR181ParameterValues(dut, Arrays.asList(parameters), null);
+	if (null != tr181Parameters && !tr181Parameters.isEmpty()) {
+
+	    for (TR181Parameter tr181Parameter : tr181Parameters) {
+		status = false;
+		for (String parameter : parameters) {
+		    if (parameter.equals(tr181Parameter.getName())
+			    && CommonMethods.isNotNull(tr181Parameter.getValue())) {
+			status = true;
+			break;
+		    }
+		}
+
+	    }
+	}
+
+	LOGGER.debug("ENDING METHOD: getTR69ParameterValuesUsingWebPA");
+	return status;
+    }
+
+    /**
      * Get the values of multiple TR-181 paramters using webPa
      * 
      * @param dut
@@ -658,19 +959,264 @@ public class AutomaticsTapApi {
      */
     public Map<String, String> executeMultipleWebPaGetCommands(Dut dut, String[] parameters) {
 
-	Map<String, String> tr69ParamResponse = new HashMap<String, String>();
-	WebPaServerResponse serverResponse = WebPaConnectionHandler.get().getWebPaParamValue(dut, parameters);
+	List<TR181Parameter> tr181Params = getTR181ParameterValues(dut, Arrays.asList(parameters), null);
 
-	List<WebPaParameter> params = serverResponse.getParams();
-
-	if (null != params && !params.isEmpty()) {
-	    for (WebPaParameter webPaParameter : params) {
-		tr69ParamResponse.put(webPaParameter.getName(), webPaParameter.getValue());
-	    }
-	}
+	Map<String, String> tr69ParamResponse = TR181Utils.convertTR181ResponseToMap(tr181Params);
 
 	LOGGER.debug("COMPLETED METHOD: AutomaticsTapApi.executeMultipleWebPaCommands");
 	return tr69ParamResponse;
+    }
+
+    /**
+     * Method to execute a single WebPA response and return the result.
+     * 
+     * @param dut
+     *            Dut instance in which test need to be executed
+     * @param parameter
+     *            WebPA command to be executed.
+     * 
+     * @return the WebPa command response
+     */
+    public List<WebPaParameter> setWebPaParams(Dut dut, String parameter, String value, int dataType) {
+
+	LOGGER.debug("STARTING METHOD: AutomaticsTapApi.setWebPaParams");
+	WebPaParameter webPaParam = new WebPaParameter();
+
+	webPaParam.setDataType(dataType);
+	webPaParam.setName(parameter);
+	webPaParam.setValue(value);
+	List<WebPaParameter> webPaParameters = new ArrayList<WebPaParameter>();
+	webPaParameters.add(webPaParam);
+
+	List<TR181Parameter> tr181Params = TR181Utils.convertWebPaToTR181ParamObject(webPaParameters);
+	Map<String, String> tr181Response = setTR181ParameterValues(dut, tr181Params, null);
+
+	List<WebPaParameter> webPaParamsResponse = TR181Utils.convertTR181ToWebPaParamObject(tr181Response);
+
+	LOGGER.debug("ENDING METHOD: AutomaticsTapApi.setWebPaParams");
+	return webPaParamsResponse;
+    }
+
+    /**
+     * Helper method to set WebPa parameter values
+     * 
+     * @param dut
+     *            The device under test
+     * @param webPaParameters
+     *            The WebPa parameter to set
+     * @return The response of the execution of webpa parameter.
+     */
+    public WebPaServerResponse setWebPaParameterValues(Dut dut, List<WebPaParameter> webPaParameters) {
+	LOGGER.debug("STARTING METHOD: setWebPaParameterValues");
+
+	List<TR181Parameter> parameterList = TR181Utils.convertWebPaToTR181ParamObject(webPaParameters);
+	Map<String, String> response = setTR181ParameterValues(dut, parameterList, null);
+
+	WebPaServerResponse webPaResponse = TR181Utils.convertTR181ToWebPaResponseObject(response);
+	LOGGER.info("ENDING METHOD: setWebPaParameterValues : " + webPaResponse.getMessage());
+	return webPaResponse;
+    }
+
+    /**
+     * Method to execute a single WebPA response and return the result.
+     * 
+     * @param dut
+     *            Dut instance in which test need to be executed
+     * @param parameter
+     *            WebPA command to be executed.
+     * 
+     * @return the WebPa command response
+     */
+    public String executeWebPaCommand(Dut dut, String parameter) {
+
+	LOGGER.debug("STARTING METHOD: AutomaticsTapApi.executeWebPaCommand");
+
+	String tr181ParamValue = null;
+
+	List<String> parameterList = new ArrayList<String>();
+	parameterList.add(parameter);
+
+	List<TR181Parameter> paramResponseList = getTR181ParameterValues(dut, parameterList, null);
+	if (null != paramResponseList && !paramResponseList.isEmpty()) {
+	    TR181Parameter tr181Parameter = paramResponseList.get(0);
+	    if (null != tr181Parameter) {
+		tr181ParamValue = tr181Parameter.getValue();
+	    }
+	}
+
+	LOGGER.debug("ENDING METHOD: AutomaticsTapApi.executeWebPaCommand");
+	return tr181ParamValue;
+    }
+
+    /**
+     * Method to execute multiple WebPA response and return the result.
+     * 
+     * @param dut
+     *            Dut instance in which test need to be executed
+     * @param parameterArray
+     *            List containing the WebPA params to be executed
+     * @param value
+     * 
+     * @return List containing the response of all the parameteres
+     */
+    public List<String> executeWebPaCommands(Dut dut, String[] parameterArray) {
+
+	LOGGER.debug("STARTING METHOD: AutomaticsTapApi.executeWebPaCommands");
+
+	List<String> tr181ParamsResponse = null;
+
+	if (null != parameterArray && parameterArray.length > 0) {
+
+	    List<String> tr181ParamList = Arrays.asList(parameterArray);
+
+	    List<TR181Parameter> paramResponseList = getTR181ParameterValues(dut, tr181ParamList, null);
+
+	    if (null != paramResponseList && !paramResponseList.isEmpty()) {
+
+		tr181ParamsResponse = new ArrayList<String>();
+
+		for (TR181Parameter tr181Parameter : paramResponseList) {
+
+		    if (null != tr181Parameter) {
+			tr181ParamsResponse.add(tr181Parameter.getValue());
+		    }
+		}
+	    }
+	}
+
+	LOGGER.debug("ENDING METHOD: AutomaticsTapApi.executeWebPaCommands");
+	return tr181ParamsResponse;
+    }
+
+    /**
+     * Get the TR-069 parameter values using WebPA.
+     * 
+     * @param dut
+     *            The dut to be used.
+     * @param parameters
+     *            TR-069 parameter
+     * @return The value corresponding to TR-069 parameter
+     */
+    public List<String> getTR69ParameterValuesUsingWebPA(Dut dut, String[] parameter) {
+
+	List<String> tr181ParamsResponse = executeWebPaCommands(dut, parameter);
+
+	return tr181ParamsResponse;
+    }
+
+    /**
+     * Get the TR-069 parameter values using WebPA.
+     * 
+     * @param dut
+     *            The dut to be used.
+     * @param parameters
+     *            TR-069 parameter
+     * @return The value corresponding to TR-069 parameter
+     */
+    public WebPaServerResponse getTR69ParameterValuesUsingWebPA(Dut dut, String parameter) {
+	List<String> tr181Params = new ArrayList<String>();
+	tr181Params.add(parameter);
+
+	List<TR181Parameter> tr181ResponseList = getTR181ParameterValues(dut, tr181Params, null);
+	List<WebPaParameter> webPaParams = TR181Utils.convertTR181ToWebPaParamObject(tr181ResponseList);
+	WebPaServerResponse serverResponse = new WebPaServerResponse();
+	serverResponse.setParams(webPaParams);
+
+	return serverResponse;
+    }
+
+    /**
+     * Helper method to update entries in dynamic table by providing Table Name and their Parameter Name & Value pairs
+     * (WebPA PUT)
+     * 
+     * @param dut
+     *            The device under test
+     * @param tableName
+     *            String representing the Table Name
+     * @param paramKeyValue
+     *            Map representing the parameter which is in key value pair.
+     * 
+     * @return The response of the execution of WebPA parameter.
+     * 
+     * @author Susheela C
+     */
+    public WebPaServerResponse putWebpaTableParamUsingRestApi(Dut dut, String tableName,
+	    Map<String, HashMap<String, List<String>>> paramKeyValue) {
+	LOGGER.debug("STARTING METHOD: putWebpaTableParamUsingRestApi");
+	WebPaServerResponse response = new WebPaServerResponse();
+	try {
+	    if (!paramKeyValue.isEmpty()) {
+		response = WebPaConnectionHandler.get().putWebPaParameterValue(dut, tableName, paramKeyValue);
+	    } else {
+		throw new TestException("Empty paramKeyValue received...");
+	    }
+	} catch (Exception exception) {
+	    LOGGER.error("FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA PUT PARAMS REQUEST: "
+		    + exception.getMessage());
+	    throw new TestException(exception.getMessage());
+	}
+	LOGGER.debug("ENDING METHOD: putWebpaTableParamUsingRestApi");
+	return response;
+    }
+
+    /**
+     * Helper method to add new entry to dynamic table by providing Table Name and their Parameter Name & Value pairs
+     * (WebPA POST)
+     * 
+     * @param dut
+     *            The device under test
+     * @param tableName
+     *            String representing the Table Name
+     * @param paramKeyValue
+     *            Map representing the parameter which is in key value pair.
+     * 
+     * @return The response of the execution of WebPA parameter.
+     * 
+     * @author Susheela C
+     */
+    public WebPaServerResponse postWebpaTableParamUsingRestApi(Dut dut, String tableName,
+	    Map<String, List<String>> paramKeyValue) {
+	LOGGER.debug("STARTING METHOD: postWebpaTableParamUsingRestApi");
+	WebPaServerResponse response = null;
+	try {
+	    if (!paramKeyValue.isEmpty()) {
+		response = WebPaConnectionHandler.get().postWebPaParameterValue(dut, tableName, paramKeyValue);
+	    } else {
+		throw new TestException("Empty paramKeyValue received...");
+	    }
+	} catch (Exception exception) {
+	    LOGGER.error("FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA POST PARAMS REQUEST: "
+		    + exception.getMessage());
+	    throw new TestException(exception.getMessage());
+	}
+	LOGGER.debug("ENDING METHOD: postWebpaTableParamUsingRestApi");
+	return response;
+    }
+
+    /**
+     * Helper method to delete entries in dynamic table by providing Table Name (WebPA DELETE)
+     * 
+     * @param dut
+     *            The device under test
+     * @param tableNameWithRow
+     *            String representing the Table Name along with row id.
+     * 
+     * @return The response of the execution of WebPA parameter.
+     * 
+     * @author Susheela C
+     */
+    public WebPaServerResponse deleteTableRowUsingRestApi(Dut dut, String tableNameWithRow) {
+	LOGGER.debug("STARTING METHOD: deleteTableRowUsingRestApi");
+	WebPaServerResponse response = null;
+	try {
+	    response = WebPaConnectionHandler.get().deleteWebPaParameterValue(dut, tableNameWithRow);
+	} catch (Exception exception) {
+	    LOGGER.error(
+		    "FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA DELETE REQUEST: " + exception.getMessage());
+	    throw new TestException(exception.getMessage());
+	}
+	LOGGER.debug("ENDING METHOD: deleteTableRowUsingRestApi");
+	return response;
     }
 
     /**
@@ -774,52 +1320,6 @@ public class AutomaticsTapApi {
     }
 
     /**
-     * Method to execute a single WebPA response and return the result.
-     * 
-     * @param dut
-     *            Dut instance in which test need to be executed
-     * @param parameter
-     *            WebPA command to be executed.
-     * 
-     * @return the WebPa command response
-     */
-    public List<WebPaParameter> setWebPaParams(Dut dut, String parameter, String value, int dataType) {
-
-	LOGGER.debug("STARTING METHOD: AutomaticsTapApi.setWebPaParams");
-	WebPaParameter webPaParam = new WebPaParameter();
-
-	webPaParam.setDataType(dataType);
-	webPaParam.setName(parameter);
-	webPaParam.setValue(value);
-
-	List<WebPaParameter> webPaParameters = new ArrayList<WebPaParameter>();
-	webPaParameters.add(webPaParam);
-
-	WebPaServerResponse webPaSetResponse = setWebPaParameterValues(dut, webPaParameters);
-
-	LOGGER.info("WebPA response : " + webPaSetResponse);
-
-	LOGGER.debug("ENDING METHOD: AutomaticsTapApi.setWebPaParams");
-	return webPaSetResponse.getParams();
-    }
-
-    /**
-     * Helper method to set WebPa parameter values
-     * 
-     * @param dut
-     *            The device under test
-     * @param webPaParameters
-     *            The WebPa parameter to set
-     * @return The response of the execution of webpa parameter.
-     */
-    public WebPaServerResponse setWebPaParameterValues(Dut dut, List<WebPaParameter> webPaParameters) {
-	LOGGER.debug("STARTING METHOD: setWebPaParameterValues");
-	WebPaServerResponse serverResponse = WebPaConnectionHandler.get().setWebPaParameterValue(dut, webPaParameters);
-	LOGGER.info("ENDING METHOD: setWebPaParameterValues : " + serverResponse.getMessage());
-	return serverResponse;
-    }
-
-    /**
      * Sleeps till the specified time elapses.
      * 
      * @param milliseconds
@@ -827,97 +1327,6 @@ public class AutomaticsTapApi {
      */
     public void waitTill(long milliseconds) {
 	AutomaticsUtils.sleep(milliseconds);
-    }
-
-    /**
-     * Method to execute a single WebPA response and return the result.
-     * 
-     * @param dut
-     *            Dut instance in which test need to be executed
-     * @param parameter
-     *            WebPA command to be executed.
-     * 
-     * @return the WebPa command response
-     */
-    public String executeWebPaCommand(Dut dut, String parameter) {
-
-	LOGGER.debug("STARTING METHOD: AutomaticsTapApi.executeWebPaCommand");
-	// for the storing response from executeWebPaCommands API
-	List<String> response = null;
-	// stores the result of the WebPA comand execution
-	String commandResult = null;
-
-	LOGGER.debug("WebPA Command to be run on client " + parameter);
-	String[] commandArray = new String[] { parameter };
-	response = executeWebPaCommands(dut, commandArray);
-
-	// retrieving the first index of the response so as to get the value of
-	// the parameter if the response array is
-	// of length 1
-	if (response.size() == 1) {
-	    commandResult = response.get(response.size() - 1);
-
-	}
-	LOGGER.info("WebPA response : " + commandResult);
-
-	LOGGER.debug("ENDING METHOD: AutomaticsTapApi.executeWebPaCommand");
-	return commandResult;
-    }
-
-    /**
-     * Method to execute multiple WebPA response and return the result.
-     * 
-     * @param dut
-     *            Dut instance in which test need to be executed
-     * @param parameterArray
-     *            List containing the WebPA params to be executed
-     * @param value
-     * 
-     * @return List containing the response of all the parameteres
-     */
-    public List<String> executeWebPaCommands(Dut dut, String[] parameterArray) {
-
-	LOGGER.debug("STARTING METHOD: AutomaticsTapApi.executeWebPaCommands");
-
-	LOGGER.debug("Length of Array " + parameterArray.length);
-	LOGGER.debug("Command Array" + parameterArray[parameterArray.length - 1]);
-	List<String> response = getTR69ParameterValuesUsingWebPA(dut, parameterArray);
-	LOGGER.debug("Response.size " + response.size());
-	LOGGER.debug("ENDING METHOD: AutomaticsTapApi.executeWebPaCommands");
-	return response;
-    }
-
-    /**
-     * Get the TR-069 parameter values using WebPA.
-     * 
-     * @param dut
-     *            The dut to be used.
-     * @param parameters
-     *            TR-069 parameter
-     * @return The value corresponding to TR-069 parameter
-     */
-    public List<String> getTR69ParameterValuesUsingWebPA(Dut dut, String[] parameter) {
-	List<String> tr69ParamResponse = new ArrayList<String>();
-
-	String commandsCommaSeparated = FrameworkHelperUtils.convertToCommaSeparatedList(parameter);
-	LOGGER.info("About to get values for TR69 params {} via WebPa", commandsCommaSeparated);
-
-	WebPaServerResponse serverResponse = WebPaConnectionHandler.get().getWebPaParamValue(dut, parameter);
-
-	if (null != serverResponse) {
-	    List<WebPaParameter> params = serverResponse.getParams();
-	    if (null != params && !params.isEmpty()) {
-		for (WebPaParameter webPaParameter : params) {
-		    tr69ParamResponse.add(webPaParameter.getValue());
-		}
-	    }
-	} else {
-	    LOGGER.info("WebPA Response is null.");
-	}
-
-	LOGGER.info("TR69 Response via WebPa: {}", tr69ParamResponse);
-
-	return tr69ParamResponse;
     }
 
     /**
@@ -1468,22 +1877,6 @@ public class AutomaticsTapApi {
 
     public String getPlatform(Dut dut) {
 	return (dut.getManufacturer() + '_' + dut.getModel()).toLowerCase();
-    }
-
-    /**
-     * Get the TR-069 parameter values using WebPA.
-     * 
-     * @param dut
-     *            The dut to be used.
-     * @param parameters
-     *            TR-069 parameter
-     * @return The value corresponding to TR-069 parameter
-     */
-    public WebPaServerResponse getTR69ParameterValuesUsingWebPA(Dut dut, String parameter) {
-	WebPaServerResponse serverResponse = WebPaConnectionHandler.get().getWebPaParamValue(dut,
-		new String[] { parameter });
-
-	return serverResponse;
     }
 
     /**
@@ -2438,51 +2831,6 @@ public class AutomaticsTapApi {
     }
 
     /**
-     * Get the TR-069 parameter values using WebPA.
-     * 
-     * @param dut
-     *            The dut to be used.
-     * @param parameters
-     *            List of TR-069 parameter of type WebPaParameter
-     * @return The status message of setting the corresponding to TR-069 parameter
-     */
-    public Map<String, String> executeMultipleWebPaSetCommands(Dut dut, List<WebPaParameter> webPaParameters) {
-	LOGGER.debug("STARTING METHOD: AutomaticsTapApi.executeMultipleWebPaCommands");
-	Map<String, String> webPAParamResponse = new HashMap<String, String>();
-	WebPaServerResponse serverResponse = WebPaConnectionHandler.get().setWebPaParameterValue(dut, webPaParameters);
-
-	List<WebPaParameter> params = serverResponse.getParams();
-
-	if (null != params && !params.isEmpty()) {
-	    for (WebPaParameter webPaParameter : params) {
-		webPAParamResponse.put(webPaParameter.getName(), webPaParameter.getMessage());
-	    }
-	}
-
-	LOGGER.debug("COMPLETED METHOD: AutomaticsTapApi.executeMultipleWebPaCommands");
-	return webPAParamResponse;
-    }
-
-    /**
-     * Set the TR-069 parameter value using WebPA.
-     * 
-     * @param dut
-     *            The dut to be used.
-     * @param parameters
-     *            TR-069 parameter
-     * @return The status of execution.
-     */
-    public String setTR69ParameterValuesUsingWebPA(Dut dut, List<WebPaParameter> webPaParameters) {
-
-	LOGGER.info("Setting TR69 param values using WebPa");
-
-	WebPaServerResponse serverResponse = WebPaConnectionHandler.get().setWebPaParameterValue(dut, webPaParameters);
-	LOGGER.info("serverResponse[Message] : " + serverResponse.getMessage() + "\nserverResponse[StatusCode] "
-		+ serverResponse.getStatusCode());
-	return serverResponse.getMessage();
-    }
-
-    /**
      * Get the known reboot counter value
      * 
      * @return knownRebootCounter
@@ -3408,224 +3756,6 @@ public class AutomaticsTapApi {
     }
 
     /**
-     * Helper method to update entries in dynamic table by providing Table Name and their Parameter Name & Value pairs
-     * (WebPA PUT)
-     * 
-     * @param dut
-     *            The device under test
-     * @param tableName
-     *            String representing the Table Name
-     * @param paramKeyValue
-     *            Map representing the parameter which is in key value pair.
-     * 
-     * @return The response of the execution of WebPA parameter.
-     * 
-     * @author Susheela C
-     */
-    public WebPaServerResponse putWebpaTableParamUsingRestApi(Dut dut, String tableName,
-	    Map<String, HashMap<String, List<String>>> paramKeyValue) {
-	LOGGER.debug("STARTING METHOD: putWebpaTableParamUsingRestApi");
-	WebPaServerResponse response = new WebPaServerResponse();
-	try {
-	    if (!paramKeyValue.isEmpty()) {
-		response = WebPaConnectionHandler.get().putWebPaParameterValue(dut, tableName, paramKeyValue);
-	    } else {
-		throw new TestException("Empty paramKeyValue received...");
-	    }
-	} catch (Exception exception) {
-	    LOGGER.error("FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA PUT PARAMS REQUEST: "
-		    + exception.getMessage());
-	    throw new TestException(exception.getMessage());
-	}
-	LOGGER.debug("ENDING METHOD: putWebpaTableParamUsingRestApi");
-	return response;
-    }
-
-    /**
-     * Helper method to add new entry to dynamic table by providing Table Name and their Parameter Name & Value pairs
-     * (WebPA POST)
-     * 
-     * @param dut
-     *            The device under test
-     * @param tableName
-     *            String representing the Table Name
-     * @param paramKeyValue
-     *            Map representing the parameter which is in key value pair.
-     * 
-     * @return The response of the execution of WebPA parameter.
-     * 
-     * @author Susheela C
-     */
-    public WebPaServerResponse postWebpaTableParamUsingRestApi(Dut dut, String tableName,
-	    Map<String, List<String>> paramKeyValue) {
-	LOGGER.debug("STARTING METHOD: postWebpaTableParamUsingRestApi");
-	WebPaServerResponse response = null;
-	try {
-	    if (!paramKeyValue.isEmpty()) {
-		response = WebPaConnectionHandler.get().postWebPaParameterValue(dut, tableName, paramKeyValue);
-	    } else {
-		throw new TestException("Empty paramKeyValue received...");
-	    }
-	} catch (Exception exception) {
-	    LOGGER.error("FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA POST PARAMS REQUEST: "
-		    + exception.getMessage());
-	    throw new TestException(exception.getMessage());
-	}
-	LOGGER.debug("ENDING METHOD: postWebpaTableParamUsingRestApi");
-	return response;
-    }
-
-    /**
-     * Helper method to add new entry to dynamic table by providing Table Name and their Parameter Name & Value pairs
-     * (WebPA GET)
-     * 
-     * @param dut
-     *            The device under test
-     * @param tableName
-     *            String representing the Table Name
-     * 
-     * @return The response of the execution of WebPA parameter.
-     * 
-     * @author Susheela C
-     */
-    public WebPaEntityResponse getWebPaTableParamValuesUsingRestApi(Dut dut, String tableName) {
-	LOGGER.debug("STARTING METHOD: getWebPaTableParamValuesUsingRestApi");
-	WebPaEntityResponse response = null;
-	try {
-	    response = WebPaConnectionHandler.get().getWebPaTableParamValue(dut, tableName);
-	} catch (Exception exception) {
-	    LOGGER.error("FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA GET PARAMS REQUEST: "
-		    + exception.getMessage());
-	    throw new TestException(exception.getMessage());
-	}
-	LOGGER.debug("ENDING METHOD: getWebPaTableParamValuesUsingRestApi");
-	return response;
-    }
-
-    /**
-     * Helper method to add new entry to dynamic table by providing Table Name and their Parameter Name & Value pairs
-     * (WebPA GET)
-     * 
-     * @param dut
-     *            The device under test
-     * @param tableName
-     *            String representing the Table Name
-     * 
-     * @return The response of the execution of WebPA parameter.
-     * 
-     * @author Susheela C
-     */
-    public WebPaServerResponse getWebPaParamValuesUsingRestApi(Dut dut, String tableName) {
-	LOGGER.debug("STARTING METHOD: getWebPaParamValuesUsingRestApi");
-	WebPaServerResponse response = null;
-	try {
-	    response = WebPaConnectionHandler.get().getWebPaParamValue(dut, new String[] { tableName });
-	} catch (Exception exception) {
-	    LOGGER.error("FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA GET PARAMS REQUEST: "
-		    + exception.getMessage());
-	    throw new TestException(exception.getMessage());
-	}
-	LOGGER.debug("ENDING METHOD: getWebPaParamValuesUsingRestApi");
-	return response;
-    }
-
-    /**
-     * Helper method to delete entries in dynamic table by providing Table Name (WebPA DELETE)
-     * 
-     * @param dut
-     *            The device under test
-     * @param tableNameWithRow
-     *            String representing the Table Name along with row id.
-     * 
-     * @return The response of the execution of WebPA parameter.
-     * 
-     * @author Susheela C
-     */
-    public WebPaServerResponse deleteTableRowUsingRestApi(Dut dut, String tableNameWithRow) {
-	LOGGER.debug("STARTING METHOD: deleteTableRowUsingRestApi");
-	WebPaServerResponse response = null;
-	try {
-	    response = WebPaConnectionHandler.get().deleteWebPaParameterValue(dut, tableNameWithRow);
-	} catch (Exception exception) {
-	    LOGGER.error(
-		    "FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA DELETE REQUEST: " + exception.getMessage());
-	    throw new TestException(exception.getMessage());
-	}
-	LOGGER.debug("ENDING METHOD: deleteTableRowUsingRestApi");
-	return response;
-    }
-
-    /**
-     * Helper method to set WebPa parameter values
-     * 
-     * @param dut
-     *            The device under test
-     * @param webPaParameters
-     *            The WebPa parameter to set
-     * @return The response of the execution of webpa parameter.
-     * 
-     * @author Susheela C
-     */
-    public WebPaServerResponse setWebPaParameterValuesUsingRestApi(Dut dut, List<WebPaParameter> webPaParameters) {
-	WebPaServerResponse response = null;
-	try {
-	    LOGGER.debug("STARTING METHOD: setWebPaParameterValuesUsingRestApi");
-	    response = WebPaConnectionHandler.get().setWebPaParameterValue(dut, webPaParameters);
-
-	} catch (Exception exception) {
-	    LOGGER.error("FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA SET REQUEST: " + exception.getMessage());
-	    throw new TestException(exception.getMessage());
-	}
-
-	LOGGER.debug("ENDING METHOD: setWebPaParameterValuesUsingRestApi");
-	return response;
-    }
-
-    /**
-     * Get the TR-069 parameter values using WebPA and executing the webpa command
-     * 
-     * @param dut
-     *            The dut to be used.
-     * @param parameters
-     *            TR-069 parameter
-     * @return The value corresponding to TR-069 parameter
-     * 
-     * @author sgunas200
-     */
-    public boolean getWebPaAttributeValues(Dut dut, String[] parameter) {
-	LOGGER.debug("STARTING METHOD: getTR69ParameterValuesUsingWebPA");
-	boolean status = false;
-	WebPaServerResponse serverResponse = WebPaConnectionHandler.get().getWebPaParamValue(dut, parameter);
-	if (serverResponse.getStatusCode() == HttpStatus.SC_OK) {
-	    status = true;
-	}
-	LOGGER.debug("ENDING METHOD: getTR69ParameterValuesUsingWebPA");
-	return status;
-    }
-
-    /**
-     * Helper method to set WebPa Attribute Values and Execute the command
-     * 
-     * @param dut
-     *            The device under test
-     * @param webPaParameters
-     *            The WebPa parameter to set
-     * @return The response of the execution of webpa parameter.
-     * 
-     * @author sgunas200
-     */
-    public boolean setWebPaAttributeValues(Dut dut, List<WebPaParameter> webPaParameters) {
-	LOGGER.debug("STARTING METHOD: setWebPaAttributeValues");
-	boolean status = false;
-	WebPaServerResponse serverResponse = WebPaConnectionHandler.get().setWebPaParameterValue(dut, webPaParameters);
-	if (serverResponse.getStatusCode() == HttpStatus.SC_OK) {
-	    status = true;
-	}
-	LOGGER.debug("ENDING METHOD: setWebPaAttributeValues");
-	return status;
-    }
-
-    /**
      * Executes the command & the options inside the ATOM Console. The Command to be
      * 
      * @param dut
@@ -3738,35 +3868,6 @@ public class AutomaticsTapApi {
 	    response = deviceConnectionProvider.execute((Device) camDevice, commandList);
 	}
 	return response;
-    }
-
-    /**
-     * Method to execute the WebPA command and get the appropriate error message in case of any failure.
-     * 
-     * @param dut
-     *            The {@link Dut} to be used.
-     * @param parameters
-     *            The TR-181 parameter to be verified.
-     * @return List of {@link WebPaParameter} with WebPA response.
-     */
-    public List<WebPaParameter> executeWebPaGetCommand(Dut dut, String... parameters) {
-	List<WebPaParameter> params = null;
-	WebPaServerResponse serverResponse = WebPaConnectionHandler.get().getWebPaParamValue(dut, parameters);
-
-	if (serverResponse.getStatusCode() == HttpStatus.SC_OK) {
-	    params = serverResponse.getParams();
-	} else {
-	    JSONObject errorMessage = new JSONObject();
-	    try {
-		errorMessage.put("statusCode", serverResponse.getStatusCode());
-		errorMessage.put("message", serverResponse.getMessage());
-	    } catch (JSONException e) {
-		LOGGER.error("JSON Exception while processing JSON Response from WebPA", e);
-	    }
-
-	    throw new TestException(errorMessage.toString());
-	}
-	return params;
     }
 
     /**
@@ -6213,6 +6314,7 @@ public class AutomaticsTapApi {
      */
     public String setTR69ParameterValues(Dut dut, List<Parameter> parameterList) {
 
+	/***** TR69 specific *****/
 	String response = "Failed to set TR69 param value";
 	TR69Provider tr69Provider = BeanUtils.getTR69Provider();
 
@@ -6275,6 +6377,7 @@ public class AutomaticsTapApi {
      */
     public List<String> getTr69ParameterValue(Dut dut, String[] parameters) {
 
+	/** TR69 specific ***/
 	TR69Provider tr69Provider = BeanUtils.getTR69Provider();
 	List<String> response = null;
 	if (null != tr69Provider) {
@@ -6321,56 +6424,89 @@ public class AutomaticsTapApi {
      * @param tr181AccessMethod
      * @return
      */
-    public List<Parameter> getTR181ParameterValues(Dut dut, List<String> parameterList,
+    public List<TR181Parameter> getTR181ParameterValues(Dut dut, List<String> parameterList,
 	    TR181AccessMethods tr181AccessMethod) {
-	List<Parameter> response = null;
+	return getTR181ParameterValue(dut, parameterList, tr181AccessMethod);
+
+    }
+
+    private List<TR181Parameter> getTR181ParameterValue(Dut dut, List<String> parameterList,
+	    TR181AccessMethods tr181AccessMethod) {
+
+	List<TR181Parameter> response = null;
 	String resp = null;
 	if (null != parameterList && !parameterList.isEmpty()) {
-	    if (tr181AccessMethod == null) {
-		tr181AccessMethod = TR181AccessMethods.valueOf(
-			AutomaticsPropertyUtility.getProperty(AutomaticsConstants.DEFAULT_TR181_ACCESS_METHOD));
-	    }
-	    if (TR181AccessMethods.WEBPA == tr181AccessMethod) {
-		response = getTR181ParameterValuesUsingWebPA(dut, parameterList);
-	    } else if (TR181AccessMethods.TR69 == tr181AccessMethod) {
-		String[] paramArray = null;
-		List<String> tr69Response = getTr69ParameterValue(dut, parameterList.toArray(paramArray));
-		response = convertListStringtoParams(tr69Response);
-	    } else if (TR181AccessMethods.TR181 == tr181AccessMethod) {
-		if (null != deviceConnectionProvider) {
-		    resp = deviceConnectionProvider.execute((Device) dut, parameterList);
-		    LOGGER.info("TR181 get parameter value : " + resp);
-		    response = convertListStringtoParams(Arrays.asList(resp));
-		} else {
-		    LOGGER.error("DeviceConnectionProvider not configured. Failed to get TR181 parameters");
+
+	    tr181AccessMethod = getTR181AccessMethod(tr181AccessMethod);
+
+	    LOGGER.info("TR181 Access Method: {}", tr181AccessMethod);
+
+	    switch (tr181AccessMethod) {
+	    case WEBPA: {
+
+		for (String webPaParam : parameterList) {
+
+		    WebPaServerResponse webPaServerResponse = getWebPaParameterValue(dut, webPaParam);
+		    if (null != webPaServerResponse) {
+
+			if (null == response) {
+			    response = new ArrayList<TR181Parameter>();
+			}
+
+			response.addAll(TR181Utils.convertWebPaToTR181ParamObject(webPaServerResponse.getParams()));
+
+		    }
 		}
-	    } else {
-		LOGGER.error("NO valid device data model received !! GET TR-181 parameter values failed");
+		break;
+	    }
+	    case TR69: {
+
+		String[] paramArray = null;
+
+		List<String> tr69Response = getTr69ParameterValue(dut, parameterList.toArray(paramArray));
+		response = TR181Utils.convertToTR181Response(tr69Response);
+		break;
+	    }
+
+	    case DMCLI: {
+		if (null != deviceConnectionProvider) {
+
+		    String dmcliCommand = null;
+		    String value = null;
+
+		    LOGGER.info("Going to find protocol specific names");
+		    List<TR181Parameter> dmcliParamNames = TR181Utils.getTR181ParameterObjects(parameterList,
+			    TR181AccessMethods.DMCLI);
+
+		    LOGGER.info("Going to execute commands");
+		    for (TR181Parameter param : dmcliParamNames) {
+			dmcliCommand = LinuxCommandConstants.DMCLI_GET_COMMAND + param.getProtocolSpecificParamName();
+			// Execute dmcli command
+			resp = deviceConnectionProvider.execute((Device) dut, dmcliCommand);
+
+			LOGGER.info("Dmcli response : {}", resp);
+			value = TR181Utils.parseResponseAndGetDmcliParamValues(resp);
+			LOGGER.info("Dmcli param value : {}", value);
+			param.setValue(value);
+		    }
+
+		    response = dmcliParamNames;
+
+		} else {
+		    LOGGER.error("DeviceConnectionProvider not configured. Failed to get TR181 parameters.");
+		}
+		break;
+	    }
+	    default:
+		LOGGER.error("TR181 Access Method {} not handled.", tr181AccessMethod);
+		break;
+
 	    }
 	} else {
 	    LOGGER.error("TR181 parameter is null.");
 	}
 	LOGGER.info("TR181 Response : " + response);
 
-	return response;
-    }
-
-    /**
-     * Method to convert List of string to list of parameter
-     * 
-     * @param paramValues
-     * @return
-     */
-    private List<Parameter> convertListStringtoParams(List<String> paramValues) {
-	List<Parameter> response = null;
-	if (paramValues != null) {
-	    response = new ArrayList<Parameter>();
-	    for (String value : paramValues) {
-		Parameter param = new Parameter();
-		param.setParamValue(value);
-		response.add(param);
-	    }
-	}
 	return response;
     }
 
@@ -6383,87 +6519,117 @@ public class AutomaticsTapApi {
      * @param tr181AccessMethod
      * @return
      */
-    public String setTR181ParameterValues(Dut dut, List<Parameter> parameterArray,
+    public Map<String, String> setTR181ParameterValues(Dut dut, List<TR181Parameter> parameterList,
 	    TR181AccessMethods tr181AccessMethod) {
-	String response = null;
-	if (tr181AccessMethod == null) {
-	    tr181AccessMethod = TR181AccessMethods
-		    .valueOf(AutomaticsPropertyUtility.getProperty(AutomaticsConstants.DEFAULT_TR181_ACCESS_METHOD));
-	}
-	if (tr181AccessMethod != null && TR181AccessMethods.WEBPA == tr181AccessMethod) {
-	    List<WebPaParameter> webpaParams = new ArrayList<WebPaParameter>();
-	    if (parameterArray != null) {
-		for (Parameter params : parameterArray) {
-		    WebPaParameter webPaParameter = new WebPaParameter();
-		    webPaParameter.setName(params.getParamName());
-		    webPaParameter.setValue(params.getParamValue());
-		    webpaParams.add(webPaParameter);
-		}
-	    }
-	    response = setTR69ParameterValuesUsingWebPA(dut, webpaParams);
-	} else if (tr181AccessMethod != null && TR181AccessMethods.TR69 == tr181AccessMethod) {
-	    response = setTR69ParameterValues(dut, parameterArray);
-	} else if (tr181AccessMethod != null && TR181AccessMethods.TR181 == tr181AccessMethod) {
-	    if (null != deviceConnectionProvider) {
-		List<String> commands = new ArrayList<String>();
-		if (parameterArray != null) {
-		    for (Parameter parameter : parameterArray) {
-			commands.add(parameter.getParamValue());
+	return setTR181ParameterValue(dut, parameterList, tr181AccessMethod);
+    }
+
+    private Map<String, String> setTR181ParameterValue(Dut dut, List<TR181Parameter> parameterList,
+	    TR181AccessMethods tr181AccessMethod) {
+	Map<String, String> response = new HashMap<String, String>();
+
+	tr181AccessMethod = getTR181AccessMethod(tr181AccessMethod);
+
+	switch (tr181AccessMethod) {
+	case WEBPA: {
+
+	    // Convert TR181 param object to webpa param object
+	    List<WebPaParameter> webpaParams = TR181Utils.convertTR181ToWebPaParamObject(parameterList);
+
+	    WebPaServerResponse webPaResponse = null;
+	    if (webpaParams != null) {
+
+		for (WebPaParameter webpaParam : webpaParams) {
+		    // Set webpa param value
+		    LOGGER.info("Setting webpa {} dataType {} value {}", webpaParam.getName(), webpaParam.getDataType(),
+			    webpaParam.getValue());
+		    webPaResponse = setWebPaParameterValue(dut, webpaParam);
+
+		    if (null != webPaResponse) {
+			response.put(webpaParam.getName(), webPaResponse.getMessage());
 		    }
 		}
-		response = deviceConnectionProvider.execute((Device) dut, commands);
-		LOGGER.info("TR181 set parameter response : " + response);
-	    } else {
-		LOGGER.error("DeviceConnectionProvider not configured. Failed to set TR181 commands");
 	    }
-	} else {
-	    LOGGER.error("NO valid Device data model received !! SET TR-181 parameter values failed");
+
+	    break;
 	}
-	LOGGER.info("TR181 Response : " + response);
+
+	case TR69: {
+
+	    String tr69Response = null;
+	    List<Parameter> tr69ParamsList = TR181Utils.convertTR181ToTR69ParamObject(parameterList);
+
+	    List<Parameter> singleTr69ParamList = null;
+
+	    for (Parameter parameter : tr69ParamsList) {
+		singleTr69ParamList = new ArrayList<Parameter>();
+		singleTr69ParamList.add(parameter);
+
+		// Set TR69 Parameter value
+		tr69Response = setTR69ParameterValues(dut, singleTr69ParamList);
+		response.put(parameter.getParamName(), tr69Response);
+	    }
+
+	    break;
+	}
+
+	case DMCLI: {
+	    if (null != deviceConnectionProvider) {
+
+		String dmcliResponse = null;
+		String dmcliCommand = null;
+
+		List<TR181Parameter> tr181ParameterList = TR181Utils.mapProtocolDetails(parameterList,
+			tr181AccessMethod);
+
+		for (TR181Parameter tr181Parameter : tr181ParameterList) {
+
+		    dmcliCommand = new StringBuilder(LinuxCommandConstants.DMCLI_SET_COMMAND)
+			    .append(AutomaticsConstants.SPACE).append(tr181Parameter.getProtocolSpecificParamName())
+			    .append(AutomaticsConstants.SPACE).append(tr181Parameter.getProtocolSpecificDataType())
+			    .append(AutomaticsConstants.SPACE).append(tr181Parameter.getValue()).toString();
+
+		    LOGGER.info("Dmcli Command to be executed: {}", dmcliCommand);
+
+		    dmcliResponse = deviceConnectionProvider.execute((Device) dut, dmcliCommand);
+		    LOGGER.info("Dmcli Response: {}", dmcliResponse);
+
+		    response.put(tr181Parameter.getName(), TR181Utils.isDmcliOperationSuccess(dmcliResponse));
+		}
+	    } else {
+		LOGGER.error("DeviceConnectionProvider not configured. Failed to get TR181 parameters");
+	    }
+	    break;
+	}
+
+	default:
+	    LOGGER.error("TR181AccessMethod {}not handled in setTR181.", tr181AccessMethod);
+	    break;
+
+	}
+
+	LOGGER.info("TR181 Response : {}", response);
 
 	return response;
     }
 
-    /**
-     * Get the TR-181 parameter values using WebPA.
-     * 
-     * @param dut
-     *            The dut to be used.
-     * @param parameters
-     *            TR-181 parameter
-     * @return The value corresponding to TR-181 parameter
-     */
-    private List<Parameter> getTR181ParameterValuesUsingWebPA(Dut dut, List<String> parameterList) {
-	List<Parameter> tr181ParamResponse = new ArrayList<Parameter>();
+    private TR181AccessMethods getTR181AccessMethod(TR181AccessMethods tr181AccessMethod) {
+	if (tr181AccessMethod == null) {
 
-	LOGGER.info("About to get values for TR181 params {} via WebPa", parameterList);
+	    String tr181Method = AutomaticsPropertyUtility.getProperty(AutomaticsConstants.DEFAULT_TR181_ACCESS_METHOD);
+	    LOGGER.info("TR181 Access Method configured in Automatics Props: {}", tr181Method);
 
-	if (null != parameterList && !parameterList.isEmpty()) {
-
-	    String[] paramArray = null;
-
-	    WebPaServerResponse serverResponse = WebPaConnectionHandler.get().getWebPaParamValue(dut,
-		    parameterList.toArray(paramArray));
-
-	    if (null != serverResponse) {
-		List<WebPaParameter> params = serverResponse.getParams();
-		if (null != params && !params.isEmpty()) {
-		    for (WebPaParameter webPaParameter : params) {
-			Parameter param = new Parameter();
-			param.setParamName(webPaParameter.getName());
-			param.setParamValue(webPaParameter.getValue());
-			tr181ParamResponse.add(param);
-		    }
-		}
+	    if (CommonMethods.isNull(tr181Method)) {
+		tr181AccessMethod = TR181AccessMethods.DMCLI;
 	    } else {
-		LOGGER.info("WebPA Response is null.");
+		tr181AccessMethod = TR181AccessMethods.valueOf(tr181Method);
 	    }
-	} else {
-	    LOGGER.error("TR181 parameter list is null");
+
+	    LOGGER.info("TR181 Access Method going to use: {}", tr181AccessMethod);
+
 	}
 
-	LOGGER.info("TR181 Response via WebPa: {}", tr181ParamResponse);
-
-	return tr181ParamResponse;
+	return tr181AccessMethod;
     }
+
 }
