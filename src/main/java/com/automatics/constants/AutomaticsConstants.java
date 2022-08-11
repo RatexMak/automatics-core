@@ -558,7 +558,7 @@ public class AutomaticsConstants {
 
     /** HTTP link */
     public static String STRING_HTTP = "http://";
-    
+
     /** Selenium Hub to Node Conection */
     public static String STRING_HUB = "/wd/hub";
 
@@ -967,8 +967,20 @@ public class AutomaticsConstants {
 
     /** DEFAULT Access method for TR181 data model */
     public static final String DEFAULT_TR181_ACCESS_METHOD = "DEFAULT_TR181_ACCESS_METHOD";
-    
+
     /** Regular expression to get DMCLI command value. */
     public static final String REGULAR_EXPRESSION_DMCLI_COMMAND_VALUE = "value:\\s*(.*)";
+
+    /** Json content type */
+    public static final String JSON_CONTENT_TYPE = "application/json";
+
+    /** Custom Power ON values */
+    public static final String PROP_POWER_ON_VALUES = "powerOnValues";
+
+    /** Custom Power OFF values */
+    public static final String PROP_POWER_OFF_VALUES = "powerOffValues";
+
+    /** Custom Power cycle values */
+    public static final String PROP_POWER_CYCLE_VALUES = "powerCycleValues";
 
 }

@@ -32,6 +32,8 @@
 	
 	<bean id="powerProvider" class="com.automatics.providers.rack.impl.PowerProviderRestImpl" lazy-init="true" scope = "prototype"/>
 	
+	<bean id="peripheralDevicePowerProvider" class="com.automatics.providers.rack.impl.DefaultPowerProviderImpl" lazy-init="true" scope = "prototype"/>
+	
 	<bean id="ocrProvider" class="com.automatics.providers.ocr.AutomaticsOcrProviderImpl" lazy-init="true" scope = "prototype"/>
 	
 	<bean id="avAnalysisProvider" class="com.automatics.providers.avanlyzer.AutomaticsAVAnalysisProviderImpl" lazy-init="true"/>
@@ -39,7 +41,6 @@
 	<bean id="xconfDataProvider" class="com.automatics.providers.xconf.DefaultXConfDataProviderImpl" lazy-init="true"/>
 	
 	<bean id="webpaProvider" class="com.automatics.webpa.impl.WebPaProviderImpl" lazy-init="true"/>
-	
 	
 	<bean id="deviceConnectionProvider" class="com.automatics.providers.connection.impl.DeviceConnectionProviderRestImpl"  lazy-init="true"/>
 	

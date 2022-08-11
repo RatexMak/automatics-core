@@ -15,9 +15,6 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
- 
- 
- 
 package com.automatics.utils;
 
 import org.slf4j.Logger;
@@ -171,7 +168,7 @@ public class BeanUtils {
 	}
 
     }
-    
+
     /**
      * Gets the provider implementation object via spring xml bean configuration
      * 
@@ -305,8 +302,9 @@ public class BeanUtils {
     public static DeviceConnectionProvider getDeviceConnetionProvider() {
 	DeviceConnectionProvider provider = null;
 	try {
-	    provider = (DeviceConnectionProvider) getPartnerProviderImplasDefault(BeanConstants.PROP_KEY_DEVICE_CONNECTION_PROVIDER,
-		    BeanConstants.BEAN_ID_DEVICE_CONNECTION_PROVIDER,DeviceConnectionProvider.class);
+	    provider = (DeviceConnectionProvider) getPartnerProviderImplasDefault(
+		    BeanConstants.PROP_KEY_DEVICE_CONNECTION_PROVIDER, BeanConstants.BEAN_ID_DEVICE_CONNECTION_PROVIDER,
+		    DeviceConnectionProvider.class);
 	} catch (Exception e) {
 	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_DEVICE_CONNECTION_PROVIDER);
 
@@ -534,12 +532,23 @@ public class BeanUtils {
      */
     public static PowerProvider getPowerProvider() {
 	PowerProvider provider = null;
-	try {
-	    provider = (PowerProvider) getPartnerProviderImpl(BeanConstants.PROP_KEY_POWER_PROVIDER,
-		    BeanConstants.BEAN_ID_POWER_PROVIDER, PowerProvider.class);
-	} catch (Exception e) {
-	    LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_POWER_PROVIDER);
+	boolean isPeripheralImplReq = Boolean.parseBoolean(
+		AutomaticsPropertyUtility.getProperty(BeanConstants.PROP_KEY_PERIPHERAL_POWER_PROVIDER, "false"));
 
+	if (isPeripheralImplReq) {
+	    try {
+		return coreContext.getBean(BeanConstants.BEAN_ID_PERIPHERAL_POWER_PROVIDER, PowerProvider.class);
+	    } catch (Exception e) {
+		LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_PERIPHERAL_POWER_PROVIDER);
+	    }
+
+	} else {
+	    try {
+		provider = (PowerProvider) getPartnerProviderImpl(BeanConstants.PROP_KEY_POWER_PROVIDER,
+			BeanConstants.BEAN_ID_POWER_PROVIDER, PowerProvider.class);
+	    } catch (Exception e) {
+		LOGGER.info("Bean {} is not configured.", BeanConstants.BEAN_ID_POWER_PROVIDER);
+	    }
 	}
 	return provider;
     }

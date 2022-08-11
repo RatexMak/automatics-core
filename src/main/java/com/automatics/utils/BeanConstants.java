@@ -69,6 +69,9 @@ public class BeanConstants {
 
     /** Bean name for power provider **/
     public static final String BEAN_ID_POWER_PROVIDER = "powerProvider";
+    
+    /** Bean name for peripheral power provider **/
+    public static final String BEAN_ID_PERIPHERAL_POWER_PROVIDER = "peripheralDevicePowerProvider";
 
     /** Bean name for video device provider **/
     public static final String BEAN_ID_VIDEO_DEVICE_PROVIDER = "rdkVideoDeviceProvider";
@@ -93,6 +96,9 @@ public class BeanConstants {
 
     /** Automatics props name for power provider **/
     public static final String PROP_KEY_POWER_PROVIDER = "partner.impl.powerProvider";
+    
+    /** Automatics props name for peripheral power provider **/
+    public static final String PROP_KEY_PERIPHERAL_POWER_PROVIDER = "peripheral.powerProvider";
 
     /** Automatics props name for ocr provider **/
     public static final String PROP_KEY_OCR_PROVIDER = "partner.impl.ocrProvider";
