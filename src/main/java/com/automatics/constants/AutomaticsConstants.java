@@ -974,6 +974,9 @@ public class AutomaticsConstants {
     /** Json content type */
     public static final String JSON_CONTENT_TYPE = "application/json";
 
+    /** Custom Power status values */
+    public static final String PROP_POWER_STATUS_VALUES = "powerStatusValues";
+
     /** Custom Power ON values */
     public static final String PROP_POWER_ON_VALUES = "powerOnValues";
 

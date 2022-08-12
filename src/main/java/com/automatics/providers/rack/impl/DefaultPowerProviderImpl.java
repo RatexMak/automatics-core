@@ -489,10 +489,9 @@ public class DefaultPowerProviderImpl extends AbstractPowerProvider {
     private String mapCustomPowerStatusValue(String customStatusValue) {
 
 	PowerStatus powerStatus = PowerStatus.OFF;
-	String powerOnValues = AutomaticsPropertyUtility.getProperty(AutomaticsConstants.PROP_POWER_ON_VALUES);
+	String powerOnValues = AutomaticsPropertyUtility.getProperty(AutomaticsConstants.PROP_POWER_STATUS_VALUES);
 
 	List<String> onValues = CommonMethods.splitStringByDelimitor(powerOnValues, AutomaticsConstants.COMMA);
-	onValues.add("true");
 	onValues.add(PowerStatus.ON.name());
 
 	for (String onValue : onValues) {
