@@ -154,4 +154,10 @@ public class LinuxCommandConstants {
     /** dmcli set command. */
     public static final String DMCLI_SET_COMMAND = "dmcli eRT setv";
 
+    /** dmcli delete command. */
+    public static final String DMCLI_DELETE_COMMAND = "dmcli eRT deltable ";
+
+    /** dmcli add command. */
+    public static final String DMCLI_ADD_COMMAND = "dmcli eRT addtable ";
+
 }

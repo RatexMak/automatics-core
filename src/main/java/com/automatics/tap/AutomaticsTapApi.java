@@ -132,6 +132,7 @@ import com.automatics.snmp.SnmpParams;
 import com.automatics.snmp.SnmpProtocol;
 import com.automatics.test.AutomaticsTestBase;
 import com.automatics.tr181.TR181Parameter;
+import com.automatics.tr181.TR181Response;
 import com.automatics.utils.AutomaticsPropertyUtility;
 import com.automatics.utils.AutomaticsSnmpUtils;
 import com.automatics.utils.AutomaticsUtils;
@@ -928,12 +929,14 @@ public class AutomaticsTapApi {
 	LOGGER.debug("STARTING METHOD: getTR69ParameterValuesUsingWebPA");
 	boolean status = false;
 
-	List<TR181Parameter> tr181Parameters = getTR181ParameterValues(dut, Arrays.asList(parameters), null);
+	List<String> params = TR181Utils.splitCommaSepValues(Arrays.asList(parameters));
+
+	List<TR181Parameter> tr181Parameters = getTR181ParameterValues(dut, params, null);
 	if (null != tr181Parameters && !tr181Parameters.isEmpty()) {
 
 	    for (TR181Parameter tr181Parameter : tr181Parameters) {
 		status = false;
-		for (String parameter : parameters) {
+		for (String parameter : params) {
 		    if (parameter.equals(tr181Parameter.getName())
 			    && CommonMethods.isNotNull(tr181Parameter.getValue())) {
 			status = true;
@@ -1143,20 +1146,14 @@ public class AutomaticsTapApi {
     public WebPaServerResponse putWebpaTableParamUsingRestApi(Dut dut, String tableName,
 	    Map<String, HashMap<String, List<String>>> paramKeyValue) {
 	LOGGER.debug("STARTING METHOD: putWebpaTableParamUsingRestApi");
-	WebPaServerResponse response = new WebPaServerResponse();
-	try {
-	    if (!paramKeyValue.isEmpty()) {
-		response = WebPaConnectionHandler.get().putWebPaParameterValue(dut, tableName, paramKeyValue);
-	    } else {
-		throw new TestException("Empty paramKeyValue received...");
-	    }
-	} catch (Exception exception) {
-	    LOGGER.error("FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA PUT PARAMS REQUEST: "
-		    + exception.getMessage());
-	    throw new TestException(exception.getMessage());
-	}
+
+	List<TR181Parameter> tr181ParamValues = TR181Utils.convertWebPaUpdateRequestToTR181ParamObject(tableName,
+		paramKeyValue);
+	TR181Response response = updateTR181TableData(dut, tableName, tr181ParamValues, null);
+	WebPaServerResponse webPaResponse = TR181Utils.convertTR181ResponseToWebPaResponseObject(response);
+
 	LOGGER.debug("ENDING METHOD: putWebpaTableParamUsingRestApi");
-	return response;
+	return webPaResponse;
     }
 
     /**
@@ -1176,21 +1173,18 @@ public class AutomaticsTapApi {
      */
     public WebPaServerResponse postWebpaTableParamUsingRestApi(Dut dut, String tableName,
 	    Map<String, List<String>> paramKeyValue) {
-	LOGGER.debug("STARTING METHOD: postWebpaTableParamUsingRestApi");
-	WebPaServerResponse response = null;
-	try {
-	    if (!paramKeyValue.isEmpty()) {
-		response = WebPaConnectionHandler.get().postWebPaParameterValue(dut, tableName, paramKeyValue);
-	    } else {
-		throw new TestException("Empty paramKeyValue received...");
-	    }
-	} catch (Exception exception) {
-	    LOGGER.error("FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA POST PARAMS REQUEST: "
-		    + exception.getMessage());
-	    throw new TestException(exception.getMessage());
-	}
-	LOGGER.debug("ENDING METHOD: postWebpaTableParamUsingRestApi");
-	return response;
+
+	LOGGER.debug("STARTING METHOD: putWebpaTableParamUsingRestApi");
+
+	List<TR181Parameter> tr181ParamValues = TR181Utils.convertWebPaPostRequestToTR181ParamObject(tableName,
+		paramKeyValue);
+	LOGGER.info(tr181ParamValues.toString());
+	TR181Response response = addTR181TableData(dut, tableName, tr181ParamValues, null);
+	WebPaServerResponse webPaResponse = TR181Utils.convertTR181ResponseToWebPaResponseObject(response);
+
+	LOGGER.debug("ENDING METHOD: putWebpaTableParamUsingRestApi");
+	return webPaResponse;
+
     }
 
     /**
@@ -1207,16 +1201,12 @@ public class AutomaticsTapApi {
      */
     public WebPaServerResponse deleteTableRowUsingRestApi(Dut dut, String tableNameWithRow) {
 	LOGGER.debug("STARTING METHOD: deleteTableRowUsingRestApi");
-	WebPaServerResponse response = null;
-	try {
-	    response = WebPaConnectionHandler.get().deleteWebPaParameterValue(dut, tableNameWithRow);
-	} catch (Exception exception) {
-	    LOGGER.error(
-		    "FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA DELETE REQUEST: " + exception.getMessage());
-	    throw new TestException(exception.getMessage());
-	}
+
+	TR181Response tr181Response = deleteTR181TableData(dut, tableNameWithRow, null);
+	WebPaServerResponse webPaServerResponse = TR181Utils.convertTR181ResponseToWebPaResponseObject(tr181Response);
+
 	LOGGER.debug("ENDING METHOD: deleteTableRowUsingRestApi");
-	return response;
+	return webPaServerResponse;
     }
 
     /**
@@ -2537,14 +2527,14 @@ public class AutomaticsTapApi {
 		SnmpParams snmpParamObj = AutomaticsSnmpUtils.getCopyOfSnmpRequest(snmpParams);
 
 		if (snmpParamObj.getSnmpCommand().equals(SnmpCommand.GET)) {
-		    snmpParamObj.setMibOid(snmpParamObj.getMibOid() + "." + tableIndex);
+		    snmpParamObj.setMibOid(snmpParamObj.getMibOid() + AutomaticsConstants.DOT_STRING + tableIndex);
 
 		    snmpCommandOutput.append(snmpProviderImpl.doGet(dut, snmpParamObj));
 		}
 
 		if (snmpParamObj.getSnmpCommand().equals(SnmpCommand.SET)) {
 
-		    snmpParamObj.setMibOid(snmpParamObj.getMibOid() + "." + tableIndex);
+		    snmpParamObj.setMibOid(snmpParamObj.getMibOid() + AutomaticsConstants.DOT_STRING + tableIndex);
 		    snmpCommandOutput.append(snmpProviderImpl.doSet(dut, snmpParamObj));
 		}
 	    } while (CommonMethods.getRetries(snmpCommandOutput.toString(), snmpVersion, retryCount));
@@ -5665,7 +5655,8 @@ public class AutomaticsTapApi {
 	SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_TIME_FORMAT);
 	String dateString = dateFormat.format(date);
 
-	return getCleanMac(dut) + System.getProperty("file.separator") + dateString + "." + IMAGE_FILE_FORMAT;
+	return getCleanMac(dut) + System.getProperty("file.separator") + dateString + AutomaticsConstants.DOT_STRING
+		+ IMAGE_FILE_FORMAT;
     }
 
     private String getCleanMac(Dut dut) {
@@ -6508,6 +6499,7 @@ public class AutomaticsTapApi {
 	LOGGER.info("TR181 Response : " + response);
 
 	return response;
+
     }
 
     /**
@@ -6522,6 +6514,25 @@ public class AutomaticsTapApi {
     public Map<String, String> setTR181ParameterValues(Dut dut, List<TR181Parameter> parameterList,
 	    TR181AccessMethods tr181AccessMethod) {
 	return setTR181ParameterValue(dut, parameterList, tr181AccessMethod);
+    }
+
+    private TR181AccessMethods getTR181AccessMethod(TR181AccessMethods tr181AccessMethod) {
+	if (tr181AccessMethod == null) {
+
+	    String tr181Method = AutomaticsPropertyUtility.getProperty(AutomaticsConstants.DEFAULT_TR181_ACCESS_METHOD);
+	    LOGGER.info("TR181 Access Method configured in Automatics Props: {}", tr181Method);
+
+	    if (CommonMethods.isNull(tr181Method)) {
+		tr181AccessMethod = TR181AccessMethods.DMCLI;
+	    } else {
+		tr181AccessMethod = TR181AccessMethods.valueOf(tr181Method);
+	    }
+
+	    LOGGER.info("TR181 Access Method going to use: {}", tr181AccessMethod);
+
+	}
+
+	return tr181AccessMethod;
     }
 
     private Map<String, String> setTR181ParameterValue(Dut dut, List<TR181Parameter> parameterList,
@@ -6579,8 +6590,8 @@ public class AutomaticsTapApi {
 		String dmcliResponse = null;
 		String dmcliCommand = null;
 
-		List<TR181Parameter> tr181ParameterList = TR181Utils.mapProtocolDetails(parameterList,
-			tr181AccessMethod);
+		List<TR181Parameter> tr181ParameterList = TR181Utils.mapProtocolDetails(null, parameterList,
+			tr181AccessMethod, null);
 
 		for (TR181Parameter tr181Parameter : tr181ParameterList) {
 
@@ -6613,23 +6624,324 @@ public class AutomaticsTapApi {
 	return response;
     }
 
-    private TR181AccessMethods getTR181AccessMethod(TR181AccessMethods tr181AccessMethod) {
-	if (tr181AccessMethod == null) {
+    public TR181Response updateTR181TableData(Dut dut, String tr181TableName, List<TR181Parameter> tr181ParamValues,
+	    TR181AccessMethods tr181AccessMethod) {
+	TR181Response response = new TR181Response();
+	String executionResponse = null;
 
-	    String tr181Method = AutomaticsPropertyUtility.getProperty(AutomaticsConstants.DEFAULT_TR181_ACCESS_METHOD);
-	    LOGGER.info("TR181 Access Method configured in Automatics Props: {}", tr181Method);
+	tr181AccessMethod = getTR181AccessMethod(tr181AccessMethod);
 
-	    if (CommonMethods.isNull(tr181Method)) {
-		tr181AccessMethod = TR181AccessMethods.DMCLI;
-	    } else {
-		tr181AccessMethod = TR181AccessMethods.valueOf(tr181Method);
+	switch (tr181AccessMethod) {
+	case WEBPA: {
+
+	    if (!tr181TableName.endsWith(AutomaticsConstants.DOT_STRING)) {
+		tr181TableName = tr181TableName + AutomaticsConstants.DOT_STRING;
 	    }
 
-	    LOGGER.info("TR181 Access Method going to use: {}", tr181AccessMethod);
+	    Map<String, HashMap<String, List<String>>> paramValues = TR181Utils
+		    .convertTR181ToWebPaUpdateRequest(tr181TableName, tr181ParamValues);
+
+	    WebPaServerResponse webPaResponse = putWebpaTableParamUsingWebPa(dut, tr181TableName, paramValues);
+
+	    if (null != webPaResponse) {
+		response.setResponse(webPaResponse.getMessage());
+	    }
+
+	    break;
+	}
+
+	case DMCLI: {
+	    if (null != deviceConnectionProvider) {
+
+		String dmcliResponse = null;
+		String dmcliCommand = null;
+
+		if (!tr181TableName.endsWith(AutomaticsConstants.DOT_STRING)) {
+		    tr181TableName = tr181TableName + AutomaticsConstants.DOT_STRING;
+		}
+
+		List<TR181Parameter> tr181ParameterList = TR181Utils.mapProtocolDetails(tr181TableName,
+			tr181ParamValues, tr181AccessMethod, AutomaticsConstants.UPDATE_TR181_TABLE_DATA,
+			AutomaticsConstants.EMPTY_STRING);
+
+		for (TR181Parameter tr181Parameter : tr181ParameterList) {
+
+		    dmcliCommand = new StringBuilder(LinuxCommandConstants.DMCLI_SET_COMMAND)
+			    .append(AutomaticsConstants.SPACE).append(tr181Parameter.getProtocolSpecificParamName())
+			    .append(AutomaticsConstants.SPACE).append(tr181Parameter.getProtocolSpecificDataType())
+			    .append(AutomaticsConstants.SPACE).append(tr181Parameter.getValue()).toString();
+
+		    LOGGER.info("Dmcli Command to be executed: {}", dmcliCommand);
+
+		    dmcliResponse = deviceConnectionProvider.execute((Device) dut, dmcliCommand);
+		    LOGGER.info("Dmcli Response: {}", dmcliResponse);
+
+		    executionResponse = TR181Utils.isDmcliOperationSuccess(dmcliResponse);
+		    response.setResponse(executionResponse);
+
+		    if (!AutomaticsConstants.SUCCESS.equals(executionResponse)) {
+			break;
+		    }
+		}
+	    } else {
+		LOGGER.error("DeviceConnectionProvider not configured. Failed to get TR181 parameters");
+	    }
+	    break;
+	}
+
+	default:
+	    LOGGER.error("TR181AccessMethod {}not handled in setTR181.", tr181AccessMethod);
+	    break;
 
 	}
 
-	return tr181AccessMethod;
+	LOGGER.info("TR181 Response : {}", response);
+
+	return response;
+    }
+
+    public TR181Response addTR181TableData(Dut dut, String tr181TableName, List<TR181Parameter> tr181ParamValues,
+	    TR181AccessMethods tr181AccessMethod) {
+	TR181Response response = new TR181Response();
+
+	tr181AccessMethod = getTR181AccessMethod(tr181AccessMethod);
+
+	switch (tr181AccessMethod) {
+	case WEBPA: {
+	    Map<String, List<String>> paramValues = TR181Utils.convertTR181ToWebPaPostRequest(tr181ParamValues);
+
+	    if (!tr181TableName.endsWith(AutomaticsConstants.DOT_STRING)) {
+		tr181TableName = tr181TableName + AutomaticsConstants.DOT_STRING;
+	    }
+
+	    WebPaServerResponse webPaResponse = postWebpaTableParamUsingWebPa(dut, tr181TableName, paramValues);
+
+	    if (null != webPaResponse) {
+		response.setResponse(webPaResponse.getMessage());
+
+		response.setTableRowNameWithIndex(webPaResponse.getRow());
+		String tableRowIndex = TR181Utils.parseWebPaAndGetTableRowIndex(tr181TableName, webPaResponse.getRow());
+		response.setTableRowIndex(tableRowIndex);
+		LOGGER.info("Table row index: {}", tableRowIndex);
+	    }
+
+	    break;
+	}
+
+	case DMCLI: {
+	    if (null != deviceConnectionProvider) {
+
+		String dmcliResponse = null;
+		StringBuilder dmcliCommand = new StringBuilder();
+		String executionResponse = null;
+
+		if (!tr181TableName.endsWith(AutomaticsConstants.DOT_STRING)) {
+		    tr181TableName = tr181TableName + AutomaticsConstants.DOT_STRING;
+		}
+
+		// Add the table
+		LOGGER.info("Adding table {}", tr181TableName);
+		dmcliCommand.append(LinuxCommandConstants.DMCLI_ADD_COMMAND).append(tr181TableName);
+		LOGGER.info("Dmcli Command to be executed: {}", dmcliCommand);
+
+		dmcliResponse = deviceConnectionProvider.execute((Device) dut, dmcliCommand.toString());
+		LOGGER.info("Dmcli Response: {}", dmcliResponse);
+
+		if (AutomaticsConstants.SUCCESS.equals(TR181Utils.isDmcliOperationSuccess(dmcliResponse))) {
+
+		    String tableRowIndex = TR181Utils.parseAndGetTableRowIndex(tr181TableName, dmcliResponse);
+		    LOGGER.info("Table row index: {}", tableRowIndex);
+		    response.setTableRowNameWithIndex(tr181TableName + tableRowIndex + AutomaticsConstants.DOT);
+		    response.setTableRowIndex(tableRowIndex);
+
+		    List<TR181Parameter> tr181ParameterList = TR181Utils.mapProtocolDetails(tr181TableName,
+			    tr181ParamValues, tr181AccessMethod, AutomaticsConstants.ADD_TR181_TABLE_DATA,
+			    tableRowIndex);
+		    LOGGER.info("Adding table params {}", tr181ParameterList);
+
+		    for (TR181Parameter tr181Parameter : tr181ParameterList) {
+			dmcliCommand.setLength(0);
+
+			dmcliCommand.append(LinuxCommandConstants.DMCLI_SET_COMMAND).append(AutomaticsConstants.SPACE)
+				.append(tr181TableName).append(tableRowIndex).append(AutomaticsConstants.DOT)
+				.append(tr181Parameter.getName()).append(AutomaticsConstants.SPACE)
+				.append(tr181Parameter.getProtocolSpecificDataType()).append(AutomaticsConstants.SPACE)
+				.append(tr181Parameter.getValue());
+
+			LOGGER.info("Dmcli Command to be executed: {}", dmcliCommand);
+
+			dmcliResponse = deviceConnectionProvider.execute((Device) dut, dmcliCommand.toString());
+			LOGGER.info("Dmcli Response: {}", dmcliResponse);
+
+			executionResponse = TR181Utils.isDmcliOperationSuccess(dmcliResponse);
+			response.setResponse(executionResponse);
+
+			if (!AutomaticsConstants.SUCCESS.equals(executionResponse)) {
+			    break;
+			}
+		    }
+		} else {
+		    LOGGER.error("Failed to add TR181 Table param");
+		}
+	    } else {
+		LOGGER.error("DeviceConnectionProvider not configured. Failed to get TR181 parameters");
+	    }
+	    break;
+	}
+
+	default:
+	    LOGGER.error("TR181AccessMethod {}not handled in setTR181.", tr181AccessMethod);
+	    break;
+
+	}
+
+	LOGGER.info("TR181 Response : {}", response);
+
+	return response;
+    }
+
+    /**
+     * Deletes TR181 Table Row
+     * 
+     * @param dut
+     * @param tr181TableNameWithRow
+     * @param tr181AccessMethod
+     * @return
+     */
+    public TR181Response deleteTR181TableData(Dut dut, String tr181TableNameWithRow,
+	    TR181AccessMethods tr181AccessMethod) {
+	TR181Response response = new TR181Response();
+
+	tr181AccessMethod = getTR181AccessMethod(tr181AccessMethod);
+
+	switch (tr181AccessMethod) {
+	case WEBPA: {
+
+	    if (!tr181TableNameWithRow.endsWith(AutomaticsConstants.DOT_STRING)) {
+		tr181TableNameWithRow = tr181TableNameWithRow + AutomaticsConstants.DOT_STRING;
+	    }
+
+	    WebPaServerResponse webPaResponse = deleteTableRowUsingWebPa(dut, tr181TableNameWithRow);
+	    if (null != webPaResponse) {
+		response.setResponse(webPaResponse.getMessage());
+	    }
+
+	    break;
+	}
+
+	case DMCLI: {
+	    if (null != deviceConnectionProvider) {
+
+		String dmcliResponse = null;
+
+		if (!tr181TableNameWithRow.endsWith(AutomaticsConstants.DOT_STRING)) {
+		    tr181TableNameWithRow = tr181TableNameWithRow + AutomaticsConstants.DOT_STRING;
+		}
+		String dmcliCommand = new StringBuilder(LinuxCommandConstants.DMCLI_DELETE_COMMAND)
+			.append(tr181TableNameWithRow).toString();
+
+		LOGGER.info("Dmcli Command to be executed: {}", dmcliCommand);
+
+		dmcliResponse = deviceConnectionProvider.execute((Device) dut, dmcliCommand);
+		LOGGER.info("Dmcli Response: {}", dmcliResponse);
+
+		response.setResponse(TR181Utils.isDmcliOperationSuccess(dmcliResponse));
+	    } else {
+		LOGGER.error("DeviceConnectionProvider not configured. Failed to get TR181 parameters");
+	    }
+	    break;
+	}
+
+	default:
+	    LOGGER.error("TR181AccessMethod {} not handled in deleteTR181.", tr181AccessMethod);
+	    break;
+
+	}
+
+	LOGGER.info("TR181 Response : {}", response);
+
+	return response;
+    }
+
+    /**
+     * Helper method to delete entries in dynamic table by providing Table Name (WebPA DELETE)
+     * 
+     * @param dut
+     *            The device under test
+     * @param tableNameWithRow
+     *            String representing the Table Name along with row id.
+     * 
+     * @return The response of the execution of WebPA parameter.
+     * 
+     * @author Susheela C
+     */
+    public WebPaServerResponse deleteTableRowUsingWebPa(Dut dut, String tableNameWithRow) {
+	LOGGER.debug("STARTING METHOD: deleteTableRowUsingWebPa");
+	WebPaServerResponse response = null;
+	try {
+	    response = WebPaConnectionHandler.get().deleteWebPaParameterValue(dut, tableNameWithRow);
+	} catch (Exception exception) {
+	    LOGGER.error(
+		    "FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA DELETE REQUEST: " + exception.getMessage());
+	    throw new TestException(exception.getMessage());
+	}
+	LOGGER.debug("ENDING METHOD: deleteTableRowUsingWebPa");
+	return response;
+    }
+
+    /**
+     * Update webpa table data
+     * 
+     * @param dut
+     * @param tableName
+     * @param paramKeyValue
+     * @return
+     */
+    public WebPaServerResponse putWebpaTableParamUsingWebPa(Dut dut, String tableName,
+	    Map<String, HashMap<String, List<String>>> paramKeyValue) {
+	LOGGER.debug("STARTING METHOD: putWebpaTableParamUsingRestApi");
+	WebPaServerResponse response = new WebPaServerResponse();
+	try {
+	    if (!paramKeyValue.isEmpty()) {
+		response = WebPaConnectionHandler.get().putWebPaParameterValue(dut, tableName, paramKeyValue);
+	    } else {
+		throw new TestException("Empty paramKeyValue received...");
+	    }
+	} catch (Exception exception) {
+	    LOGGER.error("FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA PUT PARAMS REQUEST: "
+		    + exception.getMessage());
+	    throw new TestException(exception.getMessage());
+	}
+	LOGGER.debug("ENDING METHOD: putWebpaTableParamUsingRestApi");
+	return response;
+    }
+
+    /**
+     * Add webpa table data
+     * 
+     * @param dut
+     * @param tableName
+     * @param paramKeyValue
+     * @return
+     */
+    public WebPaServerResponse postWebpaTableParamUsingWebPa(Dut dut, String tableName,
+	    Map<String, List<String>> paramKeyValue) {
+	LOGGER.debug("STARTING METHOD: postWebpaTableParamUsingWebPa");
+
+	WebPaServerResponse response = null;
+	try {
+	    if (!paramKeyValue.isEmpty()) {
+		response = WebPaConnectionHandler.get().postWebPaParameterValue(dut, tableName, paramKeyValue);
+	    } else {
+		throw new TestException("Empty paramKeyValue received...");
+	    }
+	} catch (Exception exception) {
+	    LOGGER.error("FOLLOWING EXCEPTION OCCURRED WHILE PROCESSING WEBPA POST PARAMS REQUEST: "
+		    + exception.getMessage());
+	    throw new TestException(exception.getMessage());
+	}
+	LOGGER.debug("ENDING METHOD: postWebpaTableParamUsingWebPa");
+	return response;
     }
 
 }

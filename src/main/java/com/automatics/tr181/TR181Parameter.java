@@ -28,6 +28,8 @@ public class TR181Parameter {
 
     protected String name;
 
+    protected String tableName;
+
     protected String value;
 
     protected String index;
@@ -145,16 +147,27 @@ public class TR181Parameter {
 	this.index = index;
     }
 
+    /**
+     * @return the tableName
+     */
+    public String getTableName() {
+	return tableName;
+    }
+
+    /**
+     * @param tableName
+     *            the tableName to set
+     */
+    public void setTableName(String tableName) {
+	this.tableName = tableName;
+    }
+
     public String toString() {
 	StringBuilder param = new StringBuilder();
-	param.append("name=").append(name).append(", protocolSpecificParamName=").append(protocolSpecificParamName)
-		.append(", value=").append(value).append(", datatype=").append(tr181DataType);
+	param.append("tableName=").append(tableName).append(", index=").append(index).append(", name=").append(name)
+		.append(", protocolSpecificParamName=").append(protocolSpecificParamName).append(", value=")
+		.append(value).append(", datatype=").append(tr181DataType);
 	return param.toString();
-    }
-    
-    
-    public static void main(String[] args) {
-	System.out.println(new TR181Parameter().toString());
     }
 
 }

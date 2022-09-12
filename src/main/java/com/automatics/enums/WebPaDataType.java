@@ -59,4 +59,15 @@ public enum WebPaDataType {
 	return webPaDataType;
     }
 
+    public static int getDataType(String dataTypeName) {
+
+	int value = STRING.getValue();
+	for (WebPaDataType dataType : WebPaDataType.values()) {
+	    if (dataType.name().equals(dataTypeName)) {
+		value = dataType.type;
+	    }
+	}
+	return value;
+    }
+
 }

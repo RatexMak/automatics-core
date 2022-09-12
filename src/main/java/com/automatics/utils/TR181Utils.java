@@ -34,6 +34,7 @@ import com.automatics.enums.TR69DataType;
 import com.automatics.enums.WebPaDataType;
 import com.automatics.providers.tr69.Parameter;
 import com.automatics.tr181.TR181Parameter;
+import com.automatics.tr181.TR181Response;
 import com.automatics.webpa.WebPaParameter;
 import com.automatics.webpa.WebPaServerResponse;
 
@@ -116,6 +117,130 @@ public class TR181Utils {
     }
 
     /**
+     * Convert WebPa Param Object to TR181 Param Object
+     * 
+     * @param webPaParameters
+     * @return TR181 Param Objects
+     */
+    public static List<TR181Parameter> convertWebPaUpdateRequestToTR181ParamObject(String tableName,
+	    Map<String, HashMap<String, List<String>>> paramKeyValue) {
+
+	LOGGER.info("Converting WebPA to TR181 params");
+	List<TR181Parameter> parameterList = null;
+	List<String> values = null;
+
+	TR181Parameter parameter = null;
+
+	if (null != paramKeyValue && !paramKeyValue.isEmpty()) {
+	    parameterList = new ArrayList<TR181Parameter>();
+
+	    HashMap<String, List<String>> tableParams = null;
+
+	    for (String index : paramKeyValue.keySet()) {
+
+		LOGGER.info("TR181 Table Name: {}", tableName);
+
+		tableParams = paramKeyValue.get(index);
+
+		if (null != tableParams) {
+
+		    for (String key : tableParams.keySet()) {
+			parameter = new TR181Parameter();
+			parameter.setName(key);
+			parameter.setTableName(tableName);
+			parameter.setIndex(index);
+			values = tableParams.get(key);
+
+			if (null != values && !values.isEmpty()) {
+			    parameter.setValue(values.get(0));
+			}
+
+			parameter.setTr181DataType(getTR181DataType(key));
+			parameterList.add(parameter);
+
+		    }
+		}
+	    }
+
+	    LOGGER.info("TR181 params: {}", parameterList);
+	}
+
+	return parameterList;
+    }
+
+    /**
+     * Convert WebPa Param Object to TR181 Param Object
+     * 
+     * @param webPaParameters
+     * @return TR181 Param Objects
+     */
+    public static List<TR181Parameter> convertWebPaPostRequestToTR181ParamObject(String tableName,
+	    Map<String, List<String>> paramKeyValue) {
+
+	LOGGER.info("Converting WebPA to TR181 params");
+	List<TR181Parameter> parameterList = null;
+	List<String> value = null;
+
+	TR181Parameter parameter = null;
+
+	if (null != paramKeyValue && !paramKeyValue.isEmpty()) {
+	    parameterList = new ArrayList<TR181Parameter>();
+
+	    LOGGER.info("TR181 Table Name: {}", tableName);
+
+	    for (String param : paramKeyValue.keySet()) {
+		parameter = new TR181Parameter();
+		parameter.setName(param);
+		value = paramKeyValue.get(param);
+		if (null != value && !value.isEmpty()) {
+		    parameter.setValue(value.get(0));
+		}
+
+		parameter.setTableName(tableName);
+		parameter.setTr181DataType(getTR181DataType(param));
+		parameterList.add(parameter);
+
+	    }
+
+	    LOGGER.info("TR181 params: {}", parameterList);
+	}
+	return parameterList;
+    }
+
+    public static TR181DataType getTR181DataType(String webPaParamName) {
+	TR181DataType dataType = TR181DataType.STRING;
+	switch (webPaParamName) {
+	case "MACAddress":
+	case "Type":
+	case "Description":
+	case "Enable":
+	case "ExternalPort":
+	case "ExternalPortEndRange":
+	case "Protocol":
+	case "InternalClient":
+	case "MacAddress":
+	case "DnsIPv4":
+	case "DnsIPv6":
+	case "Tag":
+	case "Yiaddr":
+	case "DeviceName":
+	case "X_RDKCENTRAL-COM_Ipv4PingServerURI":
+	case "X_RDKCENTRAL-COM_Ipv6PingServerURI":
+
+	    dataType = TR181DataType.STRING;
+	    break;
+
+	default:
+	    dataType = TR181DataType.STRING;
+	    break;
+	}
+
+	LOGGER.info("Mapping param: {} to TR181 data type: {}", webPaParamName, dataType);
+
+	return dataType;
+    }
+
+    /**
      * Convert TR181 Param Object to WebPa Param Object
      * 
      * @param parameterList
@@ -148,10 +273,22 @@ public class TR181Utils {
      * @param tr181ParameterList
      * @return TR181 Param Objects
      */
-    public static List<TR181Parameter> mapProtocolDetails(List<TR181Parameter> tr181ParameterList,
-	    TR181AccessMethods accessMethod) {
+    public static List<TR181Parameter> mapProtocolDetails(String tableName, List<TR181Parameter> tr181ParameterList,
+	    TR181AccessMethods accessMethod, String dataType) {
+	return mapProtocolDetails(tableName, tr181ParameterList, accessMethod, dataType, null);
+    }
+
+    /**
+     * Map TR181 Param Object to protocol specific data type
+     * 
+     * @param tr181ParameterList
+     * @return TR181 Param Objects
+     */
+    public static List<TR181Parameter> mapProtocolDetails(String tableName, List<TR181Parameter> tr181ParameterList,
+	    TR181AccessMethods accessMethod, String dataType, String tableRowIndex) {
 
 	if (null != tr181ParameterList && !tr181ParameterList.isEmpty()) {
+	    StringBuilder sb = new StringBuilder();
 
 	    switch (accessMethod) {
 
@@ -161,7 +298,28 @@ public class TR181Utils {
 		    DmcliDataType dmcliDataType = mapTR181ToDmcliDataType(parameter.getName(),
 			    parameter.getTr181DataType());
 		    parameter.setProtocolSpecificDataType(dmcliDataType.getDataTypeValue());
-		    parameter.setProtocolSpecificParamName(getProtocolParamName(parameter.getName(), accessMethod));
+
+		    if (AutomaticsConstants.ADD_TR181_TABLE_DATA.equalsIgnoreCase(dataType)
+			    || AutomaticsConstants.UPDATE_TR181_TABLE_DATA.equalsIgnoreCase(dataType)) {
+
+			if (CommonMethods.isNotNull(tableRowIndex)) {
+			    parameter.setIndex(tableRowIndex);
+			}
+			sb.append(tableName);
+			if (!tableName.endsWith(AutomaticsConstants.DOT_STRING)) {
+			    sb.append(AutomaticsConstants.DOT);
+			}
+
+			if (CommonMethods.isNotNull(parameter.getIndex())) {
+			    sb.append(parameter.getIndex()).append(AutomaticsConstants.DOT);
+			}
+
+			sb.append(parameter.getName());
+			parameter.setProtocolSpecificParamName(sb.toString());
+
+		    } else {
+			parameter.setProtocolSpecificParamName(getProtocolParamName(parameter.getName(), accessMethod));
+		    }
 		}
 		break;
 
@@ -203,6 +361,62 @@ public class TR181Utils {
 	}
 
 	return tr69Parameters;
+    }
+
+    /**
+     * Convert TR181 Param Object to TR69 Param Object
+     * 
+     * @param tr181ParameterList
+     * @return TR69 Param Objects
+     */
+    public static Map<String, HashMap<String, List<String>>> convertTR181ToWebPaUpdateRequest(String tr181TableName,
+	    List<TR181Parameter> tr181ParameterList) {
+
+	Map<String, HashMap<String, List<String>>> paramKeyValue = new HashMap<String, HashMap<String, List<String>>>();
+
+	if (null != tr181ParameterList && !tr181ParameterList.isEmpty()) {
+	    HashMap<String, List<String>> paramValueMap = null;
+	    List<String> valueList = null;
+
+	    for (TR181Parameter parameter : tr181ParameterList) {
+
+		paramValueMap = new HashMap<String, List<String>>();
+		valueList = new ArrayList<String>();
+		valueList.add(parameter.getValue());
+		paramValueMap.put(parameter.getName(), valueList);
+
+		paramKeyValue.put(parameter.getIndex(), paramValueMap);
+
+	    }
+	}
+
+	return paramKeyValue;
+    }
+
+    /**
+     * Convert TR181 Param Object to TR69 Param Object
+     * 
+     * @param tr181ParameterList
+     * @return TR69 Param Objects
+     */
+    public static Map<String, List<String>> convertTR181ToWebPaPostRequest(List<TR181Parameter> tr181ParameterList) {
+
+	Map<String, List<String>> paramKeyValue = new HashMap<String, List<String>>();
+
+	if (null != tr181ParameterList && !tr181ParameterList.isEmpty()) {
+
+	    List<String> valueList = null;
+
+	    for (TR181Parameter parameter : tr181ParameterList) {
+
+		valueList = new ArrayList<String>();
+		valueList.add(parameter.getValue());
+		paramKeyValue.put(parameter.getName(), valueList);
+
+	    }
+	}
+
+	return paramKeyValue;
     }
 
     /**
@@ -278,6 +492,21 @@ public class TR181Utils {
 
 	    }
 	}
+
+	return serverResponse;
+    }
+
+    /**
+     * Convert TR181 Param Object to WebPa Response Object
+     * 
+     * @param response
+     * @return WebPa Response Object
+     */
+    public static WebPaServerResponse convertTR181ResponseToWebPaResponseObject(TR181Response response) {
+
+	WebPaServerResponse serverResponse = new WebPaServerResponse();
+	serverResponse.setRow(response.getTableRowNameWithIndex());
+	serverResponse.setMessage(response.getResponse());
 
 	return serverResponse;
     }
@@ -476,11 +705,13 @@ public class TR181Utils {
 
 	List<TR181Parameter> tr181ParamList = new ArrayList<TR181Parameter>();
 
+	List<String> tr181ParamNamesSplit = splitCommaSepValues(tr181ParamNames);
+
 	TR181Parameter tr181Parameter = null;
 
 	switch (tr181AccessMethod) {
 	case DMCLI:
-	    for (String tr181ParamName : tr181ParamNames) {
+	    for (String tr181ParamName : tr181ParamNamesSplit) {
 		// TR181 - webpa param name to dmcli param name
 
 		tr181Parameter = new TR181Parameter();
@@ -497,6 +728,27 @@ public class TR181Utils {
 
 	return tr181ParamList;
 
+    }
+
+    /**
+     * Split the comma separated TR181 values into a list
+     * 
+     * @param tr181ParamNames
+     * @return
+     */
+    public static List<String> splitCommaSepValues(List<String> tr181ParamNames) {
+	List<String> tr181ParamNamesSplit = new ArrayList<String>();
+	String[] commaSplittedValues = null;
+
+	// Split comma separated values
+	for (String tr181 : tr181ParamNames) {
+
+	    commaSplittedValues = tr181.split(AutomaticsConstants.COMMA);
+	    for (String commaSplittedValue : commaSplittedValues) {
+		tr181ParamNamesSplit.add(commaSplittedValue);
+	    }
+	}
+	return tr181ParamNamesSplit;
     }
 
     /**
@@ -531,6 +783,43 @@ public class TR181Utils {
 	}
 
 	return status;
+    }
+
+    /**
+     * Gets the table row index
+     * 
+     * @param tableName
+     * @param dmcliResponse
+     * @return Returns table row index
+     */
+    public static String parseAndGetTableRowIndex(String tableName, String dmcliResponse) {
+	String tableRowIndex = "1";
+	String[] outputLines = dmcliResponse.split(AutomaticsConstants.DELIMITER_NEW_LINE);
+	String requiredValue = null;
+
+	for (String eachLine : outputLines) {
+	    requiredValue = CommonMethods.patternFinder(eachLine, tableName + "(.*added)");
+
+	    if (CommonMethods.isNotNull(requiredValue)) {
+		tableRowIndex = requiredValue.substring(0, requiredValue.indexOf(AutomaticsConstants.DOT));
+		break;
+	    }
+	}
+	return tableRowIndex;
+    }
+
+    /**
+     * Gets the table row index
+     * 
+     * @param tableName
+     * @param webpaResponse
+     * @return Returns table row index
+     */
+    public static String parseWebPaAndGetTableRowIndex(String tableName, String webpaResponse) {
+	String tableRowIndex = "1";
+	String tableIndex = webpaResponse.substring(tableName.length());
+	tableRowIndex = tableIndex.substring(0, tableIndex.indexOf(AutomaticsConstants.DOT_STRING));
+	return tableRowIndex;
     }
 
     /**

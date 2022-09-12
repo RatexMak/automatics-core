@@ -39,6 +39,9 @@ public class AutomaticsConstants {
     /** Dot. */
     public static final char DOT = '.';
 
+    /** Dot. */
+    public static final String DOT_STRING = ".";
+
     /** New line character. */
     public static final String NEW_LINE = "\n";
 
@@ -985,5 +988,11 @@ public class AutomaticsConstants {
 
     /** Custom Power cycle values */
     public static final String PROP_POWER_CYCLE_VALUES = "powerCycleValues";
+
+    /** UPDATE_TR181_TABLE_DATA */
+    public static final String UPDATE_TR181_TABLE_DATA = "UPDATE_TABLE_DATA";
+
+    /** ADD_TR181_TABLE_DATA */
+    public static final String ADD_TR181_TABLE_DATA = "ADD_TABLE_DATA";
 
 }
