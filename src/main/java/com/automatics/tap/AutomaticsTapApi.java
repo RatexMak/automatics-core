@@ -6943,5 +6943,25 @@ public class AutomaticsTapApi {
 	LOGGER.debug("ENDING METHOD: postWebpaTableParamUsingWebPa");
 	return response;
     }
+	
+	 /**
+     *
+     * The method is introduced to execute
+     * the commands in device via reverse ssh
+     *
+     * @param dut
+     * @param commands
+     * @return
+     */
+    public String executeCommandUsingReverseSsh(Dut dut, String[] commands) {
+	String response = null;
+
+	List<String> commandList = Arrays.asList(commands);
+	if (null != deviceConnectionProvider) {
+	    response = deviceConnectionProvider.execute((Device) dut, ExecuteCommandType.REV_SSH_DEVICE_VERIFY, commandList);
+	}
+	return response;
+
+    }
 
 }
