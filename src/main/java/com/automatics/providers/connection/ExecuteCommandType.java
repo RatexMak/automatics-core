@@ -42,6 +42,8 @@ public enum ExecuteCommandType {
      * banners should not be truncated from response
      **/
 
-    COMMAND_RESPONSE_WITH_BANNER
+    COMMAND_RESPONSE_WITH_BANNER,
+    
+    REV_SSH
 
 }

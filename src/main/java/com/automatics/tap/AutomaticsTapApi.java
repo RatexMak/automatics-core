@@ -18,48 +18,6 @@
 
 package com.automatics.tap;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Stroke;
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.imageio.ImageIO;
-
-import org.apache.http.HttpStatus;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.ITestContext;
-import org.testng.annotations.DataProvider;
-
 import com.automatics.alm.AlmTestDetails;
 import com.automatics.annotations.TestDetails;
 import com.automatics.constants.AVConstants;
@@ -149,6 +107,40 @@ import com.automatics.webpa.WebPaEntityResponse;
 import com.automatics.webpa.WebPaParameter;
 import com.automatics.webpa.WebPaServerResponse;
 import com.github.mustachejava.Code;
+import org.apache.http.HttpStatus;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.ITestContext;
+import org.testng.annotations.DataProvider;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This is the parent TAP API class for test environment.
@@ -6943,8 +6935,8 @@ public class AutomaticsTapApi {
 	LOGGER.debug("ENDING METHOD: postWebpaTableParamUsingWebPa");
 	return response;
     }
-	
-	 /**
+
+    /**
      *
      * The method is introduced to execute
      * the commands in device via reverse ssh
@@ -6958,10 +6950,13 @@ public class AutomaticsTapApi {
 
 	List<String> commandList = Arrays.asList(commands);
 	if (null != deviceConnectionProvider) {
-	    response = deviceConnectionProvider.execute((Device) dut, ExecuteCommandType.REV_SSH_DEVICE_VERIFY, commandList);
+	    LOGGER.info("Inside TAP API, Going to execute command using Reverse SSH");
+	    response = deviceConnectionProvider.execute((Device) dut, ExecuteCommandType.REV_SSH, commandList);
+	    LOGGER.info("Inside TAP API, Response of the command executed by Reverse SSH : "+response);
 	}
 	return response;
 
     }
+
 
 }
