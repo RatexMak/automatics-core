@@ -212,6 +212,8 @@ public class DeviceManager {
 	device.setHostIp6Address(deviceResponse.getHostIp6Address());
 	device.setHostIpAddress(deviceResponse.getHostIp4Address());
 	device.setClientIpAddress(deviceResponse.getClientIpAddress());
+	device.setMtaMacAddress(deviceResponse.getMtaMacAddress());
+	device.setMtaIpAddress(deviceResponse.getMtaIpAddress());
 	device.setModel(deviceResponse.getModel());
 	device.setManufacturer(deviceResponse.getManufacturer());
 	device.setSerialNumber(deviceResponse.getSerialNumber());
