@@ -58,7 +58,7 @@ public class Snmpv2ProviderImpl extends AbstractSnmpProvider {
     public String doGet(Dut dut, SnmpParams snmpParams) {
 
 	String snmpCommand = getFormattedCommand(dut, snmpParams);
-	return execute(dut, snmpCommand);
+	return execute(dut, snmpCommand, snmpParams);
     }
 
     /**
@@ -70,7 +70,7 @@ public class Snmpv2ProviderImpl extends AbstractSnmpProvider {
 	appendOption(snmpParams, AutomaticsConstants.LINUX_CMD_TEN_SECONDS_WAIT_TIME);
 	String snmpCommand = getFormattedCommand(dut, snmpParams);
 
-	return execute(dut, snmpCommand);
+	return execute(dut, snmpCommand, snmpParams);
     }
 
     /**
@@ -80,7 +80,7 @@ public class Snmpv2ProviderImpl extends AbstractSnmpProvider {
     public String doWalk(Dut dut, SnmpParams snmpParams) {
 
 	String snmpCommand = getFormattedCommand(dut, snmpParams);
-	return execute(dut, snmpCommand);
+	return execute(dut, snmpCommand, snmpParams);
     }
 
     /**
@@ -90,7 +90,7 @@ public class Snmpv2ProviderImpl extends AbstractSnmpProvider {
     public String doTable(Dut dut, SnmpParams snmpParams) {
 
 	String snmpCommand = getFormattedCommand(dut, snmpParams);
-	return execute(dut, snmpCommand);
+	return execute(dut, snmpCommand, snmpParams);
     }
 
     /**
@@ -100,7 +100,7 @@ public class Snmpv2ProviderImpl extends AbstractSnmpProvider {
     public String doBulkWalk(Dut dut, SnmpParams snmpParams) {
 
 	String snmpCommand = getFormattedCommand(dut, snmpParams);
-	return execute(dut, snmpCommand);
+	return execute(dut, snmpCommand, snmpParams);
     }
 
     /**
@@ -110,7 +110,7 @@ public class Snmpv2ProviderImpl extends AbstractSnmpProvider {
     public String doBulkGet(Dut dut, SnmpParams snmpParams) {
 
 	String snmpCommand = getFormattedCommand(dut, snmpParams);
-	return execute(dut, snmpCommand);
+	return execute(dut, snmpCommand, snmpParams);
     }
 
     /**
@@ -144,9 +144,13 @@ public class Snmpv2ProviderImpl extends AbstractSnmpProvider {
 		.append(super.formatHostIpAddress(snmpParams.getIpAddress(), securityDetails))
 		.append(AutomaticsConstants.SPACE).append(snmpParams.getMibOid());
 
-	if (SnmpCommand.SET.equals(snmpParams.getSnmpCommand())) {
-	    command.append(AutomaticsConstants.SPACE).append(snmpParams.getDataType())
-		    .append(AutomaticsConstants.SPACE).append(snmpParams.getValue());
+	/*
+	 * In case of Multiple SNMP parameter set on single command, we only form mibOid but not data type and values
+	 * fields in SnmpParams. Ignore the duplicate value set here.
+	 */
+	if (SnmpCommand.SET.equals(snmpParams.getSnmpCommand()) && !snmpParams.isMultiOid()) {
+	    command.append(AutomaticsConstants.SPACE).append(snmpParams.getDataType()).append(AutomaticsConstants.SPACE)
+		    .append(snmpParams.getValue());
 	}
 	return command.toString();
     }
@@ -160,12 +164,13 @@ public class Snmpv2ProviderImpl extends AbstractSnmpProvider {
      *            Snmp Command
      * @return Execution response
      */
-    private String execute(Dut dut, String snmpCommand) {
+    private String execute(Dut dut, String snmpCommand, SnmpParams snmpParams) {
 	List<String> commands = new ArrayList<String>();
 	commands.add(snmpCommand);
 	String response = connectionProvider.execute((Device) dut, ExecuteCommandType.SNMP_COMMAND, commands);
 
-	if (snmpCommand.contains(SnmpCommand.GET.getName()) || snmpCommand.contains(SnmpCommand.SET.getName())) {
+	if (!snmpParams.isMultiOid() && (snmpParams.getSnmpCommand().equals(SnmpCommand.GET)
+		|| snmpParams.getSnmpCommand().equals(SnmpCommand.SET))) {
 	    return parseSnmpOutput(response);
 	}
 	return response;

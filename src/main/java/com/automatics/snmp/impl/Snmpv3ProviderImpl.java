@@ -126,13 +126,14 @@ public class Snmpv3ProviderImpl extends AbstractSnmpProvider {
 		.append(SnmpConstants.SNMP_V3_COMMAND_OPTION).append(AutomaticsConstants.SPACE).append(" -u ")
 		.append(security.getSecurityName()).append(AutomaticsConstants.SPACE)
 		.append(security.getSecurityOptions()).append(" -l ").append(security.getSecurityLevel().getValue())
-		.append(AutomaticsConstants.SPACE).append(snmpParams.getCommandOption()).append(AutomaticsConstants.SPACE)
+		.append(AutomaticsConstants.SPACE).append(snmpParams.getCommandOption())
+		.append(AutomaticsConstants.SPACE)
 		.append(super.formatHostIpAddress(snmpParams.getIpAddress(), security))
 		.append(AutomaticsConstants.SPACE).append(snmpParams.getMibOid());
 
-	if (SnmpCommand.SET.equals(snmpParams.getSnmpCommand())) {
-	    command.append(AutomaticsConstants.SPACE).append(snmpParams.getDataType())
-		    .append(AutomaticsConstants.SPACE).append(snmpParams.getValue());
+	if (SnmpCommand.SET.equals(snmpParams.getSnmpCommand()) && !snmpParams.isMultiOid()) {
+	    command.append(AutomaticsConstants.SPACE).append(snmpParams.getDataType()).append(AutomaticsConstants.SPACE)
+		    .append(snmpParams.getValue());
 	}
 
 	return command.toString();
