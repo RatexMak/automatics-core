@@ -17,6 +17,8 @@
  */
 package com.automatics.providers.connection;
 
+import java.util.List;
+
 import com.automatics.device.Dut;
 
 /**
@@ -26,6 +28,24 @@ import com.automatics.device.Dut;
  */
 public interface SerialCommandExecutionProvider {
 
+    /**
+     * Executes the command on serial console of the device
+     * 
+     * @param dut
+     * @param command
+     * @param timeout
+     * @return Command execution response
+     */
     public String executeCommandInSerialConsole(Dut dut, String command, long timeout);
+
+    /**
+     * Executes the commands on serial console of the device
+     * 
+     * @param dut
+     * @param command
+     * @param timeout
+     * @return Command execution responses
+     */
+    public List<String> executeCommandsInSerialConsole(Dut dut, List<String> commandList, long timeout);
 
 }
