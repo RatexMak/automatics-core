@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.automatics.constants.AutomaticsConstants;
+import com.automatics.constants.DmcliConstants;
 import com.automatics.constants.WebPaConstants;
 import com.automatics.enums.DmcliDataType;
 import com.automatics.enums.TR181AccessMethods;
@@ -872,6 +873,77 @@ public class TR181Utils {
 	    }
 	}
 	return tr181Parameter;
+    }
+
+    /**
+     * Checks whether dmcli apply settings to be executed
+     * 
+     * @param dmcliParamName
+     * @return true if apply settings to be executed
+     */
+    public static boolean isApplySettingsRequired(String dmcliParamName) {
+	boolean applySettings = false;
+
+	if (dmcliParamName.startsWith(DmcliConstants.DMCLI_WIFI_RADIO)
+		|| dmcliParamName.startsWith(DmcliConstants.DMCLI_WIFI_SSID)
+		|| dmcliParamName.startsWith(DmcliConstants.DMCLI_WIFI_ACCESSPOINT)) {
+	    applySettings = true;
+	}
+
+	return applySettings;
+
+    }
+
+    /**
+     * Extract index number from dmcli param name
+     * 
+     * @param dmcliParamName
+     */
+    public static String getDmcliApplySettingParamName(String dmcliParamName) {
+
+	String paramName = DmcliConstants.DEVICE_WIFI_RADIO_1_APPLY_SETTING;
+
+	int indexNum = extractNumberFromDmcliParamName(dmcliParamName);
+
+	LOGGER.info("Dmcli param name: {} index identified: {}", dmcliParamName, indexNum);
+
+	if (indexNum % AutomaticsConstants.CONSTANT_2 == AutomaticsConstants.CONSTANT_0) {
+	    paramName = DmcliConstants.DEVICE_WIFI_RADIO_2_APPLY_SETTING;
+	}
+
+	return paramName;
+    }
+
+    /**
+     * Extract index number from dmcli param name
+     * 
+     * @param dmcliParamName
+     */
+    public static int extractNumberFromDmcliParamName(String dmcliParamName) {
+
+	int indexNum = AutomaticsConstants.CONSTANT_0;
+
+	if (dmcliParamName.startsWith(DmcliConstants.DMCLI_WIFI_RADIO)) {
+	    dmcliParamName = dmcliParamName.substring(DmcliConstants.DMCLI_WIFI_RADIO.length());
+	} else if (dmcliParamName.startsWith(DmcliConstants.DMCLI_WIFI_ACCESSPOINT)) {
+	    dmcliParamName = dmcliParamName.substring(DmcliConstants.DMCLI_WIFI_ACCESSPOINT.length());
+	} else if (dmcliParamName.startsWith(DmcliConstants.DMCLI_WIFI_SSID)) {
+	    dmcliParamName = dmcliParamName.substring(DmcliConstants.DMCLI_WIFI_SSID.length());
+	}
+
+	if (dmcliParamName.indexOf(AutomaticsConstants.DOT) != -1) {
+	    dmcliParamName = dmcliParamName.substring(AutomaticsConstants.CONSTANT_0,
+		    dmcliParamName.indexOf(AutomaticsConstants.DOT));
+	}
+
+	try {
+	    indexNum = Integer.parseInt(dmcliParamName);
+	} catch (NumberFormatException e) {
+	    LOGGER.error("Error parsing number in dmcli param name: {} {} ", dmcliParamName, e.getMessage());
+	}
+
+	return indexNum;
+
     }
 
 }

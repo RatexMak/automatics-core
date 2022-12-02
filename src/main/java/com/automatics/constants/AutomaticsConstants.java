@@ -823,6 +823,9 @@ public class AutomaticsConstants {
     /** Thirty seconds in millisecond representation. */
     public static final long THIRTY_SECOND_IN_MILLIS = 3 * TEN_SECOND_IN_MILLIS;
 
+    /** Fifty seconds in millisecond representation. */
+    public static final long FIFTY_SECOND_IN_MILLIS = 5 * TEN_SECOND_IN_MILLIS;
+
     /** Text for "true". */
     public static final String TRUE = "true";
 
@@ -994,5 +997,5 @@ public class AutomaticsConstants {
 
     /** ADD_TR181_TABLE_DATA */
     public static final String ADD_TR181_TABLE_DATA = "ADD_TABLE_DATA";
-
+    
 }

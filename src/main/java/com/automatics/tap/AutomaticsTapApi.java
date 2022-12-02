@@ -6597,6 +6597,33 @@ public class AutomaticsTapApi {
 		    dmcliResponse = deviceConnectionProvider.execute((Device) dut, dmcliCommand);
 		    LOGGER.info("Dmcli Response: {}", dmcliResponse);
 
+		    String dmcliStatus = TR181Utils.isDmcliOperationSuccess(dmcliResponse);
+
+		    /**
+		     * Execute dmcli settings command
+		     */
+
+		    if (AutomaticsConstants.SUCCESS.equals(dmcliStatus)) {
+
+			if (TR181Utils.isApplySettingsRequired(tr181Parameter.getProtocolSpecificParamName())) {
+
+			    LOGGER.info("Apply settings dmcli command to be executed");
+
+			    dmcliCommand = new StringBuilder("dmcli eRT setv ")
+				    .append(TR181Utils.getDmcliApplySettingParamName(
+					    tr181Parameter.getProtocolSpecificParamName()))
+				    .append(" bool true").toString();
+
+			    LOGGER.info("Dmcli Command to be executed: {}", dmcliCommand);
+
+			    dmcliResponse = deviceConnectionProvider.execute((Device) dut, dmcliCommand,
+				    DeviceConsoleType.ARM, AutomaticsConstants.FIFTY_SECOND_IN_MILLIS);
+
+			    LOGGER.info("Dmcli Response: {}", dmcliResponse);
+			}
+
+		    }
+
 		    response.put(tr181Parameter.getName(), TR181Utils.isDmcliOperationSuccess(dmcliResponse));
 		}
 	    } else {
@@ -6952,7 +6979,7 @@ public class AutomaticsTapApi {
 	if (null != deviceConnectionProvider) {
 	    LOGGER.info("Inside TAP API, Going to execute command using Reverse SSH");
 	    response = deviceConnectionProvider.execute((Device) dut, ExecuteCommandType.REV_SSH, commandList);
-	    LOGGER.info("Inside TAP API, Response of the command executed by Reverse SSH : "+response);
+	    LOGGER.info("Inside TAP API, Response of the command executed by Reverse SSH : " + response);
 	}
 	return response;
 

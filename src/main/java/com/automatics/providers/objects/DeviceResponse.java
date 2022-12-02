@@ -19,6 +19,8 @@ package com.automatics.providers.objects;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * AccountDevices class
  * 
@@ -26,6 +28,7 @@ import java.util.List;
  * @author Raja M
  */
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DeviceResponse {
 
     private List<DeviceObject> deviceObjects;
