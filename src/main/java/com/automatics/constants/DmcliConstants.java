@@ -24,14 +24,29 @@ package com.automatics.constants;
  */
 public class DmcliConstants {
 
+    /**
+     * Dmcli param to apply settings for Wifi Radio parameters with odd index value
+     */
     public static final String DEVICE_WIFI_RADIO_1_APPLY_SETTING = "Device.WiFi.Radio.1.X_CISCO_COM_ApplySetting";
 
+    /**
+     * Dmcli param to apply settings for Wifi Radio parameters with even index value
+     */
     public static final String DEVICE_WIFI_RADIO_2_APPLY_SETTING = "Device.WiFi.Radio.2.X_CISCO_COM_ApplySetting";
 
+    /**
+     * Prefix for wifi radio related dmcli parameters
+     */
     public static final String DMCLI_WIFI_RADIO = "Device.WiFi.Radio.";
 
+    /**
+     * Prefix for wifi ssid related dmcli parameters
+     */
     public static final String DMCLI_WIFI_SSID = "Device.WiFi.SSID.";
 
+    /**
+     * Prefix for wifi access point related dmcli parameters
+     */
     public static final String DMCLI_WIFI_ACCESSPOINT = "Device.WiFi.AccessPoint.";
 
 }
