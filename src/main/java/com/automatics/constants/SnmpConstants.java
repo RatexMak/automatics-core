@@ -139,4 +139,15 @@ public class SnmpConstants {
     /** Props key of MIB OID value for device reboot. */
     public static final String PROP_KEY_DEVICE_REBOOT_OID_VALUE = "device.reboot.oid.value";
 
+    /** SNMP Response - Timeout: No Response */
+    public static final String SNMP_RESPONSE_TIMEOUT = "Timeout: No Response";
+
+    /** SNMP Response - Error in packet */
+    public static final String SNMP_RESPONSE_ERROR_IN_PACKET = "Error in packet";
+
+    /** SNMP Response - No Such Instance */
+    public static final String SNMP_RESPONSE_NO_SUCH_INSTANCE = "No Such Instance";
+
+    /** SNMP Response - No Such Object available */
+    public static final String SNMP_RESPONSE_NO_SUCH_OBJECT_AVAILABLE = "No Such Object available";
 }

@@ -119,6 +119,7 @@ import com.automatics.snmp.SnmpCommand;
 import com.automatics.snmp.SnmpDataType;
 import com.automatics.snmp.SnmpParams;
 import com.automatics.snmp.SnmpProtocol;
+import com.automatics.snmp.SnmpOid;
 import com.automatics.tap.AutomaticsTapApi;
 import com.automatics.test.AutomaticsTestBase;
 import com.automatics.utils.tr69.Tr69Constants;
@@ -1442,6 +1443,77 @@ public class CommonMethods {
 	    snmpParams.setSnmpVersion(snmpVersion);
 	    snmpParams.setIpAddress(ipAddress);
 	    snmpParams.setMibOid(mibOrOid);
+	    response = snmpProviderImpl.doGet(dut, snmpParams);
+	}
+	return response;
+    }
+    
+    /**
+     * Utility method to execute SNMP set for multiple OIDs in single SNMP command.
+     * 
+     * @param device
+     *            The device to be queried.
+     * @param oids
+     *            Multiple set parameters includes OID, Data Type and Values.
+     * @return SNMP Command Response.
+     */
+    public static String snmpSetOnEcm(Dut dut, List<SnmpOid> oids) {
+
+	String response = null;
+
+	SnmpProtocol snmpVersion = SnmpProtocol.SNMP_V2;
+	if (SnmpProtocol.SNMP_V3.equals(AutomaticsSnmpUtils.getSnmpProtocolVersion())) {
+	    snmpVersion = SnmpProtocol.SNMP_V3;
+	}
+	StringBuffer formattedSnmpSetParams = new StringBuffer();
+	for (SnmpOid params : oids) {
+	    formattedSnmpSetParams.append(params.getMibOid()).append(AutomaticsConstants.SPACE)
+		    .append(params.getDataType()).append(AutomaticsConstants.SPACE).append(params.getValue())
+		    .append(AutomaticsConstants.SPACE);
+	}
+
+	SnmpProviderFactory providerFactory = BeanUtils.getSnmpFactoryProvider();
+	SnmpProvider snmpProviderImpl = providerFactory.getSnmpProvider(snmpVersion);
+	if (null != snmpProviderImpl) {
+	    SnmpParams snmpParams = new SnmpParams();
+	    snmpParams.setSnmpCommand(SnmpCommand.SET);
+	    snmpParams.setMultiOid(true);
+	    snmpParams.setSnmpVersion(snmpVersion);
+	    snmpParams.setMibOid(formattedSnmpSetParams.toString());
+	    snmpParams.setIpAddress(((Device) dut).getEcmIpAddress());
+	    response = snmpProviderImpl.doSet(dut, snmpParams);
+	}
+	return response;
+    }
+
+    /**
+     * Utility method to execute SNMP get for multiple OIDs in single SNMP command.
+     * 
+     * @param dut
+     *            The device to be queried.
+     * @param oidOrMibName
+     *            List of OIDs to be queried.
+     * @return The SNMP Command Response.
+     */
+    public static String snmpGetOnEcm(Dut dut, List<String> oidOrMibName) {
+	String response = null;
+
+	SnmpProtocol snmpVersion = SnmpProtocol.SNMP_V2;
+	if (SnmpProtocol.SNMP_V3.equals(AutomaticsSnmpUtils.getSnmpProtocolVersion())) {
+	    snmpVersion = SnmpProtocol.SNMP_V3;
+	}
+	StringBuffer formattedOids = new StringBuffer();
+	for (String oid : oidOrMibName) {
+	    formattedOids.append(oid).append(AutomaticsConstants.SPACE);
+	}
+	SnmpProviderFactory providerFactory = BeanUtils.getSnmpFactoryProvider();
+	SnmpProvider snmpProviderImpl = providerFactory.getSnmpProvider(snmpVersion);
+	if (null != snmpProviderImpl) {
+	    SnmpParams snmpParams = new SnmpParams();
+	    snmpParams.setSnmpCommand(SnmpCommand.GET);
+	    snmpParams.setSnmpVersion(snmpVersion);
+	    snmpParams.setMultiOid(true);
+	    snmpParams.setMibOid(formattedOids.toString());
 	    response = snmpProviderImpl.doGet(dut, snmpParams);
 	}
 	return response;
@@ -4828,5 +4900,70 @@ public class CommonMethods {
 	}
 	LOGGER.info("Exiting getandSetErouterIpAddress with ip =" + estbIPAddress);
 	return estbIPAddress;
+    }
+    
+    /**
+     * Utility method to execute SNMP GET command retrieve values for multiple oids in single command.
+     * 
+     * @param dut
+     *            The device to be validated.
+     * @param oidOrMibNames
+     *            List of MIB or OID name.
+     * @return Provides the Key value pair of SNMP response.
+     */
+    public static Map<String, String> executeSnmpGetOnEcm(Dut dut, List<String> oidOrMibNames) {
+	return extractSnmpResponse(CommonMethods.snmpGetOnEcm(dut, oidOrMibNames));
+    }
+
+    /**
+     * Utility method to execute SNMP SET for multiple oids in single command.
+     * 
+     * @param tapEnv
+     *            The {@link AutomaticsTapApi} instance
+     * @param device
+     *            The device to be validated.
+     * @param oidOrMibName
+     *            List of MIB or OID name.
+     * @return Provides the Key value pair of SNMP response.
+     */
+    public static Map<String, String> executeSnmpSetOnEcm(Dut dut, List<SnmpOid> oidOrMibNames) {
+	return extractSnmpResponse(CommonMethods.snmpSetOnEcm(dut, oidOrMibNames));
+    }
+
+    /**
+     * Helper method to extract the SNMP response and populated as Key value pairs
+     * 
+     * @param {@link
+     *            HashMap} with SNMP response as Key value pairs.
+     */
+    public static Map<String, String> extractSnmpResponse(String snmpCommandResponse) {
+	Map<String, String> snmpOidValueMapping = new HashMap<String, String>();
+	if (isValidSnmpResponse(snmpCommandResponse)) {
+	    String[] snmpResponseLines = snmpCommandResponse.split("\\r?\\n");
+
+	    for (String line : snmpResponseLines) {
+		String[] snmpOidValue = line.split(AutomaticsConstants.DELIMITER_EQUALS);
+		if (snmpOidValue.length >= AutomaticsConstants.CONSTANT_2) {
+		    snmpOidValueMapping.put(snmpOidValue[AutomaticsConstants.CONSTANT_0].trim(),
+			    snmpOidValue[AutomaticsConstants.CONSTANT_1].trim());
+		}
+	    }
+	}
+	return snmpOidValueMapping;
+    }
+
+    /**
+     * Helper method to check whether SNMP Response is valid or not.
+     * 
+     * @param response
+     *            SNMP command response.
+     * @return true if response is valid, otherwise false.
+     */
+    public static boolean isValidSnmpResponse(String response) {
+	return CommonMethods.isNotNull(response) && !response.contains(SnmpConstants.SNMP_RESPONSE_TIMEOUT)
+		&& !response.contains(SnmpConstants.SNMP_RESPONSE_ERROR_IN_PACKET)
+		&& !response.contains(SnmpConstants.SNMP_RESPONSE_NO_SUCH_INSTANCE)
+		&& !response.contains(SnmpConstants.SNMP_RESPONSE_NO_SUCH_OBJECT_AVAILABLE)
+		&& !response.contains(SnmpConstants.ERROR_STRING_INVALID_AUTH_KEY);
     }
 }

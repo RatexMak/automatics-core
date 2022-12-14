@@ -22,8 +22,8 @@ package com.automatics.snmp;
  * Defines snmp parameters
  *
  */
-public class SnmpParams {
-    
+public class SnmpParams extends SnmpOid {
+
     SnmpProtocol snmpVersion = SnmpProtocol.SNMP_V2;
 
     SnmpCommand snmpCommand;    
@@ -32,15 +32,11 @@ public class SnmpParams {
 
     String ipAddress;
 
-    String mibOid;
-
     String commandOption;
-
-    SnmpDataType dataType;
-
-    String value;
     
     boolean generateNewKey;
+    
+    boolean isMultiOid;
 
     public SnmpCommand getSnmpCommand() {
 	return snmpCommand;
@@ -66,14 +62,6 @@ public class SnmpParams {
 	this.ipAddress = ipAddress;
     }
 
-    public String getMibOid() {
-	return mibOid;
-    }
-
-    public void setMibOid(String mibOid) {
-	this.mibOid = mibOid;
-    }
-
     public String getCommandOption() {
 	return commandOption;
     }
@@ -82,21 +70,6 @@ public class SnmpParams {
 	this.commandOption = commandOption;
     }
 
-    public SnmpDataType getDataType() {
-	return dataType;
-    }
-
-    public void setDataType(SnmpDataType dataType) {
-	this.dataType = dataType;
-    }
-
-    public String getValue() {
-	return value;
-    }
-
-    public void setValue(String value) {
-	this.value = value;
-    }   
 
     /**
      * @return the generateNewKey
@@ -126,5 +99,18 @@ public class SnmpParams {
         this.snmpVersion = snmpVersion;
     }
 
+    /**
+     * @return the isMultiOid
+     */
+    public boolean isMultiOid() {
+	return isMultiOid;
+    }
 
+    /**
+     * @param isMultiOid
+     *            the isMultiOid to set
+     */
+    public void setMultiOid(boolean isMultiOid) {
+	this.isMultiOid = isMultiOid;
+    }
 }
