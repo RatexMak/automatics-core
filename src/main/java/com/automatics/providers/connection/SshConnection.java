@@ -31,6 +31,7 @@ import com.automatics.exceptions.FailedTransitionException;
 import com.automatics.providers.connection.auth.Credential;
 import com.automatics.providers.connection.auth.CredentialFactory;
 import com.automatics.providers.connection.auth.ICrypto;
+import com.automatics.utils.AutomaticsPropertyUtility;
 import com.automatics.utils.BeanUtils;
 import com.automatics.utils.CommonMethods;
 import com.jcraft.jsch.Channel;
@@ -140,7 +141,18 @@ public class SshConnection implements Connection {
 	this.hostName = host;
 	LOGGER.trace("SSH Host IP from Constructor " + host);
 	if (port <= 0 || port >= 65536) {
-	    this.portNumber = DEFAULT_SSH_PORT_NUMBER;
+	    String customPort = AutomaticsPropertyUtility.getProperty(AutomaticsConstants.SSH_CUSTOM_PORT);
+	    if (CommonMethods.isNotNull(customPort)) {
+		try {
+		    this.portNumber = Integer.valueOf(customPort);
+		} catch (NumberFormatException e) {
+		    LOGGER.error("Invalid SSH custom port. Using default SSH port: " + DEFAULT_SSH_PORT_NUMBER + "\n"
+			    + e.getMessage());
+		    this.portNumber = DEFAULT_SSH_PORT_NUMBER;
+		}
+	    } else {
+		this.portNumber = DEFAULT_SSH_PORT_NUMBER;
+	    }
 	} else {
 	    this.portNumber = port;
 	}

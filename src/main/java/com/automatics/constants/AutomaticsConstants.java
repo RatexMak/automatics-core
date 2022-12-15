@@ -997,5 +997,8 @@ public class AutomaticsConstants {
 
     /** ADD_TR181_TABLE_DATA */
     public static final String ADD_TR181_TABLE_DATA = "ADD_TABLE_DATA";
+
+    /** Custom port for SSH  */
+    public static final String SSH_CUSTOM_PORT="ssh_custom_port";
     
 }
