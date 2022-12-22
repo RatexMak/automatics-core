@@ -1524,10 +1524,15 @@ public class AutomaticsTapApi {
 	String imageLocation = AutomaticsConstants.EMPTY_STRING;
 	imageName = System.currentTimeMillis() + "_" + imageName;
 	BufferedImage capturedScreen = captureCurrentScreen(dut);
-	String savedLocation = saveImages(dut, capturedScreen, imageName);
-	File file = new File(savedLocation);
-	if (file.exists() && file.isFile()) {
-	    imageLocation = savedLocation;
+
+	if (null != capturedScreen) {
+	    String savedLocation = saveImages(dut, capturedScreen, imageName);
+	    File file = new File(savedLocation);
+	    if (file.exists() && file.isFile()) {
+		imageLocation = savedLocation;
+	    }
+	} else {
+	    LOGGER.info("Image captured from device is null.");
 	}
 	return imageLocation;
     }
@@ -2849,7 +2854,12 @@ public class AutomaticsTapApi {
 	} else {
 	    imageName = System.currentTimeMillis() + "_" + imageName;
 	    BufferedImage capturedScreen = captureCurrentScreen(dut);
-	    saveImages(dut, capturedScreen, imageName, defaultPath);
+
+	    if (null != capturedScreen) {
+		saveImages(dut, capturedScreen, imageName, defaultPath);
+	    } else {
+		LOGGER.info("Image captured from device is null.");
+	    }
 	}
     }
 
@@ -4885,20 +4895,20 @@ public class AutomaticsTapApi {
 
 	OcrRegionInfo ocrRegionInfo = (OcrRegionInfo) ImageRegionUtils
 		.getRegionInfo(getResourceLocator().getResource(ocrXml, dut), regionName);
-	ocrRegionInfo.setX(0);
-	ocrRegionInfo.setY(0);
-	ocrRegionInfo.setWidth(image.getWidth());
-	ocrRegionInfo.setHeight(image.getHeight());
-	ocrRegionInfo.setUrl("sample_url");
-	ocrRegionInfo.setExpectedText("sample_expected");
-	ocrRegionInfo.setFilepath(ocrXml);
-	ocrRegionInfo.setName(regionName);
-	ocrRegionInfo.setSuccessTolerance(80);
-	ocrRegionInfo.setTimeout(30);
-	ocrRegionInfo.setXTolerance(90);
-	ocrRegionInfo.setYTolerance(90);
 
 	if (ocrRegionInfo != null) {
+	    ocrRegionInfo.setX(0);
+	    ocrRegionInfo.setY(0);
+	    ocrRegionInfo.setWidth(image.getWidth());
+	    ocrRegionInfo.setHeight(image.getHeight());
+	    ocrRegionInfo.setUrl("sample_url");
+	    ocrRegionInfo.setExpectedText("sample_expected");
+	    ocrRegionInfo.setFilepath(ocrXml);
+	    ocrRegionInfo.setName(regionName);
+	    ocrRegionInfo.setSuccessTolerance(80);
+	    ocrRegionInfo.setTimeout(30);
+	    ocrRegionInfo.setXTolerance(90);
+	    ocrRegionInfo.setYTolerance(90);
 	    // Croping image
 	    subImage = image.getSubimage(ocrRegionInfo.getX(), ocrRegionInfo.getY(), ocrRegionInfo.getWidth(),
 		    ocrRegionInfo.getHeight());
@@ -4908,6 +4918,8 @@ public class AutomaticsTapApi {
 	    boolean readFullImageRegion = true;
 	    // Retreive text from image
 	    text = dut.getOcrProvider().getOcrTextFromImage(ocrRegionInfo, subImage, readFullImageRegion);
+	} else {
+	    LOGGER.info("OcrRegionInfo is null");
 	}
 
 	LOGGER.info("getTextFromImageRegion() - Text captured from the image - " + text);
@@ -6965,8 +6977,7 @@ public class AutomaticsTapApi {
 
     /**
      *
-     * The method is introduced to execute
-     * the commands in device via reverse ssh
+     * The method is introduced to execute the commands in device via reverse ssh
      *
      * @param dut
      * @param commands
@@ -6984,6 +6995,5 @@ public class AutomaticsTapApi {
 	return response;
 
     }
-
 
 }
