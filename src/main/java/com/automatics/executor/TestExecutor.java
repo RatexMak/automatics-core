@@ -1,40 +1,19 @@
 /**
  * Copyright 2021 Comcast Cable Communications Management, LLC
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
 package com.automatics.executor;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.TestListenerAdapter;
-import org.testng.TestNG;
-import org.testng.xml.XmlClass;
-import org.testng.xml.XmlInclude;
-import org.testng.xml.XmlSuite;
-import org.testng.xml.XmlTest;
 
 import com.automatics.constants.AutomaticsConstants;
 import com.automatics.constants.DataProviderConstants;
@@ -42,6 +21,7 @@ import com.automatics.constants.ReportsConstants;
 import com.automatics.constants.TraceProviderConstants;
 import com.automatics.core.SupportedModelHandler;
 import com.automatics.core.TestMethod;
+import com.automatics.device.Dut;
 import com.automatics.device.config.DeviceConfigModelUtils;
 import com.automatics.device.config.DeviceModels;
 import com.automatics.providers.TestInitilizationProvider;
@@ -55,10 +35,28 @@ import com.automatics.utils.TestParserUtils;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FileUtils;
+import org.codehaus.jettison.json.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.TestListenerAdapter;
+import org.testng.TestNG;
+import org.testng.xml.XmlClass;
+import org.testng.xml.XmlInclude;
+import org.testng.xml.XmlSuite;
+import org.testng.xml.XmlTest;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class executes the given list of test cases in multiple STBs.
- * 
+ *
  * @author smithabg
  * @author Selvaraj Mariyappan
  * @author Arjun Prakash
@@ -86,9 +84,25 @@ public class TestExecutor {
 
 	    // Entry point for device initialization
 	    rackInitializerInstance = AutomaticsTapApi.getRackInitializerInstance();
-
-	    // Create test suite and execute tests
-	    prepareAndExecuteTestSuite();
+	    //prepareAndExecutePyTestSuite();
+	    String testScriptType = System.getProperty("Test_Script_Type");
+	    if (testScriptType != null && testScriptType.equalsIgnoreCase("python")) {
+		final List<Dut> lockedDevices = new ArrayList<Dut>();
+		Boolean isAccountTest = new Boolean(
+			System.getProperty(AutomaticsConstants.SYSTEM_PROPERTY_ACCOUNT_EXECUTION));
+		if (isAccountTest) {
+		    lockedDevices.addAll(rackInitializerInstance.getLockedDevicesInAccountBasedTest());
+		} else {
+		    lockedDevices.addAll(RackInitializer.getLockedSettops());
+		}
+		LOGGER.info("Locked Settops: " + lockedDevices.size());
+		LOGGER.info("Locked Settops ip address : " + lockedDevices.get(0).getHostIpAddress());
+		// Create test suite and execute tests in python
+		prepareAndExecutePyTestSuite(lockedDevices);
+	    } else {
+		// Create test suite and execute tests in java
+		prepareAndExecuteTestSuite();
+	    }
 
 	    // Perform framework and test environment clean up
 	    performPostExecutioCleanup();
@@ -179,10 +193,10 @@ public class TestExecutor {
 
     /**
      * This method creates a list of included methods corresponding to the tests to be run for each test class.
-     * 
+     *
      * @param clazz
      *            - String which denotes the name of the class
-     * 
+     *
      * @return the list of included methods.
      */
     private List<XmlInclude> getIncludedMethods(Class clazz) {
@@ -210,7 +224,7 @@ public class TestExecutor {
 
     /**
      * This method creates a list of XmlClasses corresponding to the classes under test.
-     * 
+     *
      * @return list of XML classes.
      */
     private List<XmlClass> getXmlClasses() {
@@ -304,4 +318,19 @@ public class TestExecutor {
 
     }
 
+    /**
+     *
+     * @param lockedDevices
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    private void prepareAndExecutePyTestSuite(List<Dut> lockedDevices)
+	    throws IOException, InterruptedException, JSONException {
+	LOGGER.info("Inside prepare and execute py test suite");
+	PythonScriptExecutor pythonScriptExecutor = new PythonScriptExecutor();
+	boolean isTCPytest = false;
+	if(System.getProperty("is_pytest_testCase") != null && !System.getProperty("is_pytest_testCase").isEmpty())
+	    isTCPytest = Boolean.parseBoolean(System.getProperty("is_pytest_testCase"));
+	pythonScriptExecutor.executePythonScriptUsingProcess(isTCPytest, lockedDevices);
+    }
 }

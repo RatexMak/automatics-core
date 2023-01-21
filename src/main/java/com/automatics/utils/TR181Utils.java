@@ -110,6 +110,8 @@ public class TR181Utils {
 		parameter.setTr181DataType(
 			mapWebPaToTR181DataType(webPaParameter.getName(), webPaParameter.getDataType()));
 		parameter.setValue(webPaParameter.getValue());
+		parameter.setStatusCode(webPaParameter.getStatusCode());
+		LOGGER.info("TR181 parametrs status code  added  "+parameter.getStatusCode());
 		parameterList.add(parameter);
 	    }
 	}
@@ -945,5 +947,29 @@ public class TR181Utils {
 	return indexNum;
 
     }
+
+    public static List<TR181Parameter>  convertWebPaToTR181ParamObject(List<WebPaParameter> webPaParameters,
+			int statusCode) {
+		
+		List<TR181Parameter> parameterList = null;
+		TR181Parameter parameter = null;
+
+		if (null != webPaParameters && !webPaParameters.isEmpty()) {
+		    parameterList = new ArrayList<TR181Parameter>();
+
+		    for (WebPaParameter webPaParameter : webPaParameters) {
+			parameter = new TR181Parameter();
+			parameter.setName(webPaParameter.getName());
+
+			parameter.setTr181DataType(
+				mapWebPaToTR181DataType(webPaParameter.getName(), webPaParameter.getDataType()));
+			parameter.setValue(webPaParameter.getValue());
+			parameter.setStatusCode(statusCode);
+			parameterList.add(parameter);
+		    }
+		}
+		return parameterList;
+		
+	}
 
 }

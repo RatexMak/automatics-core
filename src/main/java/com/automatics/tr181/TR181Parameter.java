@@ -30,6 +30,8 @@ public class TR181Parameter {
 
     protected String tableName;
 
+    protected int statusCode;
+
     protected String value;
 
     protected String index;
@@ -57,6 +59,13 @@ public class TR181Parameter {
 	this.name = name;
     }
 
+
+    public int getStatusCode(){
+       return this.statusCode ;
+    } 
+    public void setStatusCode(int statusCode){
+        this.statusCode = statusCode;
+    }	
     /**
      * @return the value
      */
@@ -166,7 +175,7 @@ public class TR181Parameter {
 	StringBuilder param = new StringBuilder();
 	param.append("tableName=").append(tableName).append(", index=").append(index).append(", name=").append(name)
 		.append(", protocolSpecificParamName=").append(protocolSpecificParamName).append(", value=")
-		.append(value).append(", datatype=").append(tr181DataType);
+		.append(value).append(", datatype=").append(tr181DataType).append(", statusCode=").append(statusCode);
 	return param.toString();
     }
 

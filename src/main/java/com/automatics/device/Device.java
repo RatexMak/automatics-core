@@ -240,6 +240,11 @@ public class Device extends DutImpl {
 	setAccessMechanism(SshMechanism.REVERSESSH.name());
     }
 
+    @Override
+    public String getHostMacAddress() {
+	return super.getHostMacAddress();
+    }
+
     public String getDeviceExecutionLogUrl() {
 	return deviceExecutionLogUrl;
     }

@@ -928,13 +928,10 @@ public class AutomaticsTapApi {
 
 	    for (TR181Parameter tr181Parameter : tr181Parameters) {
 		status = false;
-		for (String parameter : params) {
-		    if (parameter.equals(tr181Parameter.getName())
-			    && CommonMethods.isNotNull(tr181Parameter.getValue())) {
+			if ((tr181Parameter.getStatusCode() == HttpStatus.SC_OK)) {
 			status = true;
 			break;
 		    }
-		}
 
 	    }
 	}
@@ -6448,7 +6445,7 @@ public class AutomaticsTapApi {
 			    response = new ArrayList<TR181Parameter>();
 			}
 
-			response.addAll(TR181Utils.convertWebPaToTR181ParamObject(webPaServerResponse.getParams()));
+			response.addAll(TR181Utils.convertWebPaToTR181ParamObject(webPaServerResponse.getParams(),webPaServerResponse.getStatusCode()));
 
 		    }
 		}
@@ -6995,5 +6992,11 @@ public class AutomaticsTapApi {
 	return response;
 
     }
+
+    public Iterator getTCDeviceList() {
+	Iterator deviceItr = createSettopDataProvider(false,null, null);
+	return deviceItr;
+    }
+
 
 }
