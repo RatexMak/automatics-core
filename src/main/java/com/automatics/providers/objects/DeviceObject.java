@@ -64,10 +64,6 @@ public class DeviceObject {
 
     private String ecmMacAddress;
 
-    private String mtaMacAddress;
-
-    private String mtaIpAddress;
-
     private String estbIpAdress;
 
     private String ecmIpAddress;
@@ -109,10 +105,19 @@ public class DeviceObject {
     private List<String> components;
 
     private String wanMacAddress;
-
+    
     private RemoteControlType defaultRemoteControlType;
 
     private List<RemoteControlType> remoteControlTypes;
+    /**
+     * Holds the mtaMacAddress of device
+     */
+    String mtaMacAddress = null;
+
+    /**
+     * Holds the mtaIpAddress of device
+     */
+    String mtaIpAddress = null;
 
     /**
      * @return the id
@@ -677,56 +682,55 @@ public class DeviceObject {
     }
 
     /**
-     * @param defaultRemoteControlType
-     *            the defaultRemoteControlType to set
+     * @param defaultRemoteControlType the defaultRemoteControlType to set
      */
     public void setDefaultRemoteControlType(RemoteControlType defaultRemoteControlType) {
 	this.defaultRemoteControlType = defaultRemoteControlType;
     }
-
+    
     /**
      * @return the remoteControlTypes
      */
     public List<RemoteControlType> getRemoteControlTypes() {
-	return remoteControlTypes;
+        return remoteControlTypes;
     }
 
     /**
-     * @param remoteControlTypes
-     *            the remoteControlTypes to set
+     * @param remoteControlTypes the remoteControlTypes to set
      */
     public void setRemoteControlTypes(List<RemoteControlType> remoteControlTypes) {
-	this.remoteControlTypes = remoteControlTypes;
+        this.remoteControlTypes = remoteControlTypes;
     }
 
     /**
-     * @return the mtaMacAddress
+     *
+     * @return
      */
     public String getMtaMacAddress() {
 	return mtaMacAddress;
     }
 
     /**
+     *
      * @param mtaMacAddress
-     *            the mtaMacAddress to set
      */
     public void setMtaMacAddress(String mtaMacAddress) {
 	this.mtaMacAddress = mtaMacAddress;
     }
 
     /**
-     * @return the mtaIpAddress
+     *
+     * @return
      */
     public String getMtaIpAddress() {
 	return mtaIpAddress;
     }
 
     /**
+     *
      * @param mtaIpAddress
-     *            the mtaIpAddress to set
      */
     public void setMtaIpAddress(String mtaIpAddress) {
 	this.mtaIpAddress = mtaIpAddress;
     }
-
 }
