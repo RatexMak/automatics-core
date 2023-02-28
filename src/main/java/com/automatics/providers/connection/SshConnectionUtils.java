@@ -18,17 +18,34 @@
 package com.automatics.providers.connection;
 
 import java.io.IOException;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 
+import org.apache.http.HttpStatus;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.automatics.constants.AutomaticsConstants;
 import com.automatics.constants.LinuxCommandConstants;
+import com.automatics.error.GeneralError;
+import com.automatics.exceptions.FailedTransitionException;
+import com.automatics.providers.connection.auth.Credential;
+import com.automatics.providers.connection.auth.CredentialFactory;
+import com.automatics.providers.objects.SshRequest;
+import com.automatics.providers.objects.SshResponse;
+import com.automatics.utils.CommonMethods;
+import com.automatics.utils.TestUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jcraft.jsch.JSchException;
 
 public class SshConnectionUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SshConnectionUtils.class);
+    private static String GET_SSH_DETAILS = "/device/sshDetailsByIpAddress";
 
     public static String executeCommand(SshConnection sshConnection, String command, long respTimeout)
 	    throws IOException, InterruptedException, JSchException {
@@ -74,4 +91,91 @@ public class SshConnectionUtils {
 	return status;
     }
 
+    /**
+     * Method to get SshConnection details either from Server.Xml file or devicemanager Api
+     * 
+     * @param ipAddress
+     * @return
+     */
+    public static Credential getSshDetails(String ipAddress) {
+
+	Credential credential = null;
+	try {
+	    credential = CredentialFactory.get().getServerCredentials(ipAddress);
+
+	} catch (FailedTransitionException e) {
+	    credential = getApiResponse(ipAddress);
+	}
+	if (credential == null) {
+	    throw new FailedTransitionException(GeneralError.PROVIDED_RESOURCE_NOT_FOUND,
+		    "Unable to fetch ssh connection details for " + ipAddress
+			    + " in the serverconfig.xml file and device manager.");
+	}
+	return credential;
+
+    }
+
+    /**
+     * This method will return Sshconnection details from DeviceManager API
+     * 
+     * @param ipAddress
+     * @return
+     */
+    public static Credential getApiResponse(String ipAddress) {
+
+	SshRequest request = new SshRequest();
+	request.setIpAddress(ipAddress);
+	Credential sshcredential = null;
+	String baseUrl = TestUtils.getDeviceManagerUrl();
+	SshResponse sshresponse = new SshResponse();
+	ResteasyClient client = getClient();
+	String url = CommonMethods.getNormalizedUrl(baseUrl + GET_SSH_DETAILS);
+	ResteasyWebTarget target = client.target(url);
+	LOGGER.info("Fetching ssh connection details for device {}  Url Path: {}", request.getIpAddress(), url);
+	try {
+	    Response response = target.request().post(Entity.entity(request, "application/json"));
+	    if (null != response) {
+		if (response.getStatus() == HttpStatus.SC_OK) {
+		    String respData = response.readEntity(String.class);
+		    LOGGER.info("Response: {}", respData);
+
+		    if (CommonMethods.isNotNull(respData)) {
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+			    sshresponse = mapper.readValue(respData, SshResponse.class);
+			    String user = sshresponse.getSshUserName();
+			    String pass = sshresponse.getSshPassword();
+			    String privateKeyLocation = sshresponse.getSshPrivateKeyLocation();
+			    String defaultusername = user;
+			    sshcredential = new Credential(ipAddress);
+			    sshcredential.addLogin(user, pass);
+			    sshcredential.setPrivateKeyLocation(privateKeyLocation);
+			    sshcredential.setDefaultLogin(defaultusername);
+
+			} catch (JsonProcessingException e1) {
+			    LOGGER.error("Exception parsing json data for device {}", request.getIpAddress(), e1);
+			} catch (IOException e1) {
+			    LOGGER.error("Exception parsing json data for device {}", request.getIpAddress(), e1);
+			}
+		    }
+
+		} else {
+		    LOGGER.info("Failed to get ssh connection details for {} : Status: {}", request.getIpAddress(),
+			    response.getStatus());
+
+		}
+	    }
+	} catch (Exception e1) {
+	    LOGGER.error("Error occured while fetching ssh connection details from devicemanager {} ", e1.getMessage());
+	}
+
+	return sshcredential;
+
+    }
+
+    private static ResteasyClient getClient() {
+	ResteasyClient client = new ResteasyClientBuilder().build();
+	return client;
+
+    }
 }

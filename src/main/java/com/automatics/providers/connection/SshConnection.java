@@ -29,7 +29,6 @@ import com.automatics.constants.AutomaticsConstants;
 import com.automatics.error.GeneralError;
 import com.automatics.exceptions.FailedTransitionException;
 import com.automatics.providers.connection.auth.Credential;
-import com.automatics.providers.connection.auth.CredentialFactory;
 import com.automatics.providers.connection.auth.ICrypto;
 import com.automatics.utils.AutomaticsPropertyUtility;
 import com.automatics.utils.BeanUtils;
@@ -141,17 +140,49 @@ public class SshConnection implements Connection {
 	this.hostName = host;
 	LOGGER.trace("SSH Host IP from Constructor " + host);
 	if (port <= 0 || port >= 65536) {
-	    String customPort = AutomaticsPropertyUtility.getProperty(AutomaticsConstants.SSH_CUSTOM_PORT);
+	    String customPort = creds.getSshPortNumber();
+	    boolean portFound = false;
 	    if (CommonMethods.isNotNull(customPort)) {
 		try {
 		    this.portNumber = Integer.valueOf(customPort);
+		    LOGGER.info("SSH port is set from serverconfig.xml ");
+		    portFound = true;
 		} catch (NumberFormatException e) {
-		    LOGGER.error("Invalid SSH custom port. Using default SSH port: " + DEFAULT_SSH_PORT_NUMBER + "\n"
-			    + e.getMessage());
-		    this.portNumber = DEFAULT_SSH_PORT_NUMBER;
+		    LOGGER.error("Invalid SSH custom port from serverconfig.xml. " + e.getMessage());
 		}
-	    } else {
-		this.portNumber = DEFAULT_SSH_PORT_NUMBER;
+	    }
+	    if (!portFound) {
+		Credential sshPortFromApi = SshConnectionUtils.getApiResponse(host);
+		if (sshPortFromApi != null) {
+		    customPort = sshPortFromApi.getSshPortNumber();
+		    if (CommonMethods.isNotNull(customPort)) {
+			try {
+			    this.portNumber = Integer.valueOf(customPort);
+			    LOGGER.info("SSH port is set from devicemanager Api");
+			    portFound = true;
+			} catch (NumberFormatException e) {
+			    LOGGER.error("Invalid SSH custom port from devicemanagerApi. " + e.getMessage());
+			}
+		    }
+		}
+	    }
+	    if (!portFound) {
+		customPort = AutomaticsPropertyUtility.getProperty(AutomaticsConstants.SSH_CUSTOM_PORT);
+		if (CommonMethods.isNotNull(customPort)) {
+		    try {
+			this.portNumber = Integer.valueOf(customPort);
+			LOGGER.info("SSH port is set from Automatics property");
+			portFound = true;
+		    } catch (NumberFormatException e) {
+			LOGGER.error("Invalid SSH custom port. Using default SSH port: " + DEFAULT_SSH_PORT_NUMBER
+				+ "\n" + e.getMessage());
+			this.portNumber = DEFAULT_SSH_PORT_NUMBER;
+
+		    }
+		} else {
+		    this.portNumber = DEFAULT_SSH_PORT_NUMBER;
+		    LOGGER.info("Default SSH custom port is set");
+		}
 	    }
 	} else {
 	    this.portNumber = port;
@@ -171,7 +202,7 @@ public class SshConnection implements Connection {
      *            - the private key location for key based authentication
      */
     public SshConnection(String username, String password, String host, String privateKeyLocation) {
-	this(CredentialFactory.get().getServerCredentials(host), username, password, host, 0, privateKeyLocation);
+	this(SshConnectionUtils.getSshDetails(host), username, password, host, 0, privateKeyLocation);
 	connect();
     }
 
@@ -186,7 +217,7 @@ public class SshConnection implements Connection {
      *            FQDN or IP of the host to connect to
      */
     public SshConnection(String username, String password, String host) {
-	this(CredentialFactory.get().getServerCredentials(host), username, password, host, 0, null);
+	this(SshConnectionUtils.getSshDetails(host), username, password, host, 0, null);
 	connect();
     }
 
@@ -199,7 +230,7 @@ public class SshConnection implements Connection {
      *            FQDN or IP of the host to connect to
      */
     public SshConnection(String username, String host) {
-	this(CredentialFactory.get().getServerCredentials(host), username, null, host, 0, null);
+	this(SshConnectionUtils.getSshDetails(host), username, null, host, 0, null);
 	connect();
     }
 
@@ -210,8 +241,9 @@ public class SshConnection implements Connection {
      *            FQDN or IP of the host to connect to
      */
     public SshConnection(String host) {
-	this(CredentialFactory.get().getServerCredentials(host), null, null, host, 0, null);
+	this(SshConnectionUtils.getSshDetails(host), null, null, host, 0, null);
 	connect();
+
     }
 
     /**
@@ -223,7 +255,7 @@ public class SshConnection implements Connection {
      *            enum definind for type of channel to be openend
      */
     public SshConnection(String host, ConnectionType connectionType) {
-	this(CredentialFactory.get().getServerCredentials(host), null, null, host, 0, null);
+	this(SshConnectionUtils.getSshDetails(host), null, null, host, 0, null);
 	connect(connectionType);
     }
 
@@ -1187,4 +1219,5 @@ public class SshConnection implements Connection {
 	}
 	return isConnected;
     }
+
 }

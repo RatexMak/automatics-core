@@ -27,9 +27,6 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import com.automatics.error.GeneralError;
-import com.automatics.exceptions.FailedTransitionException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -37,6 +34,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.automatics.error.GeneralError;
+import com.automatics.exceptions.FailedTransitionException;
 import com.automatics.utils.AutomaticsPropertyUtility;
 import com.automatics.utils.CommonMethods;
 
@@ -56,7 +55,6 @@ public class CredentialFactory {
 
     /** The single ton instance of {@link CredentialFactory} class. */
     private static CredentialFactory credentialFactory = null;
-
     /** The Hash map holds the server details. */
     private final Map<String, Object> SERVER_DETAILS = new HashMap<String, Object>();
 
@@ -96,14 +94,13 @@ public class CredentialFactory {
      */
     public synchronized Credential getServerCredentials(String machineName) {
 	Credential ret = null;
-
 	ret = (Credential) SERVER_DETAILS.get(machineName);
 
 	if (ret == null) {
-	    throw new FailedTransitionException(GeneralError.PROVIDED_RESOURCE_NOT_FOUND, "Unable to find "
-		    + machineName + " in the credentials file.");
-	}
+	    throw new FailedTransitionException(GeneralError.PROVIDED_RESOURCE_NOT_FOUND,
+		    "Unable to find " + machineName + " in the credentials file.");
 
+	}
 	return ret;
     }
 
@@ -120,6 +117,7 @@ public class CredentialFactory {
      * This method parse the configuration files and update the server details with required informantions.
      */
     private synchronized void loadCredentials() {
+
 	String configFile = null;
 	String configFileFromProperties = AutomaticsPropertyUtility.getProperty("serverConfig.path");
 	try {
@@ -149,21 +147,24 @@ public class CredentialFactory {
 		    Element eElement = (Element) nNode;
 
 		    String auth = eElement.getAttribute("auth-type");
+
 		    String user = eElement.getAttribute("username");
+
 		    String pass = eElement.getAttribute("password");
 
 		    String privateKeyLocation = eElement.getAttribute("private-key");
+
 		    String defaultUserName = eElement.getAttribute("default-user");
+
+		    String port = eElement.getAttribute("port");
 
 		    if (auth.equals("password") || auth.equals("private-key")) {
 			Credential m = (Credential) SERVER_DETAILS.get(machineFqdn);
-
 			if (m == null) {
 			    m = new Credential(machineFqdn);
 			}
 
 			m.addLogin(user, pass);
-
 			if (defaultUserName != null && !defaultUserName.trim().isEmpty()) {
 			    m.setDefaultLogin(defaultUserName);
 			} else {
@@ -179,7 +180,7 @@ public class CredentialFactory {
 					machineFqdn);
 			    }
 			}
-
+			m.setSshPortNumber(port);
 			SERVER_DETAILS.put(machineFqdn, m);
 		    }
 		}
@@ -190,9 +191,9 @@ public class CredentialFactory {
     }
 
     /**
-     * This function returns an ArrayList of all the machines used. Internally it has a hashmap of fqdns
-     * and the objects associated with them. This function will iterate through those and return only the keys
-     * associated with Credential objects.
+     * This function returns an ArrayList of all the machines used. Internally it has a hashmap of fqdns and the objects
+     * associated with them. This function will iterate through those and return only the keys associated with
+     * Credential objects.
      *
      * @return An ArrayList of strings. Each string is a fully qualified domain name for the server. It is also the key
      *         used to return a Credential through the function getServerCredentials(fqdn).
@@ -210,4 +211,5 @@ public class CredentialFactory {
 
 	return servers;
     }
+
 }

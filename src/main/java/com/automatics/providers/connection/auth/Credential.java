@@ -43,6 +43,9 @@ public class Credential {
     /** location of the private key. */
     private String privateKeyLocation = null;
 
+    /** stores sshPortNumber. */
+    private String sshPortNumber = null;
+
     /** The hashmap which stores username/password pairs. */
     private final Map<String, String> CREDENTIALMAP;
 
@@ -173,8 +176,27 @@ public class Credential {
     }
 
     /**
-     * A string representation of this object. It will show the fully qualified domain name, default user, and then
-     * comma separated username,password pairs. This function is primarily for debugging purposes.
+     * THis method returns sshPortNumber
+     * 
+     * @return sshPortNumber
+     */
+    public String getSshPortNumber() {
+	return sshPortNumber;
+    }
+
+    /**
+     * 
+     * This method sets the sshPortNumber
+     * 
+     * @param sshPortNumber
+     */
+    public void setSshPortNumber(String sshPortNumber) {
+	this.sshPortNumber = sshPortNumber;
+    }
+
+    /**
+     * A string representation of this object. It will show the fully qualified domain name, default user,sshPortNumber
+     * and then comma separated username,password pairs. This function is primarily for debugging purposes.
      *
      * @return The string representation of this object. More details are shown above in the header for this function.
      */
@@ -183,7 +205,8 @@ public class Credential {
 
 	ret.append("Server: " + qualifiedDomainName + "\n");
 	ret.append("Default Login: " + defaultUserName + "\n");
-
+	ret.append("PortNumber:" + sshPortNumber + "\n");
+	ret.append("PrivateKeyLocation:" + privateKeyLocation + "\n");
 	for (String key : CREDENTIALMAP.keySet()) {
 	    ret.append("(Username,Password):(" + key + "," + CREDENTIALMAP.get(key) + ")\n");
 	}
