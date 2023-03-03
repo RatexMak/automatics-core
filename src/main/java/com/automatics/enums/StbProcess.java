@@ -227,7 +227,7 @@ public enum StbProcess {
     LIGHTTPD("lighttpd"),
     XVISIOND("xvisiond"),
     HYDRA("hydra"),
-    XCONFIGD("xconfigd"),    
+    XCONFIGD("xconfigd"),
     SENSOR_DAEMONS("sensor_daemon"),
     RTROUTED("rtrouted"),
     NTPCLIENT("ntpclient"),
@@ -239,24 +239,30 @@ public enum StbProcess {
     CAM_STREAM_SERVER("cam_stream_server"),
     XCVAAD("xcvaad"),
     SMARTRC("smartrc"),
-	/** BLE process */
-	BLEPROCESS("bleconfd"),
-	/** CcspHotspot process */
-	CCSP_HOTSPOT("CcspHotspot"),
-	/** snmp_subagent process */
-	SNMP_SUBAGENT("snmp_subagent"),
-	/** CcspEPONAgentSsp process */
-	CCSP_EPONAGENT("CcspEPONAgentSsp"),
-	/** trigger process */
-	CCSP_TRIGGER("trigger"),
-	/** rdkbPowerMgr process */
-	CCSP_RDKBPWRMGR("rdkbPowerMgr"),
-	/** IGD process */
-	CCSP_IGD("IGD"),
-	/** psmcli process */
-	CCSP_PSMCLI("psmcli"),
-	/** dmcli process */
-	CCSP_DMCLI("dmcli");
+    /** BLE process */
+    BLEPROCESS("bleconfd"),
+    /** CcspHotspot process */
+    CCSP_HOTSPOT("CcspHotspot"),
+    /** snmp_subagent process */
+    SNMP_SUBAGENT("snmp_subagent"),
+    /** CcspEPONAgentSsp process */
+    CCSP_EPONAGENT("CcspEPONAgentSsp"),
+    /** trigger process */
+    CCSP_TRIGGER("trigger"),
+    /** rdkbPowerMgr process */
+    CCSP_RDKBPWRMGR("rdkbPowerMgr"),
+    /** IGD process */
+    CCSP_IGD("IGD"),
+    /** psmcli process */
+    CCSP_PSMCLI("psmcli"),
+    /** dmcli process */
+    CCSP_DMCLI("dmcli"),
+    /** dobby daemon */
+    DOBBY_DAEMON("DobbyDaemon"),
+    /** Audio capture manager **/
+    AUDIO_CAPTURE_MGR("audiocapturemgr"),
+    /** nlmon **/
+    NLMON("nlmon");
 
     private static final String DEFUALT_REGEX_FOR_MINI_DUMP_FILE = "\\s*((\\w+_)?mac\\w+_dat\\d+-\\d+-\\d+-\\d+-\\d+-\\d+_box\\d+-\\d+-\\d+-\\d+-\\d+-\\d+_mod\\w+.*dmp.tgz)";
 
@@ -305,7 +311,8 @@ public enum StbProcess {
 	this.crashFileGenerationDelay = crashFileGenerationDelay;
     }
 
-    private StbProcess(String processName, String coreDumpFileFormat, CrashFileGenerationDelay crashFileGenerationDelay) {
+    private StbProcess(String processName, String coreDumpFileFormat,
+	    CrashFileGenerationDelay crashFileGenerationDelay) {
 	this.processName = processName;
 	this.regexForCoreDumpFileFormat = coreDumpFileFormat;
 	this.regexForMiniDumpFileFormat = DEFUALT_REGEX_FOR_MINI_DUMP_FILE;
