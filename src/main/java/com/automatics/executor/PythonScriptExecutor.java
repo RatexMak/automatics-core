@@ -23,6 +23,7 @@ import com.automatics.device.Dut;
 import com.automatics.providers.objects.DeviceObject;
 import com.automatics.tap.AutomaticsTapApi;
 import com.automatics.utils.AutomaticsPropertyUtility;
+import com.automatics.utils.TestUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.codehaus.jettison.json.JSONException;
@@ -71,17 +72,25 @@ public class PythonScriptExecutor {
 		 */
 		String pyCommandString = AutomaticsPropertyUtility.getProperty("Python.exec.command");
 		String pyWrapperScript = AutomaticsPropertyUtility.getProperty("Python.wrapper.script");
+		String rdkbExecJarname = AutomaticsPropertyUtility.getProperty("Python.rdkb.exec.jar.name");
+		String rdkvExecJarname = AutomaticsPropertyUtility.getProperty("Python.rdkv.exec.jar.name");
+		String pythonScriptCheckoutFolder = AutomaticsPropertyUtility.getProperty("Python.script.checkout.folder.name");
 
 		JSONObject jsonObject = new JSONObject();
 				jsonObject.put("automaticsPropsUrl",System.getProperty("automatics.properties.file"));
 		jsonObject.put("isPyTestTc", Boolean.toString(isTcPyTest));
-		jsonObject.put("execJarPath", System.getProperty(
-			ReportsConstants.USR_DIR) + AutomaticsConstants.PATH_SEPARATOR + "target/*.jar");
+		if("RDKB".equalsIgnoreCase(AutomaticsTapApi.getInstance().getCurrentExecutionMode())){
+		    jsonObject.put("execJarPath", System.getProperty(
+			    ReportsConstants.USR_DIR) + AutomaticsConstants.PATH_SEPARATOR + "target/" + rdkbExecJarname);
+		} else if("RDKV".equalsIgnoreCase(AutomaticsTapApi.getInstance().getCurrentExecutionMode())){
+		    jsonObject.put("execJarPath", System.getProperty(
+			    ReportsConstants.USR_DIR) + AutomaticsConstants.PATH_SEPARATOR + "target/" + rdkvExecJarname);
+		}
 		jsonObject.put("filterTestCaseIds",System.getProperty(AutomaticsConstants.SYSTEM_PROPERTY_FILTER_TEST_ID));
-		pyWrapperScript = System.getProperty(
-			ReportsConstants.USR_DIR) + AutomaticsConstants.PATH_SEPARATOR + pyWrapperScript;
+		jsonObject.put("pythonTestScriptDir",System.getProperty(
+			ReportsConstants.USR_DIR) + AutomaticsConstants.PATH_SEPARATOR + pythonScriptCheckoutFolder + "/**");
 		LOGGER.info("Sending JSON String {} to python wrapper script : --->{}",jsonObject.toString(), pyWrapperScript);
-		ProcessBuilder processBuilder = new ProcessBuilder(pyCommandString, pyWrapperScript, jsonObject.toString(), deviceJson);
+		ProcessBuilder processBuilder = new ProcessBuilder(pyCommandString, "-m", pyWrapperScript, jsonObject.toString(), deviceJson);
 		processBuilder.redirectErrorStream(true);
 
 		Process process = processBuilder.start();
