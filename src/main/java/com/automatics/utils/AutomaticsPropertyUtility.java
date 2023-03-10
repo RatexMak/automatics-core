@@ -47,7 +47,7 @@ public final class AutomaticsPropertyUtility {
 	static Properties properties = null;
 
 	/** SLF4J logger. */
-	private static final java.util.logging.Logger LOGGER = LoggerFactory.getLogger(AutomaticsPropertyUtility.class);
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AutomaticsPropertyUtility.class);
 	public static final SimpleDateFormat currentDate = new SimpleDateFormat("ddMMyy");
 
 	public static synchronized void loadProperties() {
