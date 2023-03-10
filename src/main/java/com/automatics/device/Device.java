@@ -50,7 +50,9 @@ public class Device extends DutImpl {
     /** The IP address of client dut. */
     String clientIpAddress = null;
 
-    /** The comma separated MAC address of all gateway dut connected to this device. */
+    /**
+     * The comma separated MAC address of all gateway dut connected to this device.
+     */
     String connectedGateWaySettopMacs = null;
 
     /** The MAC address of gateway dut. */
@@ -195,96 +197,98 @@ public class Device extends DutImpl {
     Map<String, Connection> persistentConnections;
 
     public SshMechanism getSshmechanism() {
-	return sshmechanism;
+        return sshmechanism;
     }
 
     public void setSshmechanism(SshMechanism sshmechanism) {
-	this.sshmechanism = sshmechanism;
+        this.sshmechanism = sshmechanism;
     }
 
     public String getAccessMechanism() {
-	return accessMechanism;
+        return accessMechanism;
     }
 
     public void setAccessMechanism(String accessMechanism) {
-	this.accessMechanism = accessMechanism;
+        this.accessMechanism = accessMechanism;
     }
 
     public boolean isSshMechanismGivenType(SshMechanism requiredType) {
-	boolean istrue = false;
-	if (requiredType.equals(this.getSshmechanism())) {
-	    istrue = true;
-	}
-	return istrue;
+        boolean istrue = false;
+        if (requiredType.equals(this.getSshmechanism())) {
+            istrue = true;
+        }
+        return istrue;
     }
 
     /*
-     * public boolean isAccessMechanismGivenType(AccessMechanism requiredType) { boolean istrue = false; if
-     * (requiredType.equals(this.getAccessMechanism())) { istrue = true; } return istrue; }
+     * public boolean isAccessMechanismGivenType(AccessMechanism requiredType) {
+     * boolean istrue = false; if
+     * (requiredType.equals(this.getAccessMechanism())) { istrue = true; } return
+     * istrue; }
      */
 
     public TestSessionDO getTestSessionDetails() {
-	return testSessionDetails;
+        return testSessionDetails;
     }
 
     public void setTestSessionDetails(TestSessionDO testSessionDetails) {
-	this.testSessionDetails = testSessionDetails;
+        this.testSessionDetails = testSessionDetails;
     }
 
     public boolean isReverseAccess() {
-	return isReverseAccess;
+        return isReverseAccess;
     }
 
     public void setReverseAccess(boolean isRevSsh) {
-	this.isReverseAccess = isRevSsh;
-	setAccessMechanism(SshMechanism.REVERSESSH.name());
+        this.isReverseAccess = isRevSsh;
+        setAccessMechanism(SshMechanism.REVERSESSH.name());
     }
 
     @Override
     public String getHostMacAddress() {
-	return super.getHostMacAddress();
+        return super.getHostMacAddress();
     }
 
     public String getDeviceExecutionLogUrl() {
-	return deviceExecutionLogUrl;
+        return deviceExecutionLogUrl;
     }
 
     public void setDeviceExecutionLogUrl(String deviceExecutionLogUrl) {
-	this.deviceExecutionLogUrl = deviceExecutionLogUrl;
+        this.deviceExecutionLogUrl = deviceExecutionLogUrl;
     }
 
     public boolean isReverseSsh() {
-	return isSshMechanismGivenType(SshMechanism.REVERSESSH);
+        return isSshMechanismGivenType(SshMechanism.REVERSESSH);
     }
 
     public void setReverseSsh(boolean isReverseSsh) {
-	this.isReverseSsh = isReverseSsh;
-	setSshmechanism(SshMechanism.REVERSESSH);
+        this.isReverseSsh = isReverseSsh;
+        setSshmechanism(SshMechanism.REVERSESSH);
     }
 
     /**
      * @param mtaMacAddress
      */
     public void setMtaMacAddress(String mtaMacAddress) {
-	this.mtaMacAddress = mtaMacAddress;
+        this.mtaMacAddress = mtaMacAddress;
     }
 
     /**
      * @return
      */
     public String getMtaIpAddress() {
-	if (CommonMethods.isNull(this.mtaIpAddress)) {
-	    LOGGER.info("MTA IP Address is null. Hence fetching from Partner.");
-	    this.mtaIpAddress = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_MTA_IP_ADDRESS);
-	}
-	return this.mtaIpAddress;
+        if (CommonMethods.isNull(this.mtaIpAddress)) {
+            LOGGER.info("MTA IP Address is null. Hence fetching from Partner.");
+            this.mtaIpAddress = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_MTA_IP_ADDRESS);
+        }
+        return this.mtaIpAddress;
     }
 
     /**
      * @param mtaIpAddress
      */
     public void setMtaIpAddress(String mtaIpAddress) {
-	this.mtaIpAddress = mtaIpAddress;
+        this.mtaIpAddress = mtaIpAddress;
     }
 
     /**
@@ -292,7 +296,7 @@ public class Device extends DutImpl {
      */
 
     public String getOsType() {
-	return osType;
+        return osType;
     }
 
     /**
@@ -301,14 +305,14 @@ public class Device extends DutImpl {
      * @param setOsType
      */
     public void setOsType(String osType) {
-	this.osType = osType;
+        this.osType = osType;
     }
 
     /**
      * @return NatPort
      */
     public String getNatPort() {
-	return natPort;
+        return natPort;
     }
 
     /**
@@ -317,14 +321,14 @@ public class Device extends DutImpl {
      * @param natPort
      */
     public void setNatPort(String natPort) {
-	this.natPort = natPort;
+        this.natPort = natPort;
     }
 
     /**
      * @return NatAddress
      */
     public String getNatAddress() {
-	return natAddress;
+        return natAddress;
     }
 
     /**
@@ -333,7 +337,7 @@ public class Device extends DutImpl {
      * @param natAddress
      */
     public void setNatAddress(String natAddress) {
-	this.natAddress = natAddress;
+        this.natAddress = natAddress;
     }
 
     /**
@@ -343,11 +347,11 @@ public class Device extends DutImpl {
      */
 
     public String getEcmIpAddress() {
-	return ecmIpAddress;
+        return ecmIpAddress;
     }
 
     public void setEcmIpAddress(String ecmIpAddress) {
-	this.ecmIpAddress = ecmIpAddress;
+        this.ecmIpAddress = ecmIpAddress;
     }
 
     /**
@@ -356,17 +360,17 @@ public class Device extends DutImpl {
      * @return The IP address of client dut.
      */
     public String getClientIpAddress() {
-	return clientIpAddress;
+        return clientIpAddress;
     }
 
     /**
      * Set the IP address of the client dut.
      *
      * @param clientIpAddress
-     *            The IP address of client dut
+     *                        The IP address of client dut
      */
     public void setClientIpAddress(String clientIpAddress) {
-	this.clientIpAddress = clientIpAddress;
+        this.clientIpAddress = clientIpAddress;
     }
 
     /**
@@ -375,17 +379,17 @@ public class Device extends DutImpl {
      * @return The MAC address of gateway dut.
      */
     public String getGateWaySettopMacAddress() {
-	return getGateWaySettop().getHostMacAddress();
+        return getGateWaySettop().getHostMacAddress();
     }
 
     /**
      * Set the MAC address of gate way dut.
      *
      * @param hostMacAddress
-     *            The MAC address of gateway dut.
+     *                       The MAC address of gateway dut.
      */
     public void setGateWaySettopMacAddress(String hostMacAddress) {
-	this.gateWaySettopMacAddress = hostMacAddress;
+        this.gateWaySettopMacAddress = hostMacAddress;
     }
 
     /**
@@ -394,17 +398,17 @@ public class Device extends DutImpl {
      * @return The {@link Dut} gateway dut.
      */
     public Dut getGateWaySettop() {
-	return gateWaySettop;
+        return gateWaySettop;
     }
 
     /**
      * Set the gate way dut.
      *
      * @param host
-     *            The {@link Dut} gateway dut.
+     *             The {@link Dut} gateway dut.
      */
     public void setGateWaySettop(Dut host) {
-	this.gateWaySettop = host;
+        this.gateWaySettop = host;
     }
 
     /**
@@ -413,22 +417,22 @@ public class Device extends DutImpl {
      * @return the gatewaySettops
      */
     public ArrayList<Dut> getGatewaySettops() {
-	return gatewaySettops;
+        return gatewaySettops;
     }
 
     /**
      * Set the Gateway Settops List.
      * 
      * @param gatewaySettops
-     *            the gatewaySettops to set
+     *                       the gatewaySettops to set
      */
     public void addGatewaySettops(Dut gatewaySettop) {
-	LOGGER.info("Adding a GW Dut to the list: " + gatewaySettop.getHostMacAddress());
-	if (null == this.gatewaySettops) {
-	    this.gatewaySettops = new ArrayList<Dut>();
-	}
-	this.gatewaySettops.add(gatewaySettop);
-	LOGGER.info("GW ArrayList Size = " + this.gatewaySettops.size());
+        LOGGER.info("Adding a GW Dut to the list: " + gatewaySettop.getHostMacAddress());
+        if (null == this.gatewaySettops) {
+            this.gatewaySettops = new ArrayList<Dut>();
+        }
+        this.gatewaySettops.add(gatewaySettop);
+        LOGGER.info("GW ArrayList Size = " + this.gatewaySettops.size());
     }
 
     /**
@@ -437,17 +441,17 @@ public class Device extends DutImpl {
      * @return The device type.
      */
     public AutomaticsBuildType getBuildType() {
-	return buildType;
+        return buildType;
     }
 
     /**
      * Set the device type for particular dut box.
      *
      * @param buildType
-     *            The device type.
+     *                  The device type.
      */
     public void setBuildType(AutomaticsBuildType buildType) {
-	this.buildType = buildType;
+        this.buildType = buildType;
     }
 
     /**
@@ -456,38 +460,38 @@ public class Device extends DutImpl {
      * @return The device type.
      */
     public ExecuteOnType getExecuteOn() {
-	return executeOn;
+        return executeOn;
     }
 
     /**
      * Set the device type for particular dut box.
      *
      * @param buildType
-     *            The device type.
+     *                  The device type.
      */
     public void setExecuteOn(ExecuteOnType executeOn) {
-	this.executeOn = executeOn;
+        this.executeOn = executeOn;
     }
 
     /**
      * sets the nativeProcessId of the set-top.
      * 
      * @param nativeProcessId
-     *            nativeProcessId of the box.
+     *                        nativeProcessId of the box.
      */
     public void setNativeProcessId(String nativeProcessId) {
 
-	AutomaticsTapApi.estbMacNativeProcessIdMap.put(getHostMacAddress(), nativeProcessId);
+        AutomaticsTapApi.estbMacNativeProcessIdMap.put(getHostMacAddress(), nativeProcessId);
     }
 
     /**
      * Set the device Id of the box.
      *
      * @param deviceId
-     *            the deviceId to set
+     *                 the deviceId to set
      */
     public void setDeviceId(String deviceId) {
-	AutomaticsTapApi.estbMacDeviceIdMap.put(getHostMacAddress(), deviceId);
+        AutomaticsTapApi.estbMacDeviceIdMap.put(getHostMacAddress(), deviceId);
     }
 
     /**
@@ -497,14 +501,14 @@ public class Device extends DutImpl {
      */
     public String getDeviceId() {
 
-	deviceId = AutomaticsTapApi.estbMacDeviceIdMap.get(getHostMacAddress());
+        deviceId = AutomaticsTapApi.estbMacDeviceIdMap.get(getHostMacAddress());
 
-	if (CommonMethods.isNull(deviceId)) {
-	    this.deviceId = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_DEVICE_ID);
+        if (CommonMethods.isNull(deviceId)) {
+            this.deviceId = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_DEVICE_ID);
 
-	}
+        }
 
-	return deviceId;
+        return deviceId;
     }
 
     /**
@@ -514,13 +518,13 @@ public class Device extends DutImpl {
      */
     public String getDeviceIdForIpDevices() {
 
-	deviceId = AutomaticsTapApi.estbMacDeviceIdMap.get(getHostMacAddress());
+        deviceId = AutomaticsTapApi.estbMacDeviceIdMap.get(getHostMacAddress());
 
-	if (null == deviceId) {
-	    deviceId = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_DEVICE_ID_FOR_IP_DEVICE);
-	}
+        if (null == deviceId) {
+            deviceId = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_DEVICE_ID_FOR_IP_DEVICE);
+        }
 
-	return deviceId;
+        return deviceId;
     }
 
     /**
@@ -530,11 +534,11 @@ public class Device extends DutImpl {
      */
     public String getBillingAccountId() {
 
-	if (null == billingAccountId) {
-	    billingAccountId = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_BILLING_ACCOUNT_ID);
-	}
+        if (null == billingAccountId) {
+            billingAccountId = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_BILLING_ACCOUNT_ID);
+        }
 
-	return billingAccountId;
+        return billingAccountId;
     }
 
     /**
@@ -543,17 +547,17 @@ public class Device extends DutImpl {
      * @return the automationTestId
      */
     public String getAutomationTestId() {
-	return automationTestId;
+        return automationTestId;
     }
 
     /**
      * Set the automation test id of currently running test case.
      *
      * @param automationTestId
-     *            the automationTestId to set
+     *                         the automationTestId to set
      */
     public void setAutomationTestId(String automationTestId) {
-	this.automationTestId = automationTestId;
+        this.automationTestId = automationTestId;
     }
 
     /**
@@ -562,17 +566,17 @@ public class Device extends DutImpl {
      * @return the testTypes
      */
     public AutomaticsTestTypes getTestTypes() {
-	return testTypes;
+        return testTypes;
     }
 
     /**
      * Set the test type of currently running test case.
      *
      * @param testTypes
-     *            the testTypes to set
+     *                  the testTypes to set
      */
     public void setTestTypes(AutomaticsTestTypes testTypes) {
-	this.testTypes = testTypes;
+        this.testTypes = testTypes;
     }
 
     /**
@@ -581,17 +585,17 @@ public class Device extends DutImpl {
      * @return the testDescription
      */
     public String getTestDescription() {
-	return testDescription;
+        return testDescription;
     }
 
     /**
      * Set the test description of currently running test case.
      *
      * @param testDescription
-     *            the testDescription to set
+     *                        the testDescription to set
      */
     public void setTestDescription(String testDescription) {
-	this.testDescription = testDescription;
+        this.testDescription = testDescription;
     }
 
     /**
@@ -600,21 +604,21 @@ public class Device extends DutImpl {
      * @return the firmwareVersion
      */
     public String getFirmwareVersion() {
-	LOGGER.debug("Firmware version={}", firmwareVersion);
-	if (CommonMethods.isNull(firmwareVersion) && !SupportedModelHandler.isNonRDKDevice(this)) {
-	    firmwareVersion = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_FIRMWARE_VERSION);
-	}
-	return firmwareVersion;
+        LOGGER.debug("Firmware version={}", firmwareVersion);
+        if (CommonMethods.isNull(firmwareVersion) && !SupportedModelHandler.isNonRDKDevice(this)) {
+            firmwareVersion = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_FIRMWARE_VERSION);
+        }
+        return firmwareVersion;
     }
 
     /**
      * Set the firmware version of dut during test initialization.
      *
      * @param firmwareVersion
-     *            the firmwareVersion to set
+     *                        the firmwareVersion to set
      */
     public void setFirmwareVersion(String firmwareVersion) {
-	this.firmwareVersion = firmwareVersion;
+        this.firmwareVersion = firmwareVersion;
     }
 
     /**
@@ -623,7 +627,7 @@ public class Device extends DutImpl {
      * @return
      */
     public String getGuideVersion() {
-	return guideVersion;
+        return guideVersion;
     }
 
     /**
@@ -632,7 +636,7 @@ public class Device extends DutImpl {
      * @param guideVersion
      */
     public void setGuideVersion(String guideVersion) {
-	this.guideVersion = guideVersion;
+        this.guideVersion = guideVersion;
     }
 
     /**
@@ -641,17 +645,17 @@ public class Device extends DutImpl {
      * @return the isHdmiConnected True if HDMI is connected, otherwise false.
      */
     public boolean isHdmiConnected() {
-	return isHdmiConnected;
+        return isHdmiConnected;
     }
 
     /**
      * Set the HDMI connection status for particular dut box.
      *
      * @param isHdmiConnected
-     *            the isHdmiConnected to set
+     *                        the isHdmiConnected to set
      */
     public void setHdmiConnected(boolean isHdmiConnected) {
-	this.isHdmiConnected = isHdmiConnected;
+        this.isHdmiConnected = isHdmiConnected;
     }
 
     /**
@@ -660,17 +664,17 @@ public class Device extends DutImpl {
      * @return ExecutionMode
      */
     public ExecutionMode getExecutionMode() {
-	return executionMode;
+        return executionMode;
     }
 
     /**
      * Method to set current execution mode
      * 
      * @param executionMode
-     *            ExecutionMode
+     *                      ExecutionMode
      */
     public void setExecutionMode(ExecutionMode executionMode) {
-	this.executionMode = executionMode;
+        this.executionMode = executionMode;
     }
 
     /**
@@ -680,16 +684,16 @@ public class Device extends DutImpl {
      */
     public List<Dut> getConnectedDeviceList() {
 
-	// Here we are reusing the existing variable
-	return connectedDevices;
+        // Here we are reusing the existing variable
+        return connectedDevices;
     }
 
     /**
      * @param connectedDevices
-     *            the connectedDevices to set
+     *                         the connectedDevices to set
      */
     public void setConnectedDevices(List<Dut> connectedDevices) {
-	this.connectedDevices = connectedDevices;
+        this.connectedDevices = connectedDevices;
     }
 
     /**
@@ -699,11 +703,11 @@ public class Device extends DutImpl {
      */
     public void addConnectedDeviceToList(Dut connectedDevice) {
 
-	if (connectedDevices == null) {
-	    connectedDevices = new ArrayList<Dut>();
-	}
+        if (connectedDevices == null) {
+            connectedDevices = new ArrayList<Dut>();
+        }
 
-	connectedDevices.add(connectedDevice);
+        connectedDevices.add(connectedDevice);
     }
 
     /**
@@ -714,11 +718,11 @@ public class Device extends DutImpl {
      * @see Dut#getHostIp6Address()
      */
     public String getHostIpAddress() {
-	String hostIpAddress = super.getHostIp4Address();
-	if (StringUtils.isBlank(hostIpAddress)) {
-	    hostIpAddress = super.getHostIp6Address();
-	}
-	return hostIpAddress;
+        String hostIpAddress = super.getHostIp4Address();
+        if (StringUtils.isBlank(hostIpAddress)) {
+            hostIpAddress = super.getHostIp6Address();
+        }
+        return hostIpAddress;
     }
 
     /**
@@ -727,14 +731,14 @@ public class Device extends DutImpl {
      * @return ecm Mac of the box
      */
     public String getEcmMac() {
-	if (null == ecmMac) {
-	    // Getting ecm mac
-	    ecmMac = AutomaticsTapApi.estbMacEcmMap.get(getHostMacAddress());
-	    if (null == ecmMac) {
-		ecmMac = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_ECM_MAC_ADDRESS);
-	    }
-	}
-	return ecmMac;
+        if (null == ecmMac) {
+            // Getting ecm mac
+            ecmMac = AutomaticsTapApi.estbMacEcmMap.get(getHostMacAddress());
+            if (null == ecmMac) {
+                ecmMac = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_ECM_MAC_ADDRESS);
+            }
+        }
+        return ecmMac;
     }
 
     /**
@@ -744,28 +748,28 @@ public class Device extends DutImpl {
      */
     public String getHeadEnd() {
 
-	headEnd = AutomaticsTapApi.estbMacHeadEndMap.get(hostMacAddress);
-	LOGGER.info("Head end for device {} {}", hostMacAddress, headEnd);
-	if (CommonMethods.isNull(headEnd)) {
-	    headEnd = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_HEAD_END);
+        headEnd = AutomaticsTapApi.estbMacHeadEndMap.get(hostMacAddress);
+        LOGGER.info("Head end for device {} {}", hostMacAddress, headEnd);
+        if (CommonMethods.isNull(headEnd)) {
+            headEnd = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_HEAD_END);
 
-	    LOGGER.info("Head end for device {} {}", hostMacAddress, headEnd);
-	    if (CommonMethods.isNotNull(headEnd)) {
-		AutomaticsTapApi.estbMacHeadEndMap.put(hostMacAddress, headEnd);
-	    }
-	} else {
-	    LOGGER.error("Could not get head end for device {}", hostMacAddress);
-	}
+            LOGGER.info("Head end for device {} {}", hostMacAddress, headEnd);
+            if (CommonMethods.isNotNull(headEnd)) {
+                AutomaticsTapApi.estbMacHeadEndMap.put(hostMacAddress, headEnd);
+            }
+        } else {
+            LOGGER.error("Could not get head end for device {}", hostMacAddress);
+        }
 
-	return headEnd;
+        return headEnd;
 
     }
 
     public void setHeadEnd(String headEnd) {
-	this.headEnd = headEnd;
-	if (null != headEnd) {
-	    AutomaticsTapApi.estbMacHeadEndMap.put(hostMacAddress, headEnd);
-	}
+        this.headEnd = headEnd;
+        if (null != headEnd) {
+            AutomaticsTapApi.estbMacHeadEndMap.put(hostMacAddress, headEnd);
+        }
     }
 
     /**
@@ -774,99 +778,104 @@ public class Device extends DutImpl {
      * @return Webpage location in jenkins
      */
     public String getImageSaveLocation() {
-	return imageSaveLocation;
+        return imageSaveLocation;
     }
 
     public void setImageSaveLocation(String imageRedirectionFolder) {
-	imageSaveLocation = imageRedirectionFolder;
+        imageSaveLocation = imageRedirectionFolder;
     }
 
     public String getUsername() {
-	return username;
+        return username;
     }
 
     public void setUsername(String username) {
-	this.username = username;
+        this.username = username;
     }
 
     public String getPassword() {
-	return password;
+        return password;
     }
 
     public void setPassword(String password) {
-	this.password = password;
+        this.password = password;
     }
 
     /**
      * @return true for osType = Windows
      */
     public boolean isWindows() {
-	boolean isWindows = false;
-	if (this.osType != null
-		&& this.osType.equals(AutomaticsPropertyUtility.getProperty(AutomaticsConstants.OS_KEY_WINDOWS))) {
-	    isWindows = true;
-	}
-	return isWindows;
+        boolean isWindows = false;
+        if (this.osType != null
+                && this.osType.equals(AutomaticsPropertyUtility.getProperty(AutomaticsConstants.OS_KEY_WINDOWS))) {
+            isWindows = true;
+        }
+        return isWindows;
     }
 
     /**
      * @return true for osType = Ios
      */
     public boolean isIoS() {
-	boolean isIoS = false;
-	if (this != null && this.osType != null
-		&& this.osType.equals(AutomaticsPropertyUtility.getProperty(AutomaticsConstants.OS_KEY_IOS))) {
-	    isIoS = true;
-	}
-	return isIoS;
+        boolean isIoS = false;
+        if (this != null && this.osType != null
+                && this.osType.equals(AutomaticsPropertyUtility.getProperty(AutomaticsConstants.OS_KEY_IOS))) {
+            isIoS = true;
+        }
+        return isIoS;
     }
 
     /**
      * @return true for osType = Linux
      */
     public boolean isLinux() {
-	boolean isLinux = false;
-	if (this != null && this.osType != null
-		&& this.osType.equals(AutomaticsPropertyUtility.getProperty(AutomaticsConstants.OS_KEY_LINUX))) {
-	    isLinux = true;
-	}
-	return isLinux;
+        LOGGER.info("+++++++++++++++++++++++++ DEBUG isLinux +++++++++++++++++++++++++");
+        boolean isLinux = false;
+        LOGGER.info(AutomaticsPropertyUtility.getProperty(AutomaticsConstants.OS_KEY_LINUX));
+        LOGGER.info("this.osType = "+this.osType);
+        if (this != null && this.osType != null
+                && this.osType.equals(AutomaticsPropertyUtility.getProperty(AutomaticsConstants.OS_KEY_LINUX))) {
+            isLinux = true;
+        }
+        LOGGER.info("Linux OS? = "+isLinux);
+        LOGGER.info("+++++++++++++++++++++++++ DEBUG isLinux +++++++++++++++++++++++++");
+        return isLinux;
     }
 
     /**
      * @return true for osType = Android
      */
     public boolean isAndroid() {
-	boolean isAndroid = false;
-	if (this != null && this.osType != null
-		&& this.osType.equals(AutomaticsPropertyUtility.getProperty(AutomaticsConstants.OS_KEY_ANDROID))) {
-	    isAndroid = true;
-	}
-	return isAndroid;
+        boolean isAndroid = false;
+        if (this != null && this.osType != null
+                && this.osType.equals(AutomaticsPropertyUtility.getProperty(AutomaticsConstants.OS_KEY_ANDROID))) {
+            isAndroid = true;
+        }
+        return isAndroid;
     }
 
     public boolean isRaspbianLinux() {
-	boolean isRaspbianLinux = false;
-	if (this != null && this.osType != null && this.osType
-		.equals(AutomaticsPropertyUtility.getProperty(AutomaticsConstants.OS_KEY_RASPBIAN_LINUX))) {
-	    isRaspbianLinux = true;
-	}
-	return isRaspbianLinux;
+        boolean isRaspbianLinux = false;
+        if (this != null && this.osType != null && this.osType
+                .equals(AutomaticsPropertyUtility.getProperty(AutomaticsConstants.OS_KEY_RASPBIAN_LINUX))) {
+            isRaspbianLinux = true;
+        }
+        return isRaspbianLinux;
     }
 
     /**
      * @return the connectedDeviceInfo
      */
     public ConnectedDeviceInfo getConnectedDeviceInfo() {
-	return connectedDeviceInfo;
+        return connectedDeviceInfo;
     }
 
     /**
      * @param connectedDeviceInfo
-     *            the connectedDeviceInfo to set
+     *                            the connectedDeviceInfo to set
      */
     public void setConnectedDeviceInfo(ConnectedDeviceInfo connectedDeviceInfo) {
-	this.connectedDeviceInfo = connectedDeviceInfo;
+        this.connectedDeviceInfo = connectedDeviceInfo;
     }
 
     //
@@ -876,16 +885,16 @@ public class Device extends DutImpl {
      * @return the erouterIpAddress
      */
     public String getErouterIpAddress() {
-	return erouterIpAddress;
+        return erouterIpAddress;
     }
 
     /**
      * 
      * @param erouterIpAddress
-     *            the erouterIpAddress to set
+     *                         the erouterIpAddress to set
      */
     public void setErouterIpAddress(String erouterIpAddress) {
-	this.erouterIpAddress = erouterIpAddress;
+        this.erouterIpAddress = erouterIpAddress;
     }
 
     /**
@@ -894,7 +903,7 @@ public class Device extends DutImpl {
      * @return
      */
     public String getNodePort() {
-	return nodePort;
+        return nodePort;
     }
 
     /**
@@ -903,30 +912,30 @@ public class Device extends DutImpl {
      * @param nodePort
      */
     public void setNodePort(String nodePort) {
-	this.nodePort = nodePort;
+        this.nodePort = nodePort;
     }
 
     /**
      * @return true for osType = MacOS
      */
     public boolean isMacOS() {
-	boolean isMacOS = false;
-	if (this != null && this.osType != null
-		&& this.osType.equals(AutomaticsPropertyUtility.getProperty(AutomaticsConstants.OS_KEY_MAC))) {
-	    isMacOS = true;
-	}
-	return isMacOS;
+        boolean isMacOS = false;
+        if (this != null && this.osType != null
+                && this.osType.equals(AutomaticsPropertyUtility.getProperty(AutomaticsConstants.OS_KEY_MAC))) {
+            isMacOS = true;
+        }
+        return isMacOS;
     }
 
     public String getServiceAccountId() {
 
-	serviceAccountId = AutomaticsTapApi.estbMacServiceAccountIdMap.get(getHostMacAddress());
+        serviceAccountId = AutomaticsTapApi.estbMacServiceAccountIdMap.get(getHostMacAddress());
 
-	if (null == serviceAccountId) {
-	    serviceAccountId = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_SERVICE_ACCOUNT_ID);
-	}
+        if (null == serviceAccountId) {
+            serviceAccountId = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_SERVICE_ACCOUNT_ID);
+        }
 
-	return serviceAccountId;
+        return serviceAccountId;
     }
 
     /**
@@ -936,246 +945,246 @@ public class Device extends DutImpl {
      */
     public String getNativeProcessId() {
 
-	nativeProcessId = AutomaticsTapApi.estbMacNativeProcessIdMap.get(getHostMacAddress());
+        nativeProcessId = AutomaticsTapApi.estbMacNativeProcessIdMap.get(getHostMacAddress());
 
-	if (null == nativeProcessId) {
-	    nativeProcessId = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_NATIVE_PROCESS_ID);
-	}
-	return nativeProcessId;
+        if (null == nativeProcessId) {
+            nativeProcessId = this.getDeviceProperty(AutomaticsConstants.DEVICE_PROP_NATIVE_PROCESS_ID);
+        }
+        return nativeProcessId;
     }
 
     /**
      * @return the homeAccountName
      */
     public String getHomeAccountName() {
-	return homeAccountName;
+        return homeAccountName;
     }
 
     /**
      * @param homeAccountName
-     *            the homeAccountName to set
+     *                        the homeAccountName to set
      */
     public void setHomeAccountName(String homeAccountName) {
-	this.homeAccountName = homeAccountName;
+        this.homeAccountName = homeAccountName;
     }
 
     /**
      * @return the homeAccountNumber
      */
     public String getHomeAccountNumber() {
-	return homeAccountNumber;
+        return homeAccountNumber;
     }
 
     /**
      * @param homeAccountNumber
-     *            the homeAccountNumber to set
+     *                          the homeAccountNumber to set
      */
     public void setHomeAccountNumber(String homeAccountNumber) {
-	this.homeAccountNumber = homeAccountNumber;
+        this.homeAccountNumber = homeAccountNumber;
     }
 
     /**
      * @return the homeAccountGroupName
      */
     public String getHomeAccountGroupName() {
-	return homeAccountGroupName;
+        return homeAccountGroupName;
     }
 
     /**
      * @param homeAccountGroupName
-     *            the homeAccountGroupName to set
+     *                             the homeAccountGroupName to set
      */
     public void setHomeAccountGroupName(String homeAccountGroupName) {
-	this.homeAccountGroupName = homeAccountGroupName;
+        this.homeAccountGroupName = homeAccountGroupName;
     }
 
     /**
      * @return the rackServerHost
      */
     public String getRackServerHost() {
-	return rackServerHost;
+        return rackServerHost;
     }
 
     /**
      * @param rackServerHost
-     *            the rackServerHost to set
+     *                       the rackServerHost to set
      */
     public void setRackServerHost(String rackServerHost) {
-	this.rackServerHost = rackServerHost;
+        this.rackServerHost = rackServerHost;
     }
 
     /**
      * @return the rackServerPort
      */
     public Integer getRackServerPort() {
-	return rackServerPort;
+        return rackServerPort;
     }
 
     /**
      * @param rackServerPort
-     *            the rackServerPort to set
+     *                       the rackServerPort to set
      */
     public void setRackServerPort(Integer rackServerPort) {
-	this.rackServerPort = rackServerPort;
+        this.rackServerPort = rackServerPort;
     }
 
     /**
      * @return the persistentConnections
      */
     public Map<String, Connection> getPersistentConnections() {
-	return persistentConnections;
+        return persistentConnections;
     }
 
     /**
      * @param connection
-     *            name
+     *                   name
      * @return the persistentConnection
      */
     public Connection getPersistentConnection(String connectionName) {
-	Connection connection = null;
-	if (null != persistentConnections && null != persistentConnections.get(connectionName)) {
-	    connection = persistentConnections.get(connectionName);
-	}
-	return connection;
+        Connection connection = null;
+        if (null != persistentConnections && null != persistentConnections.get(connectionName)) {
+            connection = persistentConnections.get(connectionName);
+        }
+        return connection;
     }
 
     /**
      * @param persistentConnections
-     *            the persistentConnections to set
+     *                              the persistentConnections to set
      */
     public void setPersistentConnections(Map<String, Connection> persistentConnections) {
-	this.persistentConnections = persistentConnections;
+        this.persistentConnections = persistentConnections;
     }
 
     /**
      * @param persistentConnections
-     *            the persistentConnections to set
+     *                              the persistentConnections to set
      */
     public void addPersistentConnections(String connectionName, Connection connection) {
-	if (null == this.persistentConnections) {
-	    this.persistentConnections = new HashMap<String, Connection>();
-	}
-	this.persistentConnections.put(connectionName, connection);
+        if (null == this.persistentConnections) {
+            this.persistentConnections = new HashMap<String, Connection>();
+        }
+        this.persistentConnections.put(connectionName, connection);
     }
 
     /**
      * @return the deviceCategory
      */
     public String getDeviceCategory() {
-	return deviceCategory;
+        return deviceCategory;
     }
 
     /**
      * @param deviceCategory
-     *            the deviceCategory to set
+     *                       the deviceCategory to set
      */
     public void setDeviceCategory(String deviceCategory) {
-	this.deviceCategory = deviceCategory;
+        this.deviceCategory = deviceCategory;
     }
 
     /**
      * @return the connectedGateWaySettopMacs
      */
     public String getConnectedGateWaySettopMacs() {
-	return connectedGateWaySettopMacs;
+        return connectedGateWaySettopMacs;
     }
 
     /**
      * @param connectedGateWaySettopMacs
-     *            the connectedGateWaySettopMacs to set
+     *                                   the connectedGateWaySettopMacs to set
      */
     public void setConnectedGateWaySettopMacs(String connectedGateWaySettopMacs) {
-	this.connectedGateWaySettopMacs = connectedGateWaySettopMacs;
+        this.connectedGateWaySettopMacs = connectedGateWaySettopMacs;
     }
 
     /**
      * @return the defaultRemoteControlType
      */
     public RemoteControlType getDefaultRemoteControlType() {
-	return defaultRemoteControlType;
+        return defaultRemoteControlType;
     }
 
     /**
      * @param defaultRemoteControlType
-     *            the defaultRemoteControlType to set
+     *                                 the defaultRemoteControlType to set
      */
     public void setDefaultRemoteControlType(RemoteControlType defaultRemoteControlType) {
-	this.defaultRemoteControlType = defaultRemoteControlType;
+        this.defaultRemoteControlType = defaultRemoteControlType;
     }
 
     /**
      * @return the remoteControlTypes
      */
     public List<RemoteControlType> getRemoteControlTypes() {
-	return remoteControlTypes;
+        return remoteControlTypes;
     }
 
     /**
      * @param remoteControlTypes
-     *            the remoteControlTypes to set
+     *                           the remoteControlTypes to set
      */
     public void setRemoteControlTypes(List<RemoteControlType> remoteControlTypes) {
-	this.remoteControlTypes = remoteControlTypes;
+        this.remoteControlTypes = remoteControlTypes;
     }
 
     /**
      * @return the estbIpAdress
      */
     public String getEstbIpAdress() {
-	return estbIpAdress;
+        return estbIpAdress;
     }
 
     /**
      * @param estbIpAdress
-     *            the estbIpAdress to set
+     *                     the estbIpAdress to set
      */
     public void setEstbIpAdress(String estbIpAdress) {
-	this.estbIpAdress = estbIpAdress;
+        this.estbIpAdress = estbIpAdress;
     }
 
     /**
      * @return the extraProperties
      */
     public Map<String, String> getExtraProperties() {
-	return extraProperties;
+        return extraProperties;
     }
 
     /**
      * @param extraProperties
-     *            the extraProperties to set
+     *                        the extraProperties to set
      */
     public void setExtraProperties(Map<String, String> extraProperties) {
-	this.extraProperties = extraProperties;
+        this.extraProperties = extraProperties;
     }
 
     /**
      * Gets value for requested device property
      * 
      * @param propertyName
-     *            Device Property name
+     *                     Device Property name
      * @return Value for requested device property
      */
     private String getDeviceProperty(String propertyName) {
 
-	LOGGER.info("Fetching device property: {}", propertyName);
+        LOGGER.info("Fetching device property: {}", propertyName);
 
-	String propertyValue = null;
-	DevicePropsRequest request = new DevicePropsRequest();
-	request.setMac(getHostMacAddress());
-	List<String> requestedPropsName = new ArrayList<String>();
-	requestedPropsName.add(propertyName);
-	request.setDeviceProps(requestedPropsName);
-	
-	DeviceManager deviceManager = DeviceManager.getInstance();
-	Map<String, String> response = deviceManager.getDeviceProperties(request);
+        String propertyValue = null;
+        DevicePropsRequest request = new DevicePropsRequest();
+        request.setMac(getHostMacAddress());
+        List<String> requestedPropsName = new ArrayList<String>();
+        requestedPropsName.add(propertyName);
+        request.setDeviceProps(requestedPropsName);
 
-	if (null != response) {
-	    propertyValue = response.get(propertyName);
-	}
+        DeviceManager deviceManager = DeviceManager.getInstance();
+        Map<String, String> response = deviceManager.getDeviceProperties(request);
 
-	LOGGER.info("Device property name: {} value obtained: {}", propertyName, propertyValue);
+        if (null != response) {
+            propertyValue = response.get(propertyName);
+        }
 
-	return propertyValue;
+        LOGGER.info("Device property name: {} value obtained: {}", propertyName, propertyValue);
+
+        return propertyValue;
     }
 
 }
