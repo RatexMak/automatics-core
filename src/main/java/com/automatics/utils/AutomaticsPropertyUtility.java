@@ -134,11 +134,11 @@ public final class AutomaticsPropertyUtility {
 				LOGGER.info("Properties is not null");
 				LOGGER.info("PropertyName = " + propertyName);
 				propertyValue = properties.getProperty(propertyName);
-				LOGGER.info("+++++++++++++++++++++++++ DEBUG getProperty +++++++++++++++++++++++++");
+				LOGGER.info("PropertyValue = " + propertyValue);
 			}
 			if (CommonMethods.isNotNull(propertyValue)) {
+				LOGGER.info("PropertyValue is not null");
 				propertyValue = propertyValue.trim();
-				LOGGER.info("+++++++++++++++++++++++++ DEBUG getProperty +++++++++++++++++++++++++");
 				LOGGER.info("PropertyValue = " + propertyValue);
 				LOGGER.info("+++++++++++++++++++++++++ DEBUG getProperty +++++++++++++++++++++++++");
 			}
