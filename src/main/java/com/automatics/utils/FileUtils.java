@@ -46,7 +46,7 @@ import com.automatics.constants.ReportsConstants;
 public class FileUtils {
 
     /** SLF4j logger. */
-    protected static final java.util.logging.Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
+    protected static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
 
     /**
      * Retrieve the properties from a specified resource.
