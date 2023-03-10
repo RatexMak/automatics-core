@@ -130,17 +130,19 @@ public final class AutomaticsPropertyUtility {
 			propertyValue = propertyValue.trim();
 		} else {
 			if (properties != null) {
-				LOGGER.info("+++++++++++++++++++++++++ DEBUG getProperty +++++++++++++++++++++++++");
+				LOGGER.info("+++++++++++++++++++++++++ DEBUG getProperty-0 +++++++++++++++++++++++++");
 				LOGGER.info("Properties is not null");
 				LOGGER.info("PropertyName = " + propertyName);
 				propertyValue = properties.getProperty(propertyName);
 				LOGGER.info("PropertyValue = " + propertyValue);
+				LOGGER.info("+++++++++++++++++++++++++ DEBUG getProperty-1 +++++++++++++++++++++++++");
 			}
 			if (CommonMethods.isNotNull(propertyValue)) {
+				LOGGER.info("+++++++++++++++++++++++++ DEBUG getProperty-2 +++++++++++++++++++++++++");
 				LOGGER.info("PropertyValue is not null");
 				propertyValue = propertyValue.trim();
 				LOGGER.info("PropertyValue = " + propertyValue);
-				LOGGER.info("+++++++++++++++++++++++++ DEBUG getProperty +++++++++++++++++++++++++");
+				LOGGER.info("+++++++++++++++++++++++++ DEBUG getProperty-3 +++++++++++++++++++++++++");
 			}
 
 		}
