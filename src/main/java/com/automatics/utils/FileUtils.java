@@ -46,7 +46,7 @@ import com.automatics.constants.ReportsConstants;
 public class FileUtils {
 
     /** SLF4j logger. */
-    protected static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
+    protected static final java.util.logging.Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
 
     /**
      * Retrieve the properties from a specified resource.
@@ -65,8 +65,11 @@ public class FileUtils {
 	InputStream inputStream = null;
 
 	try {
+		LOGGER.info("++++++++++++++++++++++++++++++ DEBUG load ++++++++++++++++++++++++++++++");
 	    inputStream = loadResource(FileUtils.class, resourceName);
+		LOGGER.info("resourceName: "+resourceName);
 	    properties.load(inputStream);
+		LOGGER.info("++++++++++++++++++++++++++++++ DEBUG load ++++++++++++++++++++++++++++++");
 	} finally {
 
 	    if (null != inputStream) {
