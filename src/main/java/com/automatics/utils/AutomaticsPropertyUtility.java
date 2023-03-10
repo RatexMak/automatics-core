@@ -199,6 +199,9 @@ public final class AutomaticsPropertyUtility {
 
 				if (properties != null) {
 					properties.setProperty(propertyName, propertyValue);
+					LOGGER.info("+++++++++++++++++++ set property +++++++++++++++++++");
+					LOGGER.info("SETTING PROPERTY: "+propertyName+" = "+propertyValue);
+					LOGGER.info("+++++++++++++++++++ set property +++++++++++++++++++");
 				}
 			}
 		}
