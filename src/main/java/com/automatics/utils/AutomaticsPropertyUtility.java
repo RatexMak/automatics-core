@@ -70,7 +70,8 @@ public final class AutomaticsPropertyUtility {
 			// if the system property is set, then its given 1st priority, else the default
 			// value will be taken.
 			String propertyFileLoc = System.getProperty("automatics.properties.file");
-
+			LOGGER.info("+++++++++++++++++++++++++ DEBUG Properties +++++++++++++++++++++++++");
+			LOGGER.info(propertyFileLoc);
 			if (CommonMethods.isNotNull(propertyFileLoc)) {
 				LOGGER.info("AutomaticsPropertyUtility: Reading automatics.properties file from " + propertyFileLoc);
 
@@ -85,6 +86,12 @@ public final class AutomaticsPropertyUtility {
 					connection.setUseCaches(false);
 
 					properties.load(connection.getInputStream());
+
+					LOGGER.info("+++++++++++++++++++++++++ DEBUG PrintProperties +++++++++++++++++++++++++");
+					for (String key : properties.stringPropertyNames()) {
+						System.out.println(key + "=" + properties.getProperty(key));
+					}
+					LOGGER.info("+++++++++++++++++++++++++ DEBUG PrintProperties +++++++++++++++++++++++++");
 
 				} catch (FileNotFoundException e) {
 					LOGGER.error("AutomaticsPropertyUtility: File Not Found ->" + e.getMessage(), e);
