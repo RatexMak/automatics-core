@@ -87,12 +87,6 @@ public final class AutomaticsPropertyUtility {
 
 					properties.load(connection.getInputStream());
 
-					LOGGER.info("+++++++++++++++++++++++++ DEBUG PrintProperties +++++++++++++++++++++++++");
-					for (String key : properties.stringPropertyNames()) {
-						System.out.println(key + "=" + properties.getProperty(key));
-					}
-					LOGGER.info("+++++++++++++++++++++++++ DEBUG PrintProperties +++++++++++++++++++++++++");
-
 				} catch (FileNotFoundException e) {
 					LOGGER.error("AutomaticsPropertyUtility: File Not Found ->" + e.getMessage(), e);
 				} catch (IOException e) {
