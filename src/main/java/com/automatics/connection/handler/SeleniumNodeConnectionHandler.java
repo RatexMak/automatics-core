@@ -53,7 +53,7 @@ import com.automatics.utils.CommonMethods;
 public class SeleniumNodeConnectionHandler {
 
     /** SLF4j logger. */
-    private static final java.util.logging.Logger LOGGER = LoggerFactory.getLogger(SeleniumNodeConnectionHandler.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SeleniumNodeConnectionHandler.class);
 
     private static final String COMMAND_HOME_FOLDER_CLIENT = "cut -d : -f6 < <(getent passwd $USER)";
 
