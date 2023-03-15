@@ -486,10 +486,10 @@ public class SeleniumNodeConnectionHandler {
 		default:
 		    break;
 		}
-		LOGGER.info("+++++++++++++++++++++ DEBUG RemoteWebDriver +++++++++++++++++++")
+		LOGGER.info("+++++++++++++++++++++ DEBUG RemoteWebDriver +++++++++++++++++++");
 		LOGGER.info(nodeURL);
 		LOGGER.info(capabilities.getValue);
-		LOGGER.info("+++++++++++++++++++++ DEBUG RemoteWebDriver +++++++++++++++++++")
+		LOGGER.info("+++++++++++++++++++++ DEBUG RemoteWebDriver +++++++++++++++++++");
 		driver = new RemoteWebDriver(nodeURL, capabilities);
 	    } else {
 		LOGGER.error(LOGGER_PREFIX_CONFIG_VALIDATION
