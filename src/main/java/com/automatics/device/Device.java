@@ -855,11 +855,16 @@ public class Device extends DutImpl {
     }
 
     public boolean isRaspbianLinux() {
+        LOGGER.info("+++++++++++++++++++++++++ DEBUG isRaspbianLinux +++++++++++++++++++++++++");
         boolean isRaspbianLinux = false;
+        LOGGER.info(AutomaticsPropertyUtility.getProperty(AutomaticsConstants.OS_KEY_RASPBIAN_LINUX));
+        LOGGER.info("this.osType = "+this.osType);
         if (this != null && this.osType != null && this.osType
                 .equals(AutomaticsPropertyUtility.getProperty(AutomaticsConstants.OS_KEY_RASPBIAN_LINUX))) {
             isRaspbianLinux = true;
         }
+        LOGGER.info("Linux OS? = "+isRaspbianLinux);
+        LOGGER.info("+++++++++++++++++++++++++ DEBUG isRaspbianLinux +++++++++++++++++++++++++");
         return isRaspbianLinux;
     }
 
