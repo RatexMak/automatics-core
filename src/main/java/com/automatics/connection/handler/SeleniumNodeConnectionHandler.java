@@ -53,7 +53,7 @@ import com.automatics.utils.CommonMethods;
 public class SeleniumNodeConnectionHandler {
 
     /** SLF4j logger. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(SeleniumNodeConnectionHandler.class);
+    private static final java.util.logging.Logger LOGGER = LoggerFactory.getLogger(SeleniumNodeConnectionHandler.class);
 
     private static final String COMMAND_HOME_FOLDER_CLIENT = "cut -d : -f6 < <(getent passwd $USER)";
 
@@ -486,6 +486,10 @@ public class SeleniumNodeConnectionHandler {
 		default:
 		    break;
 		}
+		LOGGER.info("+++++++++++++++++++++ DEBUG RemoteWebDriver +++++++++++++++++++")
+		LOGGER.info(nodeURL);
+		LOGGER.info(capabilities.getValue);
+		LOGGER.info("+++++++++++++++++++++ DEBUG RemoteWebDriver +++++++++++++++++++")
 		driver = new RemoteWebDriver(nodeURL, capabilities);
 	    } else {
 		LOGGER.error(LOGGER_PREFIX_CONFIG_VALIDATION
