@@ -488,7 +488,6 @@ public class SeleniumNodeConnectionHandler {
 		}
 		LOGGER.info("+++++++++++++++++++++ DEBUG RemoteWebDriver +++++++++++++++++++");
 		LOGGER.info(nodeURL.toString());
-		LOGGER.info(capabilities);
 		LOGGER.info("+++++++++++++++++++++ DEBUG RemoteWebDriver +++++++++++++++++++");
 		driver = new RemoteWebDriver(nodeURL, capabilities);
 	    } else {
