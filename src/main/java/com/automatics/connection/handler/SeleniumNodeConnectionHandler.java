@@ -442,13 +442,13 @@ public class SeleniumNodeConnectionHandler {
 			// capabilities.setPlatform(Platform.LINUX);
 			// capabilities.setCapability(BROWSER_CAPABILITY_HEADLESS, true);
 			// capabilities.setCapability(BROWSER_CAPABILITY_MARIONETTE, false);
+			System.setProperty("webdriver.gecko.driver", "/usr/bin/geckodriver");
 			FirefoxOptions options = new FirefoxOptions();
             capabilities = DesiredCapabilities.firefox();
             options.setHeadless(true);
             options.addPreference("marionette", false);
             capabilities.setPlatform(Platform.LINUX);
             capabilities.merge(options);
-            driver = new RemoteWebDriver(nodeURL, options);
 		    } else if (ecatsSettop.isWindows()) {
 			FirefoxOptions options = new FirefoxOptions();
 			options.addArguments(AutomaticsConstants.HYPHEN + BROWSER_CAPABILITY_HEADLESS);
