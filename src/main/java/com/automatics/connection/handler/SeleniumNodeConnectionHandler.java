@@ -446,7 +446,7 @@ public class SeleniumNodeConnectionHandler {
 			FirefoxOptions options = new FirefoxOptions();
             capabilities = DesiredCapabilities.firefox();
             options.setHeadless(true);
-            options.addPreference("marionette", false);
+            // options.addPreference("marionette", false);
             capabilities.setPlatform(Platform.LINUX);
             capabilities.merge(options);
 		    } else if (ecatsSettop.isWindows()) {
