@@ -144,9 +144,9 @@ public class DeviceAccessValidatorImpl implements DeviceAccessValidator {
 			// Get the wait time after device hard reboot
 			DeviceConfig deviceConfig = DeviceConfigUtils.getDeviceObj(dut.getModel());
 			long maxWaitTimeInMilliSec = 240000;
-			LOGGER.INFO("++++++++++++++++ DEBUG Reboot Wait Time ++++++++++++++++");
+			LOGGER.info("++++++++++++++++ DEBUG Reboot Wait Time ++++++++++++++++");
 			deviceConfig.setWaitTimeAfterHardReboot(600000);
-			LOGGER.INFO("++++++++++++++++ DEBUG Reboot Wait Time ++++++++++++++++");
+			LOGGER.info("++++++++++++++++ DEBUG Reboot Wait Time ++++++++++++++++");
 			// long maxWaitTimeInMilliSec = 600000;
 			if (null != deviceConfig && deviceConfig.getWaitTimeAfterHardReboot() > 0) {
 				LOGGER.info("Reboot wait time: {}", deviceConfig.getWaitTimeAfterHardReboot());
