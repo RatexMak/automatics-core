@@ -438,10 +438,14 @@ public class SeleniumNodeConnectionHandler {
 		    capabilities = DesiredCapabilities.firefox();
 		    capabilities.setBrowserName(BROWSER_NAME_FIREFOX);
 		    // firefox version to be used against
-		    if (ecatsSettop.isLinux() || ecatsSettop.isRaspbianLinux()) {
+		    
+			if (ecatsSettop.isLinux() || ecatsSettop.isRaspbianLinux()) {
+			// Old Version
 			// capabilities.setPlatform(Platform.LINUX);
 			// capabilities.setCapability(BROWSER_CAPABILITY_HEADLESS, true);
 			// capabilities.setCapability(BROWSER_CAPABILITY_MARIONETTE, false);
+
+			// New Version
 			System.setProperty("webdriver.gecko.driver", "/usr/bin/geckodriver");
 			FirefoxOptions options = new FirefoxOptions();
             capabilities = DesiredCapabilities.firefox();
@@ -449,13 +453,14 @@ public class SeleniumNodeConnectionHandler {
             // options.addPreference("marionette", false);
             capabilities.setPlatform(Platform.LINUX);
             capabilities.merge(options);
+
 		    } else if (ecatsSettop.isWindows()) {
 			FirefoxOptions options = new FirefoxOptions();
 			options.addArguments(AutomaticsConstants.HYPHEN + BROWSER_CAPABILITY_HEADLESS);
 			capabilities.setPlatform(Platform.WINDOWS);
 			capabilities.setCapability(BROWSER_CAPABILITY_MARIONETTE, true);
 			capabilities.merge(options);
-		    }
+		    }	
 		    break;
 		case CHROME:
 		    LOGGER.info(LOGGER_PREFIX_CONFIG_VALIDATION + "Setting capabilities for chrome driver");
